@@ -1,0 +1,14 @@
+{%- liquid
+  assign position = position | default: 'top'
+  assign color = color | default: 'var(--color-primary)'
+-%}
+
+<div class="wavy-divider wavy-divider--{{ position }}" aria-hidden="true">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    {%- if position == 'top' -%}
+      <path d="M0,80 C360,20 720,100 1080,40 C1260,10 1380,30 1440,50 L1440,0 L0,0 Z" fill="{{ color }}"/>
+    {%- else -%}
+      <path d="M0,0 C360,60 720,-20 1080,40 C1260,70 1380,50 1440,30 L1440,80 L0,80 Z" fill="{{ color }}"/>
+    {%- endif -%}
+  </svg>
+</div>

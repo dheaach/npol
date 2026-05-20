@@ -1,0 +1,68 @@
+{%- if settings.seo_enable_structured_data -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }}
+      {%- if shop.description != blank -%}
+        ,"description": {{ shop.description | json }}
+      {%- endif -%}
+      {%- if settings.seo_default_og_image -%}
+        ,"logo": {{ settings.seo_default_og_image | image_url: width: 600 | prepend: 'https:' | json }}
+      {%- endif -%}
+    }
+  </script>
+
+  {%- if request.page_type == 'product' -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": {{ product.title | json }},
+        "description": {{ product.description | strip_html | truncate: 320 | json }},
+        "url": {{ shop.url | append: product.url | json }},
+        "image": [
+          {%- for image in product.images limit: 5 -%}
+            {{ image | image_url: width: 1200 | prepend: 'https:' | json }}{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ],
+        "brand": {
+          "@type": "Brand",
+          "name": {{ product.vendor | default: shop.name | json }}
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": {{ shop.url | append: product.url | json }},
+          "priceCurrency": {{ cart.currency.iso_code | json }},
+          "price": {{ product.price | money_without_currency | strip_html | json }},
+          "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}"
+        }
+      }
+    </script>
+  {%- endif -%}
+
+  {%- if request.page_type == 'article' -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": {{ article.title | json }},
+        "description": {{ article.excerpt_or_content | strip_html | truncate: 320 | json }},
+        "datePublished": {{ article.published_at | date: '%Y-%m-%d' | json }},
+        "dateModified": {{ article.updated_at | date: '%Y-%m-%d' | json }},
+        "author": {
+          "@type": "Person",
+          "name": {{ article.author | json }}
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": {{ shop.name | json }}
+        }
+        {%- if article.image -%}
+          ,"image": {{ article.image | image_url: width: 1200 | prepend: 'https:' | json }}
+        {%- endif -%}
+      }
+    </script>
+  {%- endif -%}
+{%- endif -%}

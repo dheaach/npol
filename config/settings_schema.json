@@ -1,0 +1,384 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "AGM Theme",
+    "theme_version": "1.0.0",
+    "theme_author": "AGM",
+    "theme_documentation_url": "https://help.shopify.com",
+    "theme_support_url": "https://help.shopify.com"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Brand Colors"
+      },
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Primary",
+        "default": "#1BCDC4"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary",
+        "label": "Secondary",
+        "default": "#0A1D3C"
+      },
+      {
+        "type": "color",
+        "id": "color_yellow",
+        "label": "Yellow",
+        "default": "#FFC300"
+      },
+      {
+        "type": "color",
+        "id": "color_light_blue",
+        "label": "Light Blue",
+        "default": "#ADE8F6"
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Background",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Text",
+        "default": "#0A1D3C"
+      },
+      {
+        "type": "color",
+        "id": "color_black",
+        "label": "Black / Default",
+        "default": "#1A1A1A"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Heading Font (H1–H6)"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_heading",
+        "label": "Heading font",
+        "default": "poppins_n4"
+      },
+      {
+        "type": "range",
+        "id": "font_size_h1",
+        "label": "H1 size",
+        "min": 32,
+        "max": 80,
+        "step": 2,
+        "unit": "px",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "font_size_h2",
+        "label": "H2 size",
+        "min": 24,
+        "max": 56,
+        "step": 2,
+        "unit": "px",
+        "default": 36
+      },
+      {
+        "type": "range",
+        "id": "font_size_h3",
+        "label": "H3 size",
+        "min": 18,
+        "max": 36,
+        "step": 1,
+        "unit": "px",
+        "default": 24
+      },
+      {
+        "type": "range",
+        "id": "font_size_h4",
+        "label": "H4 size",
+        "min": 16,
+        "max": 28,
+        "step": 1,
+        "unit": "px",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "font_size_h5",
+        "label": "H5 size",
+        "min": 14,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 18
+      },
+      {
+        "type": "range",
+        "id": "font_size_h6",
+        "label": "H6 size",
+        "min": 12,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Heading decoration"
+      },
+      {
+        "type": "select",
+        "id": "heading_text_decoration",
+        "label": "Text decoration",
+        "options": [
+          { "value": "none", "label": "None" },
+          { "value": "underline", "label": "Underline" },
+          { "value": "overline", "label": "Overline" },
+          { "value": "line-through", "label": "Strikethrough" }
+        ],
+        "default": "none"
+      },
+      {
+        "type": "select",
+        "id": "heading_text_transform",
+        "label": "Text transform",
+        "options": [
+          { "value": "none", "label": "None" },
+          { "value": "uppercase", "label": "Uppercase" },
+          { "value": "lowercase", "label": "Lowercase" },
+          { "value": "capitalize", "label": "Capitalize" }
+        ],
+        "default": "none"
+      },
+      {
+        "type": "range",
+        "id": "heading_letter_spacing",
+        "label": "Letter spacing",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "default": 0,
+        "info": "Scale: value × 0.01em. 0 = normal, 5 = 0.05em, 10 = 0.1em"
+      },
+      {
+        "type": "range",
+        "id": "heading_line_height",
+        "label": "Line height",
+        "min": 100,
+        "max": 180,
+        "step": 5,
+        "unit": "%",
+        "default": 120,
+        "info": "120 = 1.2 line height"
+      },
+      {
+        "type": "range",
+        "id": "heading_underline_offset",
+        "label": "Underline offset",
+        "min": 0,
+        "max": 12,
+        "step": 1,
+        "unit": "px",
+        "default": 2,
+        "info": "Applies when text decoration is underline"
+      },
+      {
+        "type": "color",
+        "id": "heading_decoration_color",
+        "label": "Decoration color",
+        "default": "#0A1D3C",
+        "info": "Underline / overline / strikethrough color"
+      },
+      {
+        "type": "header",
+        "content": "Body Font"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Body font",
+        "default": "montserrat_n4"
+      },
+      {
+        "type": "range",
+        "id": "font_size_body",
+        "label": "Paragraph size",
+        "min": 14,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Body text decoration"
+      },
+      {
+        "type": "select",
+        "id": "body_text_decoration",
+        "label": "Text decoration",
+        "options": [
+          { "value": "none", "label": "None" },
+          { "value": "underline", "label": "Underline" },
+          { "value": "overline", "label": "Overline" },
+          { "value": "line-through", "label": "Strikethrough" }
+        ],
+        "default": "none"
+      },
+      {
+        "type": "select",
+        "id": "body_text_transform",
+        "label": "Text transform",
+        "options": [
+          { "value": "none", "label": "None" },
+          { "value": "uppercase", "label": "Uppercase" },
+          { "value": "lowercase", "label": "Lowercase" },
+          { "value": "capitalize", "label": "Capitalize" }
+        ],
+        "default": "none"
+      },
+      {
+        "type": "range",
+        "id": "body_letter_spacing",
+        "label": "Letter spacing",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "default": 0,
+        "info": "Scale: value × 0.01em. 0 = normal, 5 = 0.05em, 10 = 0.1em"
+      },
+      {
+        "type": "range",
+        "id": "body_line_height",
+        "label": "Line height",
+        "min": 100,
+        "max": 200,
+        "step": 5,
+        "unit": "%",
+        "default": 170,
+        "info": "170 = 1.7 line height"
+      },
+      {
+        "type": "range",
+        "id": "body_underline_offset",
+        "label": "Underline offset",
+        "min": 0,
+        "max": 12,
+        "step": 1,
+        "unit": "px",
+        "default": 2,
+        "info": "Applies when text decoration is underline"
+      },
+      {
+        "type": "color",
+        "id": "body_decoration_color",
+        "label": "Decoration color",
+        "default": "#0A1D3C",
+        "info": "Underline / overline / strikethrough color"
+      },
+      {
+        "type": "header",
+        "content": "Button"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_button",
+        "label": "Button font",
+        "default": "poppins_n5"
+      },
+      {
+        "type": "range",
+        "id": "font_size_button",
+        "label": "Button font size",
+        "min": 14,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "SEO",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Default SEO Settings"
+      },
+      {
+        "type": "text",
+        "id": "seo_default_title_suffix",
+        "label": "Title suffix",
+        "default": "| AGM",
+        "info": "Appended to page titles for branding"
+      },
+      {
+        "type": "textarea",
+        "id": "seo_default_description",
+        "label": "Default meta description",
+        "info": "Used when a page has no custom description"
+      },
+      {
+        "type": "image_picker",
+        "id": "seo_default_og_image",
+        "label": "Default social share image (OG)",
+        "info": "Recommended: 1200 x 630 px"
+      },
+      {
+        "type": "checkbox",
+        "id": "seo_enable_structured_data",
+        "label": "Enable structured data (JSON-LD)",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Dark Quote Banner"
+      },
+      {
+        "type": "image_picker",
+        "id": "dark_quote_banner_background",
+        "label": "Dark quote banner background",
+        "info": "Default wave background for all Dark Quote Banner sections. Upload assets/dark-quote-banner-bg.png here (or your own graphic). Per-section overrides are available in each section’s settings."
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page max width",
+        "min": 1000,
+        "max": 1600,
+        "step": 10,
+        "unit": "px",
+        "default": 1440
+      },
+      {
+        "type": "range",
+        "id": "section_spacing",
+        "label": "Section vertical spacing",
+        "min": 40,
+        "max": 120,
+        "step": 10,
+        "unit": "px",
+        "default": 80
+      }
+    ]
+  }
+]

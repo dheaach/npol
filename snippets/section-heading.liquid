@@ -1,0 +1,19 @@
+{%- comment -%}
+  Reusable section heading snippet.
+  Usage: {% render 'section-heading', heading: section.settings.heading, heading_tag: 'h2', heading_size: 'h2', font_override: section.settings.heading_font %}
+{%- endcomment -%}
+
+{%- liquid
+  assign tag = heading_tag | default: 'h2'
+  assign size_class = heading_size | default: tag
+  assign font_family = font_override | default: 'heading'
+-%}
+
+{%- if heading != blank -%}
+  <{{ tag }}
+    class="section-heading section-heading--{{ size_class }}"
+    {% if font_family == 'body' %}style="font-family: var(--font-body);"{% endif %}
+  >
+    {{ heading }}
+  </{{ tag }}>
+{%- endif -%}

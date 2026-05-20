@@ -1,0 +1,18 @@
+{%- comment -%}
+  Reusable button snippet.
+  Usage: {% render 'button', label: 'Shop Now', url: '/collections/all', style: 'primary' %}
+{%- endcomment -%}
+
+{%- liquid
+  assign btn_style = style | default: 'primary'
+  assign btn_label = label | default: 'Learn More'
+  assign btn_url = url | default: '#'
+  assign btn_class = 'btn btn--' | append: btn_style
+  if class != blank
+    assign btn_class = btn_class | append: ' ' | append: class
+  endif
+-%}
+
+<a href="{{ btn_url }}" class="{{ btn_class }}"{% if new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}>
+  {{ btn_label }}
+</a>

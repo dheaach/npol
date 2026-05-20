@@ -1,0 +1,268 @@
+{% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'program-cards__header' %}
+
+<section class="program-cards section-spacing" aria-labelledby="program-heading-{{ section.id }}">
+
+  <div class="page-width">
+    <div class="program-cards__header">
+      <div class="program-cards__header-left">
+        {% render 'highlighted-heading',
+          heading: section.settings.heading,
+          heading_weight: section.settings.heading_weight,
+          heading_before: section.settings.heading_before,
+          heading_highlight: section.settings.heading_highlight,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+      </div>
+      {%- if section.settings.description != blank -%}
+        <div class="program-cards__header-right section-text rte">{{ section.settings.description }}</div>
+      {%- endif -%}
+    </div>
+
+    <div class="program-cards__grid">
+      {%- for block in section.blocks -%}
+        <article class="program-card" {{ block.shopify_attributes }} style="--card-header-color: {{ block.settings.tag_color }};">
+          {%- if block.settings.tag_label != blank -%}
+            <span class="program-card__tag">{{ block.settings.tag_label }}</span>
+          {%- endif -%}
+
+          <div class="program-card__body" style="background-color: {{ block.settings.card_bg_color }};">
+            {%- if block.settings.icon != blank -%}
+              <div class="program-card__icon">
+                {% render 'responsive-image', image: block.settings.icon, alt: block.settings.icon_alt, width: 80 %}
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.title != blank -%}
+              <h3 class="section-heading section-heading--h3 program-card__title">{{ block.settings.title }}</h3>
+            {%- endif -%}
+
+            {%- if block.settings.text != blank -%}
+              <div class="section-text rte program-card__text">{{ block.settings.text }}</div>
+            {%- endif -%}
+          </div>
+        </article>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.footer_text != blank -%}
+      <p class="program-cards__footer section-text text-center">{{ section.settings.footer_text }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Program Feature Cards",
+  "tag": "section",
+  "class": "section-program-cards",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Not Another "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Program"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit",
+      "info": "Used when single line heading is filled in"
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description (right side)"
+    },
+    {
+      "type": "header",
+      "content": "Header layout"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Heading column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Description column uses the remaining width. Stacks on tablet and below."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "text",
+      "id": "footer_text",
+      "label": "Footer text below cards"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Feature Card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag_label",
+          "label": "Tag label",
+          "default": "Feature"
+        },
+        {
+          "type": "color",
+          "id": "tag_color",
+          "label": "Tag color",
+          "default": "#FFC300"
+        },
+        {
+          "type": "color",
+          "id": "card_bg_color",
+          "label": "Card background",
+          "default": "#1BCDC4"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon / Image"
+        },
+        {
+          "type": "text",
+          "id": "icon_alt",
+          "label": "Icon alt text (SEO)"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Feature Title"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Describe this feature.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "Program Feature Cards",
+    "blocks": [
+      { "type": "card", "settings": { "tag_label": "Approach", "tag_color": "#FFC300", "card_bg_color": "#1BCDC4" } },
+      { "type": "card", "settings": { "tag_label": "Curriculum", "tag_color": "#1BCDC4", "card_bg_color": "#0A1D3C" } },
+      { "type": "card", "settings": { "tag_label": "Results", "tag_color": "#FFB6C1", "card_bg_color": "#ADE8F6" } }
+    ]
+  }]
+}
+{% endschema %}

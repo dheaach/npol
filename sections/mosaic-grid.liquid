@@ -1,0 +1,176 @@
+{% render 'section-font-vars', section: section %}
+
+<section class="mosaic-grid section-spacing" aria-labelledby="mosaic-heading-{{ section.id }}">
+  <div class="page-width">
+    {% render 'highlighted-heading',
+      heading: section.settings.heading,
+      heading_before: section.settings.heading_before,
+      heading_highlight: section.settings.heading_highlight,
+      heading_after: section.settings.heading_after,
+      heading_tag: section.settings.heading_tag,
+      heading_size: section.settings.heading_tag,
+      highlight_color: section.settings.highlight_color
+    %}
+
+    <div class="mosaic-grid__items">
+      {%- for block in section.blocks -%}
+        <div class="mosaic-grid__item mosaic-grid__item--{{ block.settings.layout }}" {{ block.shopify_attributes }}>
+          {%- if block.settings.layout == 'image-left' or block.settings.layout == 'image-right' -%}
+            <div class="mosaic-grid__media">
+              <div class="mosaic-grid__dots" aria-hidden="true"></div>
+              {% render 'responsive-image',
+                image: block.settings.image,
+                alt: block.settings.image_alt,
+                class: 'mosaic-grid__image',
+                loading: 'lazy'
+              %}
+            </div>
+            <div class="mosaic-grid__content">
+              {%- if block.settings.title != blank -%}
+                <h3 class="section-heading section-heading--h3">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="section-text rte">{{ block.settings.text }}</div>
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <div class="mosaic-grid__content mosaic-grid__content--full">
+              {%- if block.settings.title != blank -%}
+                <h3 class="section-heading section-heading--h3">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="section-text rte">{{ block.settings.text }}</div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Mosaic Feature Grid",
+  "tag": "section",
+  "class": "section-mosaic-grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Why Next Gen CFLM "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Works"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Grid Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Layout",
+          "options": [
+            { "value": "image-left", "label": "Image left, text right" },
+            { "value": "image-right", "label": "Image right, text left" },
+            { "value": "text-only", "label": "Text only" }
+          ],
+          "default": "image-left"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text (SEO)"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Feature Title"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Describe this feature.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "Mosaic Feature Grid",
+    "blocks": [
+      { "type": "item", "settings": { "layout": "image-left" } },
+      { "type": "item", "settings": { "layout": "image-right" } },
+      { "type": "item", "settings": { "layout": "image-left" } },
+      { "type": "item", "settings": { "layout": "image-right" } }
+    ]
+  }]
+}
+{% endschema %}

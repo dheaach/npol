@@ -1,0 +1,28 @@
+<article class="main-article section-spacing" itemscope itemtype="https://schema.org/Article">
+  <div class="page-width" style="max-width: 800px;">
+    <header>
+      <h1 class="section-heading section-heading--h1" itemprop="headline">{{ article.title }}</h1>
+      <p class="section-text" style="margin: 12px 0 24px; opacity: 0.8;">
+        <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">{{ article.published_at | date: '%B %d, %Y' }}</time>
+        {%- if article.author != blank -%} &middot; {{ article.author }}{%- endif -%}
+      </p>
+    </header>
+
+    {%- if article.image -%}
+      {{ article.image | image_url: width: 1200 | image_tag: alt: article.title, itemprop: 'image', loading: 'eager' }}
+    {%- endif -%}
+
+    <div class="section-text rte" style="margin-top: 32px;" itemprop="articleBody">
+      {{ article.content }}
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "class": "section-main-article",
+  "settings": []
+}
+{% endschema %}

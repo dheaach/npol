@@ -1,0 +1,135 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-math",
+      "settings": {
+        "heading_before": "A K-5 Math System Designed to Support ",
+        "heading_highlight": "Progressive Development",
+        "heading_tag": "h1",
+        "text": "<p>Empowering teachers with a research-based math curriculum that puts students at the center of learning.</p>",
+        "button_primary_label": "Get a Sample Lesson Plan",
+        "button_secondary_label": "Watch our Video"
+      }
+    },
+    "intro": {
+      "type": "intro-content",
+      "settings": {
+        "heading_before": "Why Students Can't Solve Problems and ",
+        "heading_highlight": "How to Help Them",
+        "heading_tag": "h2",
+        "list_items": "Research-based approach to math instruction\nStudent-centered learning design\nProven results in K-5 classrooms"
+      }
+    },
+    "quote": {
+      "type": "dark-quote-banner",
+      "settings": {
+        "heading": "The difference is in the design of the system, not classroom behavior.",
+        "heading_tag": "h2"
+      }
+    },
+    "programs": {
+      "type": "program-cards",
+      "blocks": {
+        "card-1": { "type": "card", "settings": { "tag_label": "Approach", "tag_color": "#FFC300", "card_bg_color": "#1BCDC4", "title": "Student-Centered Design" } },
+        "card-2": { "type": "card", "settings": { "tag_label": "Curriculum", "tag_color": "#1BCDC4", "card_bg_color": "#0A1D3C", "title": "Research-Based Units" } },
+        "card-3": { "type": "card", "settings": { "tag_label": "Results", "tag_color": "#FFB6C1", "card_bg_color": "#ADE8F6", "title": "Proven Outcomes" } }
+      },
+      "block_order": ["card-1", "card-2", "card-3"],
+      "settings": {
+        "heading_before": "Not Another ",
+        "heading_highlight": "Program"
+      }
+    },
+    "video": {
+      "type": "video-showcase",
+      "settings": {
+        "heading_before": "See How Our ",
+        "heading_highlight": "Activity Units",
+        "heading_after": " Look in Action"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials-slider",
+      "blocks": {
+        "t-1": { "type": "testimonial", "settings": { "quote": "This program transformed how our students approach math.", "author_name": "Jane Doe", "author_role": "5th Grade Teacher" } },
+        "t-2": { "type": "testimonial", "settings": { "quote": "Finally a curriculum that puts students at the center.", "author_name": "John Smith", "author_role": "Principal" } },
+        "t-3": { "type": "testimonial", "settings": { "quote": "The results speak for themselves — our scores improved dramatically.", "author_name": "Maria Garcia", "author_role": "Math Coordinator" } }
+      },
+      "block_order": ["t-1", "t-2", "t-3"],
+      "settings": {
+        "button_label": "Explore Research Studies"
+      }
+    },
+    "mosaic": {
+      "type": "mosaic-grid",
+      "blocks": {
+        "m-1": { "type": "item", "settings": { "layout": "image-left", "title": "Built for Teachers" } },
+        "m-2": { "type": "item", "settings": { "layout": "image-right", "title": "Designed for Students" } },
+        "m-3": { "type": "item", "settings": { "layout": "image-left", "title": "Backed by Research" } },
+        "m-4": { "type": "item", "settings": { "layout": "image-right", "title": "Proven in Classrooms" } }
+      },
+      "block_order": ["m-1", "m-2", "m-3", "m-4"],
+      "settings": {
+        "heading_before": "Why Next Gen CFLM ",
+        "heading_highlight": "Works"
+      }
+    },
+    "cta-teal": {
+      "type": "cta-teal",
+      "settings": {
+        "heading_before": "Empowering Teachers to Build ",
+        "heading_highlight": "Confident Mathematicians",
+        "button_label": "Contact Us Today"
+      }
+    },
+    "process": {
+      "type": "process-steps",
+      "blocks": {
+        "s-1": { "type": "step", "settings": { "step_label": "Step 1", "title": "Discover the Curriculum", "tape_color": "yellow" } },
+        "s-2": { "type": "step", "settings": { "step_label": "Step 2", "title": "Implement in Your Classroom", "tape_color": "teal" } },
+        "s-3": { "type": "step", "settings": { "step_label": "Step 3", "title": "See Student Growth", "tape_color": "yellow" } }
+      },
+      "block_order": ["s-1", "s-2", "s-3"],
+      "settings": {
+        "heading_before": "How It ",
+        "heading_highlight": "Works"
+      }
+    },
+    "resources": {
+      "type": "resources-cards",
+      "blocks": {
+        "r-1": { "type": "resource", "settings": { "title": "Teacher Guides", "button_label": "Learn More" } },
+        "r-2": { "type": "resource", "settings": { "title": "Research Studies", "button_label": "Learn More" } }
+      },
+      "block_order": ["r-1", "r-2"],
+      "settings": {
+        "heading_before": "Additional ",
+        "heading_highlight": "Resources"
+      }
+    },
+    "footer-cta": {
+      "type": "footer-cta",
+      "settings": {
+        "heading_before": "Are You Ready to Put ",
+        "heading_highlight": "Student-Centered Math",
+        "heading_after": " into Practice?",
+        "button_primary_label": "Contact an Expert",
+        "button_secondary_label": "Get a Free Sample",
+        "tape_color": "yellow"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "intro",
+    "quote",
+    "programs",
+    "video",
+    "testimonials",
+    "mosaic",
+    "cta-teal",
+    "process",
+    "resources",
+    "footer-cta"
+  ]
+}

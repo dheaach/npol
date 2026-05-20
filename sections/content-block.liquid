@@ -1,0 +1,208 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign bg_color = section.settings.background_color
+  assign text_align = section.settings.text_alignment
+  assign layout = section.settings.layout
+-%}
+
+<section
+  class="content-block section-spacing{% if layout == 'reverse' %} content-block--reverse{% endif %}"
+  {% if bg_color != blank and bg_color != 'rgba(0,0,0,0)' %}
+    style="background-color: {{ bg_color }};"
+  {% endif %}
+  aria-labelledby="content-block-heading-{{ section.id }}"
+>
+  <div class="page-width">
+    <div class="content-block__inner{% if layout == 'reverse' %} content-block__inner--reverse{% endif %}">
+      <div class="content-block__media">
+        {% render 'responsive-image',
+          image: section.settings.image,
+          alt: section.settings.image_alt,
+          class: 'content-block__image',
+          loading: section.settings.image_loading
+        %}
+      </div>
+
+      <div class="content-block__content text-{{ text_align }}">
+        {%- if section.settings.badge != blank -%}
+          <span class="content-block__badge">{{ section.settings.badge }}</span>
+        {%- endif -%}
+
+        {% render 'section-heading',
+          heading: section.settings.heading,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag
+        %}
+
+        {%- if section.settings.text != blank -%}
+          <div class="section-text rte">
+            {{ section.settings.text }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank -%}
+          {% render 'button',
+            label: section.settings.button_label,
+            url: section.settings.button_url,
+            style: section.settings.button_style
+          %}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Content Block",
+  "tag": "section",
+  "class": "section-content-block",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge text"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Your Heading Here"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" }
+      ],
+      "default": "h2",
+      "info": "Use only one H1 per page for SEO"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>Add your content here. This reusable section can be duplicated across any page.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        { "value": "primary", "label": "Primary" },
+        { "value": "secondary", "label": "Secondary" },
+        { "value": "outline", "label": "Outline" },
+        { "value": "yellow", "label": "Yellow" }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Upload or select an image from your Shopify media library"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (SEO)",
+      "info": "Describe the image for accessibility and search engines"
+    },
+    {
+      "type": "select",
+      "id": "image_loading",
+      "label": "Image loading",
+      "options": [
+        { "value": "lazy", "label": "Lazy (recommended)" },
+        { "value": "eager", "label": "Eager (above the fold)" }
+      ],
+      "default": "lazy"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout direction",
+      "options": [
+        { "value": "default", "label": "Image left, text right" },
+        { "value": "reverse", "label": "Image right, text left" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font for this section",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font for this section",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Content Block"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,53 @@
+{%- liquid
+  assign tag = heading_tag | default: 'h2'
+  assign size_class = heading_size | default: tag
+  assign highlight_color = highlight_color | default: 'var(--color-primary)'
+
+  assign before_weight_style = ''
+  if heading_before_weight != blank and heading_before_weight != 'inherit'
+    assign before_weight_style = 'font-weight: ' | append: heading_before_weight | append: ';'
+  endif
+
+  assign highlight_weight_style = ''
+  if heading_highlight_weight != blank and heading_highlight_weight != 'inherit'
+    assign highlight_weight_style = 'font-weight: ' | append: heading_highlight_weight | append: ';'
+  endif
+
+  assign after_weight_style = ''
+  if heading_after_weight != blank and heading_after_weight != 'inherit'
+    assign after_weight_style = 'font-weight: ' | append: heading_after_weight | append: ';'
+  endif
+
+  assign heading_weight_style = ''
+  if heading_weight != blank and heading_weight != 'inherit'
+    assign heading_weight_style = 'font-weight: ' | append: heading_weight | append: ';'
+  endif
+-%}
+
+{%- if heading != blank -%}
+  <{{ tag }} class="section-heading section-heading--{{ size_class }}"{% if heading_weight_style != blank %} style="{{ heading_weight_style }}"{% endif %}>
+    {{ heading }}
+  </{{ tag }}>
+{%- elsif heading_before != blank or heading_highlight != blank or heading_after != blank -%}
+  <{{ tag }} class="section-heading section-heading--{{ size_class }}">
+    {%- if heading_before != blank -%}
+      {%- if before_weight_style != blank -%}
+        <span style="{{ before_weight_style }}">{{ heading_before }}</span>
+      {%- else -%}
+        {{ heading_before }}
+      {%- endif -%}
+    {%- endif -%}
+    {%- if heading_highlight != blank -%}
+      {%- if heading_before != blank -%} {%- endif -%}
+      <span class="text-highlight" style="color: {{ highlight_color }};{% if highlight_weight_style != blank %} {{ highlight_weight_style }}{% endif %}">{{ heading_highlight }}</span>
+    {%- endif -%}
+    {%- if heading_after != blank -%}
+      {%- if heading_before != blank or heading_highlight != blank -%} {%- endif -%}
+      {%- if after_weight_style != blank -%}
+        <span style="{{ after_weight_style }}">{{ heading_after }}</span>
+      {%- else -%}
+        {{ heading_after }}
+      {%- endif -%}
+    {%- endif -%}
+  </{{ tag }}>
+{%- endif -%}

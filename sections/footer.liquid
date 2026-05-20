@@ -1,0 +1,135 @@
+<footer class="site-footer" role="contentinfo">
+  <div class="page-width">
+    <div class="site-footer__top">
+      <a href="{{ routes.root_url }}" class="site-footer__logo" aria-label="{{ shop.name | escape }}">
+        {%- if section.settings.logo != blank -%}
+          {% render 'responsive-image',
+            image: section.settings.logo,
+            alt: section.settings.logo_alt | default: shop.name,
+            class: 'site-footer__logo-image',
+            width: 160,
+            loading: 'lazy'
+          %}
+        {%- else -%}
+          <span class="site-footer__logo-text">{{ section.settings.logo_text | default: shop.name }}</span>
+        {%- endif -%}
+      </a>
+
+      {%- if section.settings.show_social -%}
+        <ul class="site-footer__social" aria-label="Social media links">
+          {%- if section.settings.social_facebook != blank -%}
+            <li><a href="{{ section.settings.social_facebook }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">{% render 'icon-facebook' %}</a></li>
+          {%- endif -%}
+          {%- if section.settings.social_instagram != blank -%}
+            <li><a href="{{ section.settings.social_instagram }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">{% render 'icon-instagram' %}</a></li>
+          {%- endif -%}
+          {%- if section.settings.social_linkedin != blank -%}
+            <li><a href="{{ section.settings.social_linkedin }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">{% render 'icon-linkedin' %}</a></li>
+          {%- endif -%}
+          {%- if section.settings.social_twitter != blank -%}
+            <li><a href="{{ section.settings.social_twitter }}" target="_blank" rel="noopener noreferrer" aria-label="Twitter">{% render 'icon-twitter' %}</a></li>
+          {%- endif -%}
+        </ul>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.menu != blank -%}
+      <nav class="site-footer__nav" aria-label="{{ section.settings.menu_title | default: 'Footer navigation' | escape }}">
+        <ul class="site-footer__links site-footer__links--inline">
+          {%- for link in section.settings.menu.links -%}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    <div class="site-footer__bottom">
+      <p>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ section.settings.copyright_text }}</p>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "class": "section-footer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Footer logo"
+    },
+    {
+      "type": "text",
+      "id": "logo_alt",
+      "label": "Logo alt text"
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo text (if no image)"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Footer menu",
+      "default": "footer",
+      "info": "Select a menu from Online Store → Navigation"
+    },
+    {
+      "type": "text",
+      "id": "menu_title",
+      "label": "Menu aria label",
+      "default": "Footer navigation"
+    },
+    {
+      "type": "header",
+      "content": "Social Media"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "label": "Show social icons",
+      "default": true
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "social_linkedin",
+      "label": "LinkedIn URL"
+    },
+    {
+      "type": "url",
+      "id": "social_twitter",
+      "label": "Twitter / X URL"
+    },
+    {
+      "type": "header",
+      "content": "Copyright"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "default": "All rights reserved."
+    }
+  ]
+}
+{% endschema %}

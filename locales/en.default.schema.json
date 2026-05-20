@@ -1,0 +1,24 @@
+{
+  "settings_schema": {
+    "colors": {
+      "name": "Colors"
+    },
+    "typography": {
+      "name": "Typography"
+    },
+    "seo": {
+      "name": "SEO"
+    },
+    "layout": {
+      "name": "Layout"
+    }
+  },
+  "sections": {
+    "header": {
+      "name": "Header"
+    },
+    "footer": {
+      "name": "Footer"
+    }
+  }
+}

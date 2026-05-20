@@ -1,0 +1,187 @@
+{% render 'section-font-vars', section: section %}
+
+<section class="process-steps section-spacing" aria-labelledby="process-heading-{{ section.id }}">
+  <div class="page-width">
+    <div class="process-steps__header text-center">
+      {% render 'highlighted-heading',
+        heading: section.settings.heading,
+        heading_before: section.settings.heading_before,
+        heading_highlight: section.settings.heading_highlight,
+        heading_tag: section.settings.heading_tag,
+        heading_size: section.settings.heading_tag,
+        highlight_color: section.settings.highlight_color
+      %}
+      {%- if section.settings.subtext != blank -%}
+        <p class="section-text process-steps__subtext">{{ section.settings.subtext }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="process-steps__list">
+      {%- for block in section.blocks -%}
+        <div class="process-step{% if forloop.index0 == 1 or forloop.index0 == 3 or forloop.index0 == 5 %} process-step--reverse{% endif %}" {{ block.shopify_attributes }}>
+          <div class="process-step__content">
+            {%- if block.settings.step_label != blank -%}
+              <span class="process-step__label">{{ block.settings.step_label }}</span>
+            {%- endif -%}
+            {%- if block.settings.title != blank -%}
+              <h3 class="section-heading section-heading--h3">{{ block.settings.title }}</h3>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <div class="section-text rte">{{ block.settings.text }}</div>
+            {%- endif -%}
+          </div>
+          <div class="process-step__media">
+            {% render 'polaroid-image',
+              image: block.settings.image,
+              alt: block.settings.image_alt,
+              tape_color: block.settings.tape_color,
+              rotation: block.settings.rotation
+            %}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Process Steps",
+  "tag": "section",
+  "class": "section-process-steps",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "How It "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Works"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "step_label",
+          "label": "Step label",
+          "default": "Step 1"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Discover the Curriculum"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Explore our research-based math units designed for K-5.</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image (Polaroid)"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text (SEO)"
+        },
+        {
+          "type": "select",
+          "id": "tape_color",
+          "label": "Tape accent color",
+          "options": [
+            { "value": "yellow", "label": "Yellow" },
+            { "value": "teal", "label": "Teal" },
+            { "value": "pink", "label": "Pink" }
+          ],
+          "default": "yellow"
+        },
+        {
+          "type": "select",
+          "id": "rotation",
+          "label": "Image rotation",
+          "options": [
+            { "value": "left", "label": "Tilt left" },
+            { "value": "right", "label": "Tilt right" },
+            { "value": "none", "label": "No rotation" }
+          ],
+          "default": "left"
+        }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "Process Steps",
+    "blocks": [
+      { "type": "step", "settings": { "step_label": "Step 1", "tape_color": "yellow" } },
+      { "type": "step", "settings": { "step_label": "Step 2", "tape_color": "teal" } },
+      { "type": "step", "settings": { "step_label": "Step 3", "tape_color": "yellow" } }
+    ]
+  }]
+}
+{% endschema %}

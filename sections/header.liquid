@@ -1,0 +1,114 @@
+<header class="site-header" role="banner">
+  <div class="page-width">
+    <div class="site-header__inner">
+      <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ shop.name | escape }} — Home">
+        {%- if section.settings.logo != blank -%}
+          {% render 'responsive-image',
+            image: section.settings.logo,
+            alt: section.settings.logo_alt | default: shop.name,
+            class: 'site-header__logo-image',
+            width: 500,
+            loading: 'eager'
+          %}
+        {%- else -%}
+          <span class="site-header__logo-text">{{ section.settings.logo_text | default: shop.name }}</span>
+        {%- endif -%}
+      </a>
+
+      {%- if section.settings.menu != blank -%}
+        <nav class="site-header__nav-wrapper" data-nav-wrapper aria-label="{{ section.settings.menu_title | default: 'Main navigation' | escape }}">
+          <ul class="site-header__nav" data-site-nav id="site-nav">
+            {%- for link in section.settings.menu.links -%}
+              <li>
+                <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      <div class="site-header__actions">
+        {%- if section.settings.button_label != blank -%}
+          <a href="{{ section.settings.button_url | default: '#' }}" class="btn btn--yellow site-header__cta">
+            {{ section.settings.button_label }}
+          </a>
+        {%- endif -%}
+
+        <button
+          class="site-header__menu-toggle"
+          data-menu-toggle
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "text",
+      "id": "logo_alt",
+      "label": "Logo alt text (SEO)"
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo text (if no image)",
+      "default": "AGM"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu",
+      "info": "Select a menu from Online Store → Navigation"
+    },
+    {
+      "type": "text",
+      "id": "menu_title",
+      "label": "Menu aria label",
+      "default": "Main navigation"
+    },
+    {
+      "type": "header",
+      "content": "Call to Action Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Get Started"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    }
+  ]
+}
+{% endschema %}

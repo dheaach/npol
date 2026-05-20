@@ -1,0 +1,16 @@
+<section class="page-404 section-spacing text-center">
+  <div class="page-width">
+    <h1 class="section-heading section-heading--h1">404</h1>
+    <p class="section-text" style="margin: 16px 0 32px;">Sorry, the page you're looking for doesn't exist.</p>
+    {% render 'button', label: 'Back to Home', url: routes.root_url, style: 'primary' %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "404 Page",
+  "tag": "section",
+  "class": "section-404",
+  "settings": []
+}
+{% endschema %}

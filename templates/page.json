@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "content-block",
+      "settings": {
+        "heading": "Page Title",
+        "heading_tag": "h1",
+        "text": "<p>Page content goes here. Add more sections below using the theme editor.</p>",
+        "layout": "default"
+      }
+    }
+  },
+  "order": ["main"]
+}

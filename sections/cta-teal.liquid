@@ -1,0 +1,155 @@
+{% render 'section-font-vars', section: section %}
+
+<section class="cta-teal section-spacing" style="background-color: {{ section.settings.background_color | default: '#1BCDC4' }};" aria-labelledby="cta-teal-heading-{{ section.id }}">
+  <div class="page-width">
+    <div class="cta-teal__inner">
+      <div class="cta-teal__content">
+        {% render 'highlighted-heading',
+          heading: section.settings.heading,
+          heading_before: section.settings.heading_before,
+          heading_highlight: section.settings.heading_highlight,
+          heading_after: section.settings.heading_after,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+
+        {%- if section.settings.text != blank -%}
+          <div class="section-text rte cta-teal__text">{{ section.settings.text }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank -%}
+          {% render 'button', label: section.settings.button_label, url: section.settings.button_url, style: 'yellow' %}
+        {%- endif -%}
+      </div>
+
+      <div class="cta-teal__decoration" aria-hidden="true">
+        <div class="blob-shape blob-shape--white"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #shopify-section-{{ section.id }} .section-heading {
+    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
+  }
+  #shopify-section-{{ section.id }} .cta-teal__text {
+    color: {{ section.settings.text_color | default: '#0A1D3C' }};
+  }
+</style>
+
+{% schema %}
+{
+  "name": "CTA — Teal Banner",
+  "tag": "section",
+  "class": "section-cta-teal",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Empowering Teachers to Build "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Confident Mathematicians"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Contact Us Today"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [{ "name": "CTA — Teal Banner" }]
+}
+{% endschema %}

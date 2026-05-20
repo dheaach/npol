@@ -1,0 +1,252 @@
+{% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'intro-content__inner' %}
+
+<section class="intro-content section-spacing" aria-labelledby="intro-heading-{{ section.id }}">
+  <div class="page-width">
+    <div class="intro-content__inner{% if section.settings.layout == 'reverse' %} intro-content__inner--reverse{% endif %}">
+      <div class="intro-content__media">
+        {% render 'responsive-image',
+          image: section.settings.image,
+          alt: section.settings.image_alt,
+          class: 'intro-content__image',
+          loading: section.settings.image_loading
+        %}
+      </div>
+
+      <div class="intro-content__text">
+        {% render 'highlighted-heading',
+          heading_before: section.settings.heading_before,
+          heading_highlight: section.settings.heading_highlight,
+          heading_after: section.settings.heading_after,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_after_weight: section.settings.heading_after_weight,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+
+        {%- if section.settings.text != blank -%}
+          <div class="section-text rte">{{ section.settings.text }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.list_items != blank -%}
+          <ul class="intro-content__list">
+            {%- assign items = section.settings.list_items | newline_to_br | split: '<br />' -%}
+            {%- for item in items -%}
+              {%- assign trimmed = item | strip -%}
+              {%- if trimmed != blank -%}
+                <li>{{ trimmed }}</li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if section.settings.text_after_list != blank -%}
+          <div class="section-text rte">{{ section.settings.text_after_list }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Intro — Image & Text",
+  "tag": "section",
+  "class": "section-intro-content",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Why Students Can't Solve Problems and"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "How to Help Them"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description"
+    },
+    {
+      "type": "textarea",
+      "id": "list_items",
+      "label": "Bullet list items",
+      "info": "One item per line",
+      "default": "Research-based approach to math instruction\nStudent-centered learning design\nProven results in K-5 classrooms"
+    },
+    {
+      "type": "richtext",
+      "id": "text_after_list",
+      "label": "Description (below list)"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (SEO)"
+    },
+    {
+      "type": "select",
+      "id": "image_loading",
+      "label": "Image loading",
+      "options": [
+        { "value": "lazy", "label": "Lazy" },
+        { "value": "eager", "label": "Eager" }
+      ],
+      "default": "lazy"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "default", "label": "Image left, text right" },
+        { "value": "reverse", "label": "Image right, text left" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Image column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Text column uses the remaining width. Applies to the first column (image) in reading order."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [{ "name": "Intro — Image & Text" }]
+}
+{% endschema %}

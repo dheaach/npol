@@ -1,0 +1,25 @@
+{%- liquid
+  assign img_alt = alt | default: image.alt | default: shop.name
+  assign tape = tape_color | default: 'pink'
+  assign rotate = rotation | default: 'none'
+  assign img_class = 'polaroid__image'
+-%}
+
+<div class="polaroid polaroid--tape-{{ tape }} polaroid--rotate-{{ rotate }}">
+  <span class="polaroid__tape polaroid__tape--left" aria-hidden="true"></span>
+  <span class="polaroid__tape polaroid__tape--right" aria-hidden="true"></span>
+  <div class="polaroid__frame">
+    {%- if image != blank -%}
+      {% render 'responsive-image',
+        image: image,
+        alt: img_alt,
+        class: img_class,
+        loading: loading | default: 'lazy'
+      %}
+    {%- else -%}
+      <div class="polaroid__placeholder" role="img" aria-label="{{ img_alt | escape }}">
+        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {%- endif -%}
+  </div>
+</div>

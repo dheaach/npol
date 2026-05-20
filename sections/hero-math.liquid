@@ -1,0 +1,204 @@
+{% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'hero-math__inner' %}
+
+<section class="hero-math section-spacing" aria-labelledby="hero-heading-{{ section.id }}">
+  <div class="page-width">
+    <div class="hero-math__inner">
+      <div class="hero-math__content">
+        {% render 'highlighted-heading',
+          heading_before: section.settings.heading_before,
+          heading_highlight: section.settings.heading_highlight,
+          heading_after: section.settings.heading_after,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+
+        {%- if section.settings.text != blank -%}
+          <div class="section-text rte hero-math__text">{{ section.settings.text }}</div>
+        {%- endif -%}
+
+        <div class="hero-math__actions">
+          {%- if section.settings.button_primary_label != blank -%}
+            {% render 'button',
+              label: section.settings.button_primary_label,
+              url: section.settings.button_primary_url,
+              style: 'yellow'
+            %}
+          {%- endif -%}
+          {%- if section.settings.button_secondary_label != blank -%}
+            <a href="{{ section.settings.button_secondary_url | default: '#' }}" class="btn btn--text-link">
+              {{ section.settings.button_secondary_label }}
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="hero-math__media">
+        
+        {% render 'responsive-image',
+          image: section.settings.image,
+          alt: section.settings.image_alt,
+          class: 'hero-math__image',
+          loading: 'eager',
+          fetchpriority: 'high'
+        %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero — K-5 Math",
+  "tag": "section",
+  "class": "section-hero-math",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "A K-5 Math System Designed to Support "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight (colored text)",
+      "default": "Progressive Development"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>Empowering teachers with a research-based math curriculum that puts students at the center of learning.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Primary Button"
+    },
+    {
+      "type": "text",
+      "id": "button_primary_label",
+      "label": "Button label",
+      "default": "Get a Sample Lesson Plan"
+    },
+    {
+      "type": "url",
+      "id": "button_primary_url",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Secondary Link"
+    },
+    {
+      "type": "text",
+      "id": "button_secondary_label",
+      "label": "Link label",
+      "default": "Watch our Video"
+    },
+    {
+      "type": "url",
+      "id": "button_secondary_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Hero image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (SEO)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Content column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Image column uses the remaining width. Stacks to one column on tablet and below."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [{ "name": "Hero — K-5 Math" }]
+}
+{% endschema %}

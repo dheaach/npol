@@ -1,0 +1,49 @@
+{%- comment -%}
+  Section font override CSS variables.
+  Include in sections that allow per-section font customization.
+  Usage: {% render 'section-font-vars', section: section %}
+{%- endcomment -%}
+
+{%- liquid
+  assign use_custom_font = false
+  if section.settings.enable_custom_font and section.settings.custom_font != blank
+    assign use_custom_font = true
+    assign custom_font = section.settings.custom_font
+  endif
+-%}
+
+{%- if use_custom_font -%}
+  <style>
+    {{ custom_font | font_face: font_display: 'swap' }}
+    #shopify-section-{{ section.id }} {
+      --section-font-heading: {{ custom_font.family }}, {{ custom_font.fallback_families }};
+      --section-font-heading-weight: {{ custom_font.weight }};
+    }
+    #shopify-section-{{ section.id }} .section-heading,
+    #shopify-section-{{ section.id }} h1,
+    #shopify-section-{{ section.id }} h2,
+    #shopify-section-{{ section.id }} h3,
+    #shopify-section-{{ section.id }} h4,
+    #shopify-section-{{ section.id }} h5,
+    #shopify-section-{{ section.id }} h6 {
+      font-family: var(--section-font-heading);
+      font-weight: var(--section-font-heading-weight);
+    }
+  </style>
+{%- endif -%}
+
+{%- if section.settings.enable_custom_body_font and section.settings.custom_body_font != blank -%}
+  {%- assign body_font = section.settings.custom_body_font -%}
+  <style>
+    {{ body_font | font_face: font_display: 'swap' }}
+    #shopify-section-{{ section.id }} {
+      --section-font-body: {{ body_font.family }}, {{ body_font.fallback_families }};
+      --section-font-body-weight: {{ body_font.weight }};
+    }
+    #shopify-section-{{ section.id }} p,
+    #shopify-section-{{ section.id }} .section-text {
+      font-family: var(--section-font-body);
+      font-weight: var(--section-font-body-weight);
+    }
+  </style>
+{%- endif -%}

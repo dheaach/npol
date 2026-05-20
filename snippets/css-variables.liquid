@@ -1,0 +1,62 @@
+{%- liquid
+  assign font_heading = settings.font_heading
+  assign font_body = settings.font_body
+  assign font_button = settings.font_button
+-%}
+
+<style>
+  {{ font_heading | font_face: font_display: 'swap' }}
+  {{ font_body | font_face: font_display: 'swap' }}
+  {{ font_button | font_face: font_display: 'swap' }}
+
+  :root {
+    /* Colors */
+    --color-primary: {{ settings.color_primary }};
+    --color-secondary: {{ settings.color_secondary }};
+    --color-yellow: {{ settings.color_yellow }};
+    --color-light-blue: {{ settings.color_light_blue }};
+    --color-background: {{ settings.color_background }};
+    --color-text: {{ settings.color_text }};
+    --color-black: {{ settings.color_black }};
+
+    /* Typography */
+    --font-heading: {{ font_heading.family }}, {{ font_heading.fallback_families }};
+    --font-heading-weight: {{ font_heading.weight }};
+    --font-heading-style: {{ font_heading.style }};
+    --font-body: {{ font_body.family }}, {{ font_body.fallback_families }};
+    --font-body-weight: {{ font_body.weight }};
+    --font-body-style: {{ font_body.style }};
+    --font-button: {{ font_button.family }}, {{ font_button.fallback_families }};
+    --font-button-weight: {{ font_button.weight }};
+    --font-button-style: {{ font_button.style }};
+
+    --font-size-h1: {{ settings.font_size_h1 }}px;
+    --font-size-h2: {{ settings.font_size_h2 }}px;
+    --font-size-h3: {{ settings.font_size_h3 }}px;
+    --font-size-h4: {{ settings.font_size_h4 }}px;
+    --font-size-h5: {{ settings.font_size_h5 }}px;
+    --font-size-h6: {{ settings.font_size_h6 }}px;
+    --font-size-body: {{ settings.font_size_body }}px;
+    --font-size-button: {{ settings.font_size_button }}px;
+
+    /* Heading decoration */
+    --heading-text-decoration: {{ settings.heading_text_decoration }};
+    --heading-text-transform: {{ settings.heading_text_transform }};
+    --heading-letter-spacing: {{ settings.heading_letter_spacing | times: 0.01 }}em;
+    --heading-line-height: {{ settings.heading_line_height | times: 0.01 }};
+    --heading-underline-offset: {{ settings.heading_underline_offset }}px;
+    --heading-decoration-color: {{ settings.heading_decoration_color }};
+
+    /* Body text decoration */
+    --body-text-decoration: {{ settings.body_text_decoration }};
+    --body-text-transform: {{ settings.body_text_transform }};
+    --body-letter-spacing: {{ settings.body_letter_spacing | times: 0.01 }}em;
+    --body-line-height: {{ settings.body_line_height | times: 0.01 }};
+    --body-underline-offset: {{ settings.body_underline_offset }}px;
+    --body-decoration-color: {{ settings.body_decoration_color }};
+
+    /* Layout */
+    --page-width: {{ settings.page_width }}px;
+    --section-spacing: {{ settings.section_spacing }}px;
+  }
+</style>

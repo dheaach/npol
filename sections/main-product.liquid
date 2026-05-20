@@ -1,0 +1,70 @@
+<section class="main-product section-spacing">
+  <div class="page-width">
+    <div class="main-product__inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;">
+      <div class="main-product__media">
+        {%- if product.featured_image -%}
+          {% render 'responsive-image',
+            image: product.featured_image,
+            alt: product.featured_image.alt | default: product.title,
+            class: 'main-product__image',
+            loading: 'eager',
+            fetchpriority: 'high'
+          %}
+        {%- endif -%}
+      </div>
+
+      <div class="main-product__info">
+        <h1 class="section-heading section-heading--h2">{{ product.title }}</h1>
+
+        {%- if product.vendor != blank -%}
+          <p class="main-product__vendor" style="color: var(--color-primary); font-weight: 600; margin: 8px 0;">
+            {{ product.vendor }}
+          </p>
+        {%- endif -%}
+
+        <p class="main-product__price" style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: 700; margin: 16px 0;">
+          {{ product.price | money }}
+          {%- if product.compare_at_price > product.price -%}
+            <s style="opacity: 0.5; font-size: var(--font-size-body); margin-left: 8px;">
+              {{ product.compare_at_price | money }}
+            </s>
+          {%- endif -%}
+        </p>
+
+        {%- if product.description != blank -%}
+          <div class="section-text rte" style="margin: 24px 0;">
+            {{ product.description }}
+          </div>
+        {%- endif -%}
+
+        {%- form 'product', product -%}
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <button type="submit" class="btn btn--primary"{% unless product.available %} disabled{% endunless %}>
+            {%- if product.available -%}
+              Add to Cart
+            {%- else -%}
+              Sold Out
+            {%- endif -%}
+          </button>
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .main-product__inner {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "class": "section-main-product",
+  "settings": []
+}
+{% endschema %}

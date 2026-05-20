@@ -1,0 +1,47 @@
+<section class="main-blog section-spacing">
+  <div class="page-width">
+    <h1 class="section-heading section-heading--h1">{{ blog.title }}</h1>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px; margin-top: 32px;">
+      {%- paginate blog.articles by section.settings.articles_per_page -%}
+        {%- for article in blog.articles -%}
+          <article>
+            {%- if article.image -%}
+              <a href="{{ article.url }}">
+                {{ article.image | image_url: width: 600 | image_tag: alt: article.title, loading: 'lazy' }}
+              </a>
+            {%- endif -%}
+            <h2 class="section-heading section-heading--h3" style="margin-top: 16px;">
+              <a href="{{ article.url }}">{{ article.title }}</a>
+            </h2>
+            <p class="section-text" style="margin-top: 8px;">{{ article.published_at | date: '%B %d, %Y' }}</p>
+            {%- if article.excerpt != blank -%}
+              <div class="section-text rte" style="margin-top: 12px;">{{ article.excerpt }}</div>
+            {%- endif -%}
+          </article>
+        {%- endfor -%}
+        {%- if paginate.pages > 1 -%}
+          <nav style="grid-column: 1 / -1; text-align: center; margin-top: 16px;">{{ paginate | default_pagination }}</nav>
+        {%- endif -%}
+      {%- endpaginate -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Blog",
+  "tag": "section",
+  "class": "section-main-blog",
+  "settings": [
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "label": "Articles per page",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "default": 12
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,210 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign layout = section.settings.layout
+  assign bg_color = section.settings.background_color
+-%}
+
+<section
+  class="hero-banner section-spacing hero-banner--{{ layout }}"
+  {% if bg_color != blank and bg_color != 'rgba(0,0,0,0)' %}
+    style="background-color: {{ bg_color }};"
+  {% endif %}
+  aria-labelledby="hero-heading-{{ section.id }}"
+>
+  {%- if layout == 'overlay' and section.settings.image != blank -%}
+    <div class="hero-banner__background" aria-hidden="true">
+      {% render 'responsive-image',
+        image: section.settings.image,
+        alt: '',
+        class: 'hero-banner__bg-image',
+        loading: 'eager',
+        fetchpriority: 'high'
+      %}
+    </div>
+    <div class="hero-banner__overlay" aria-hidden="true"></div>
+  {%- endif -%}
+
+  <div class="page-width">
+    <div class="hero-banner__inner">
+      <div class="hero-banner__content">
+        {%- if section.settings.subheading != blank -%}
+          <p class="hero-banner__subheading">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+
+        {% render 'section-heading',
+          heading: section.settings.heading,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag
+        %}
+
+        {%- if section.settings.text != blank -%}
+          <div class="hero-banner__text section-text rte">
+            {{ section.settings.text }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank or section.settings.button_label_secondary != blank -%}
+          <div class="hero-banner__actions">
+            {%- if section.settings.button_label != blank -%}
+              {% render 'button',
+                label: section.settings.button_label,
+                url: section.settings.button_url,
+                style: 'primary'
+              %}
+            {%- endif -%}
+            {%- if section.settings.button_label_secondary != blank -%}
+              {% render 'button',
+                label: section.settings.button_label_secondary,
+                url: section.settings.button_url_secondary,
+                style: 'outline'
+              %}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- unless layout == 'overlay' -%}
+        <div class="hero-banner__media">
+          {% render 'responsive-image',
+            image: section.settings.image,
+            alt: section.settings.image_alt,
+            class: 'hero-banner__image',
+            loading: 'eager',
+            fetchpriority: 'high'
+          %}
+        </div>
+      {%- endunless -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "tag": "section",
+  "class": "section-hero-banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Welcome to Our Store"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" }
+      ],
+      "default": "h1",
+      "info": "Use H1 only once per page"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Primary button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "button_label_secondary",
+      "label": "Secondary button label"
+    },
+    {
+      "type": "url",
+      "id": "button_url_secondary",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Hero image",
+      "info": "Upload your hero image here"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (SEO)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout style",
+      "options": [
+        { "value": "default", "label": "Split (text + image)" },
+        { "value": "full-width", "label": "Centered text" },
+        { "value": "overlay", "label": "Full background overlay" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font for this section",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font for this section",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
+    }
+  ]
+}
+{% endschema %}

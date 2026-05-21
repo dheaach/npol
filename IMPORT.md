@@ -1,26 +1,26 @@
-# Import tema ke Shopify
+# Import theme to Shopify
 
-Tema ini sudah memenuhi struktur standar Shopify OS 2.0 dan siap di-upload.
+This theme follows the standard Shopify OS 2.0 structure and is ready to upload.
 
-## Opsi A: Upload ZIP (paling mudah)
+## Option A: Upload ZIP (easiest)
 
-1. Jalankan di PowerShell dari folder tema:
+1. Run in PowerShell from the theme folder:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File package-theme.ps1
 ```
 
-2. File **`agm-theme.zip`** akan dibuat di folder ini.
+2. **`agm-theme.zip`** will be created in this folder.
 
-3. Di **Shopify Admin**:
+3. In **Shopify Admin**:
    - **Online Store** → **Themes**
    - **Add theme** → **Upload zip file**
-   - Pilih `agm-theme.zip`
-   - Tunggu hingga upload selesai → **Publish**
+   - Select `agm-theme.zip`
+   - Wait for upload to finish → **Publish**
 
-> **Penting:** ZIP harus berisi folder `assets`, `config`, `layout`, dll. langsung di root — bukan folder `npol` di dalam ZIP. Script `package-theme.ps1` sudah menangani ini.
+> **Important:** The ZIP must contain `assets`, `config`, `layout`, etc. at the root — not an `npol` folder inside the ZIP. `package-theme.ps1` handles this.
 
-## Opsi B: Shopify CLI
+## Option B: Shopify CLI
 
 ```bash
 npm install -g @shopify/cli @shopify/theme
@@ -28,20 +28,20 @@ cd "c:\DT360 Learn\npol"
 shopify theme push --unpublished
 ```
 
-Atau untuk development:
+Or for development:
 
 ```bash
 shopify theme dev
 ```
 
-## Setelah import
+## After import
 
-1. **Navigation** → buat menu `main-menu` dan `footer`
-2. **Theme Editor** → Header/Footer → pilih menu
-3. Upload gambar di setiap section
-4. **Publish** tema
+1. **Navigation** → create `main-menu` and `footer` menus
+2. **Theme Editor** → Header/Footer → assign menus
+3. Upload images in each section
+4. **Publish** the theme
 
-## Struktur tema (wajib Shopify)
+## Theme structure (Shopify required)
 
 ```
 assets/
@@ -50,13 +50,13 @@ layout/          ← theme.liquid, password.liquid
 locales/         ← en.default.json
 sections/
 snippets/
-templates/       ← index, product, collection, cart, dll.
+templates/       ← index, product, collection, cart, etc.
 ```
 
 ## Troubleshooting
 
-| Masalah | Solusi |
-|---------|--------|
-| ZIP ditolak | Pastikan pakai `package-theme.ps1`, jangan zip folder induk manual |
-| Menu kosong | Buat menu di Navigation, lalu pilih di Header settings |
-| Font tidak muncul | Di Theme settings → Typography, pilih Poppins & Montserrat |
+| Issue | Fix |
+|-------|-----|
+| ZIP rejected | Use `package-theme.ps1`; do not zip the parent folder manually |
+| Empty menu | Create menus in Navigation, then select them in Header settings |
+| Fonts missing | Theme settings → Typography → choose Poppins & Montserrat |

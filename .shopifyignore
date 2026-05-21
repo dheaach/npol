@@ -1,5 +1,4 @@
 # Exclude non-theme files from Shopify CLI push/package
-debut-modifications/
 package-theme.ps1
 *.zip
 .git/

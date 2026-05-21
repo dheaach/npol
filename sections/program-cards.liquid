@@ -9,12 +9,15 @@
         {% render 'highlighted-heading',
           heading: section.settings.heading,
           heading_weight: section.settings.heading_weight,
+          heading_font_size: section.settings.heading_font_size,
           heading_before: section.settings.heading_before,
           heading_highlight: section.settings.heading_highlight,
           heading_before_weight: section.settings.heading_before_weight,
+          heading_before_font_size: section.settings.heading_before_font_size,
           heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
           heading_tag: section.settings.heading_tag,
-          heading_size: section.settings.heading_tag,
+          heading_size: section.settings.heading_size,
           highlight_color: section.settings.highlight_color
         %}
       </div>
@@ -25,20 +28,86 @@
 
     <div class="program-cards__grid">
       {%- for block in section.blocks -%}
-        <article class="program-card" {{ block.shopify_attributes }} style="--card-header-color: {{ block.settings.tag_color }};">
+        {%- liquid
+          assign text_align = block.settings.text_alignment | default: 'left'
+          assign icon_size = block.settings.icon_size | default: 48
+          assign element_spacing = block.settings.element_spacing | default: 16
+          assign spacing_icon_title = block.settings.spacing_icon_title | default: element_spacing
+          assign spacing_title_text = block.settings.spacing_title_text | default: element_spacing
+          assign dots_size = block.settings.dots_size | default: 6
+          assign dots_spacing = block.settings.dots_spacing | default: 12
+          if dots_spacing < dots_size
+            assign dots_spacing = dots_size | plus: 2
+          endif
+          assign dots_line_spacing = block.settings.dots_line_spacing | default: 12
+          assign padding_top = block.settings.padding_top | default: 28
+          assign padding_bottom = block.settings.padding_bottom | default: 28
+          assign padding_left = block.settings.padding_left | default: 24
+          assign padding_right = block.settings.padding_right | default: 24
+          assign body_padding_top = padding_top
+          if block.settings.tag_label != blank
+            assign body_padding_top = padding_top | plus: 20
+          endif
+
+          case block.settings.card_alignment
+            when 'center'
+              assign card_align_items = 'center'
+            when 'right'
+              assign card_align_items = 'flex-end'
+            else
+              assign card_align_items = 'flex-start'
+          endcase
+
+        -%}
+        <article
+          id="program-card-{{ block.id }}"
+          class="program-card{% if block.settings.tag_label != blank %} program-card--has-tag{% endif %}"
+          {{ block.shopify_attributes }}
+          style="
+            --tag-fallback-bg: {{ block.settings.tag_color }};
+            --dots-color: {{ block.settings.dots_color | default: '#0A1D3C' }};
+            --dots-size: {{ dots_size }}px;
+            --dots-spacing: {{ dots_spacing }}px;
+            --dots-line-spacing: {{ dots_line_spacing }}px;
+            --icon-size: {{ icon_size }}px;
+            --spacing-icon-title: {{ spacing_icon_title }}px;
+            --spacing-title-text: {{ spacing_title_text }}px;
+          "
+        >
           {%- if block.settings.tag_label != blank -%}
-            <span class="program-card__tag">{{ block.settings.tag_label }}</span>
+            <div
+              class="program-card__tag"
+              style="{% if block.settings.tag_bg_image != blank %}background-image: url('{{ block.settings.tag_bg_image | image_url: width: 1200 }}');{% endif %} background-color: {{ block.settings.tag_color }};"
+            >
+              <span class="program-card__tag-label">{{ block.settings.tag_label }}</span>
+            </div>
           {%- endif -%}
 
-          <div class="program-card__body" style="background-color: {{ block.settings.card_bg_color }};">
+          <div
+            class="program-card__body text-{{ text_align }}"
+            style="
+              background-color: {{ block.settings.card_bg_color }};
+              align-items: {{ card_align_items }};
+              padding: {{ body_padding_top }}px {{ padding_right }}px {{ padding_bottom }}px {{ padding_left }}px;
+            "
+          >
             {%- if block.settings.icon != blank -%}
               <div class="program-card__icon">
-                {% render 'responsive-image', image: block.settings.icon, alt: block.settings.icon_alt, width: 80 %}
+                {% render 'responsive-image',
+                  image: block.settings.icon,
+                  alt: block.settings.icon_alt,
+                  class: 'program-card__icon-image',
+                  width: icon_size
+                %}
               </div>
             {%- endif -%}
 
             {%- if block.settings.title != blank -%}
-              <h3 class="section-heading section-heading--h3 program-card__title">{{ block.settings.title }}</h3>
+              <div class="program-card__title-group">
+                <span class="program-card__dots program-card__dots--top" aria-hidden="true"></span>
+                <h3 class="section-heading section-heading--h3 program-card__title">{{ block.settings.title }}</h3>
+                <span class="program-card__dots program-card__dots--bottom" aria-hidden="true"></span>
+              </div>
             {%- endif -%}
 
             {%- if block.settings.text != blank -%}
@@ -54,6 +123,83 @@
     {%- endif -%}
   </div>
 </section>
+
+<style>
+  #shopify-section-{{ section.id }} .program-cards__header-left .section-heading {
+    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
+  }
+  #shopify-section-{{ section.id }} .program-card__title,
+  #shopify-section-{{ section.id }} .program-card__text,
+  #shopify-section-{{ section.id }} .program-card__title-group {
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .program-card__icon {
+    width: var(--icon-size, 48px);
+    height: var(--icon-size, 48px);
+  }
+  #shopify-section-{{ section.id }} .program-card__icon-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  #shopify-section-{{ section.id }} .program-card__tag {
+    width: max-content;
+    max-width: 100%;
+    padding: 10px 20px;
+    background-color: var(--tag-fallback-bg, var(--color-yellow));
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  #shopify-section-{{ section.id }} .program-card__body > .program-card__icon {
+    margin-bottom: var(--spacing-icon-title, 16px);
+  }
+  #shopify-section-{{ section.id }} .program-card__body > .program-card__title-group {
+    margin-bottom: var(--spacing-title-text, 16px);
+  }
+  #shopify-section-{{ section.id }} .program-card__body > .program-card__icon:last-child,
+  #shopify-section-{{ section.id }} .program-card__body > .program-card__title-group:last-child {
+    margin-bottom: 0;
+  }
+  #shopify-section-{{ section.id }} .program-card__dots {
+    height: var(--dots-spacing, 12px);
+    background-image: radial-gradient(
+      var(--dots-color, #0A1D3C) calc(var(--dots-size, 6px) / 2),
+      transparent calc(var(--dots-size, 6px) / 2)
+    );
+    background-size: var(--dots-spacing, 12px) var(--dots-spacing, 12px);
+    background-position: 0 50%;
+  }
+  #shopify-section-{{ section.id }} .program-card__title-group {
+    gap: var(--dots-line-spacing, 12px);
+  }
+  {%- for block in section.blocks -%}
+    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title,
+    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text,
+    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text p,
+    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text li,
+    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text a {
+      color: {{ block.settings.text_color | default: '#0A1D3C' }} !important;
+    }
+    {%- if block.settings.title_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title {
+        font-size: {{ block.settings.title_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text p,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text li {
+        font-size: {{ block.settings.text_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.tag_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__tag-label {
+        font-size: {{ block.settings.tag_font_size }}px;
+      }
+    {%- endif -%}
+  {%- endfor -%}
+</style>
 
 {% schema %}
 {
@@ -81,6 +227,58 @@
       "id": "heading_highlight",
       "label": "Heading highlight",
       "default": "Program"
+    },
+    {
+      "type": "header",
+      "content": "Heading font size"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading scale (theme)",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "h2",
+      "info": "Theme typography scale. Custom sizes below override when set above 0."
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Font size (single line heading)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only. Used when the single Heading field is filled."
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
     },
     {
       "type": "select",
@@ -137,6 +335,12 @@
         { "value": "h3", "label": "H3" }
       ],
       "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#0A1D3C"
     },
     {
       "type": "color",
@@ -214,22 +418,201 @@
       "name": "Feature Card",
       "settings": [
         {
+          "type": "header",
+          "content": "Tag"
+        },
+        {
           "type": "text",
           "id": "tag_label",
           "label": "Tag label",
           "default": "Feature"
         },
         {
+          "type": "range",
+          "id": "tag_font_size",
+          "label": "Tag font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme default (14px)."
+        },
+        {
+          "type": "image_picker",
+          "id": "tag_bg_image",
+          "label": "Tag background image"
+        },
+        {
           "type": "color",
           "id": "tag_color",
-          "label": "Tag color",
+          "label": "Tag fallback background",
+          "info": "Used when no background image is set.",
           "default": "#FFC300"
+        },
+        {
+          "type": "header",
+          "content": "Card style"
         },
         {
           "type": "color",
           "id": "card_bg_color",
           "label": "Card background",
           "default": "#1BCDC4"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#0A1D3C"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "select",
+          "id": "card_alignment",
+          "label": "Card alignment",
+          "info": "Aligns icon and content within the card body.",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "header",
+          "content": "Element spacing"
+        },
+        {
+          "type": "range",
+          "id": "element_spacing",
+          "label": "Default spacing",
+          "info": "Default gap used when specific spacings below are not changed.",
+          "min": 0,
+          "max": 64,
+          "step": 4,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "spacing_icon_title",
+          "label": "Icon to title spacing",
+          "min": 0,
+          "max": 64,
+          "step": 4,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "spacing_title_text",
+          "label": "Title to description spacing",
+          "min": 0,
+          "max": 64,
+          "step": 4,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "header",
+          "content": "Card padding"
+        },
+        {
+          "type": "range",
+          "id": "padding_top",
+          "label": "Padding top",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 28
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "label": "Padding bottom",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 28
+        },
+        {
+          "type": "range",
+          "id": "padding_left",
+          "label": "Padding left",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "padding_right",
+          "label": "Padding right",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "header",
+          "content": "Title dots"
+        },
+        {
+          "type": "color",
+          "id": "dots_color",
+          "label": "Dots color",
+          "default": "#0A1D3C"
+        },
+        {
+          "type": "range",
+          "id": "dots_size",
+          "label": "Dot size",
+          "min": 2,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 6
+        },
+        {
+          "type": "range",
+          "id": "dots_spacing",
+          "label": "Dots spacing",
+          "info": "Distance between dot centers (keeps dots circular).",
+          "min": 6,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "dots_line_spacing",
+          "label": "Line spacing",
+          "info": "Space between the dots line and the title.",
+          "min": 4,
+          "max": 48,
+          "step": 2,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "header",
+          "content": "Icon"
         },
         {
           "type": "image_picker",
@@ -242,16 +625,52 @@
           "label": "Icon alt text (SEO)"
         },
         {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon size",
+          "min": 24,
+          "max": 160,
+          "step": 4,
+          "unit": "px",
+          "default": 48
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
           "type": "text",
           "id": "title",
           "label": "Title",
           "default": "Feature Title"
         },
         {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Title font size",
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme default (H3 scale)."
+        },
+        {
           "type": "richtext",
           "id": "text",
           "label": "Description",
           "default": "<p>Describe this feature.</p>"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Description font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme default body size."
         }
       ]
     }
@@ -259,9 +678,9 @@
   "presets": [{
     "name": "Program Feature Cards",
     "blocks": [
-      { "type": "card", "settings": { "tag_label": "Approach", "tag_color": "#FFC300", "card_bg_color": "#1BCDC4" } },
-      { "type": "card", "settings": { "tag_label": "Curriculum", "tag_color": "#1BCDC4", "card_bg_color": "#0A1D3C" } },
-      { "type": "card", "settings": { "tag_label": "Results", "tag_color": "#FFB6C1", "card_bg_color": "#ADE8F6" } }
+      { "type": "card", "settings": { "tag_label": "Approach", "tag_color": "#FFC300", "card_bg_color": "#1BCDC4", "text_color": "#0A1D3C" } },
+      { "type": "card", "settings": { "tag_label": "Curriculum", "tag_color": "#1BCDC4", "card_bg_color": "#0A1D3C", "text_color": "#FFFFFF" } },
+      { "type": "card", "settings": { "tag_label": "Results", "tag_color": "#FFB6C1", "card_bg_color": "#ADE8F6", "text_color": "#0A1D3C" } }
     ]
   }]
 }

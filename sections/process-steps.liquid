@@ -1,16 +1,32 @@
 {% render 'section-font-vars', section: section %}
 
+{%- liquid
+  assign dots_size = section.settings.dots_size | default: 4
+  assign dots_spacing = section.settings.dots_spacing | default: 24
+  if dots_spacing < dots_size
+    assign dots_spacing = dots_size | plus: 2
+  endif
+-%}
+
 <section class="process-steps section-spacing" aria-labelledby="process-heading-{{ section.id }}">
   <div class="page-width">
     <div class="process-steps__header text-center">
-      {% render 'highlighted-heading',
-        heading: section.settings.heading,
-        heading_before: section.settings.heading_before,
-        heading_highlight: section.settings.heading_highlight,
-        heading_tag: section.settings.heading_tag,
-        heading_size: section.settings.heading_tag,
-        highlight_color: section.settings.highlight_color
-      %}
+      <div id="process-heading-{{ section.id }}">
+        {% render 'highlighted-heading',
+          heading: section.settings.heading,
+          heading_font_size: section.settings.heading_font_size,
+          heading_weight: section.settings.heading_weight,
+          heading_before: section.settings.heading_before,
+          heading_highlight: section.settings.heading_highlight,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_before_font_size: section.settings.heading_before_font_size,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+      </div>
       {%- if section.settings.subtext != blank -%}
         <p class="section-text process-steps__subtext">{{ section.settings.subtext }}</p>
       {%- endif -%}
@@ -18,31 +34,144 @@
 
     <div class="process-steps__list">
       {%- for block in section.blocks -%}
-        <div class="process-step{% if forloop.index0 == 1 or forloop.index0 == 3 or forloop.index0 == 5 %} process-step--reverse{% endif %}" {{ block.shopify_attributes }}>
+        <div class="process-step{% if forloop.index0 == 1 or forloop.index0 == 3 or forloop.index0 == 5 %} process-step--reverse{% endif %}" {{ block.shopify_attributes }} id="process-step-{{ block.id }}">
           <div class="process-step__content">
             {%- if block.settings.step_label != blank -%}
               <span class="process-step__label">{{ block.settings.step_label }}</span>
             {%- endif -%}
             {%- if block.settings.title != blank -%}
-              <h3 class="section-heading section-heading--h3">{{ block.settings.title }}</h3>
+              <h3 class="section-heading section-heading--h3 process-step__title">{{ block.settings.title }}</h3>
             {%- endif -%}
             {%- if block.settings.text != blank -%}
-              <div class="section-text rte">{{ block.settings.text }}</div>
+              <div class="section-text rte process-step__text">{{ block.settings.text }}</div>
             {%- endif -%}
           </div>
           <div class="process-step__media">
-            {% render 'polaroid-image',
+            {% render 'responsive-image',
               image: block.settings.image,
               alt: block.settings.image_alt,
-              tape_color: block.settings.tape_color,
-              rotation: block.settings.rotation
+              class: 'process-step__image',
+              loading: block.settings.image_loading
             %}
           </div>
+          {%- if section.settings.show_dots and forloop.last == false -%}
+            <div
+              class="process-step__dots process-step__dots--{{ section.settings.dots_shape | default: 'circle' }}"
+              aria-hidden="true"
+              style="
+                --dots-color: {{ section.settings.dots_color | default: '#ADE8F6' }};
+                --dots-size: {{ dots_size }}px;
+                --dots-spacing: {{ dots_spacing }}px;
+                --dots-width: {{ section.settings.dots_width | default: 100 }}%;
+                --dots-divider-spacing: {{ section.settings.dots_divider_spacing | default: 32 }}px;
+                --dots-offset-left: {{ section.settings.dots_offset_left | default: 0 }}%;
+              "
+            ></div>
+          {%- endif -%}
         </div>
       {%- endfor -%}
     </div>
   </div>
 </section>
+
+<style>
+  {%- if section.settings.show_dots -%}
+    #shopify-section-{{ section.id }} .process-step__dots {
+      grid-column: 1 / -1;
+      width: var(--dots-width, 100%);
+      height: var(--dots-spacing, 24px);
+      margin-top: var(--dots-divider-spacing, 32px);
+      margin-left: var(--dots-offset-left, 0%);
+      margin-right: auto;
+      min-height: var(--dots-size, 4px);
+      background-position: 0 50%;
+    }
+    #shopify-section-{{ section.id }} .process-step__dots--circle {
+      background-image: radial-gradient(
+        var(--dots-color) calc(var(--dots-size) / 2),
+        transparent calc(var(--dots-size) / 2)
+      );
+      background-size: var(--dots-spacing) var(--dots-spacing);
+    }
+    #shopify-section-{{ section.id }} .process-step__dots--square {
+      background-image:
+        linear-gradient(var(--dots-color) var(--dots-size), transparent var(--dots-size)),
+        linear-gradient(90deg, var(--dots-color) var(--dots-size), transparent var(--dots-size));
+      background-size: var(--dots-spacing) var(--dots-spacing);
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .process-steps__subtext {
+      font-size: {{ section.settings.subtext_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_weight != blank and section.settings.subtext_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .process-steps__subtext {
+      font-weight: {{ section.settings.subtext_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_color != blank -%}
+    #shopify-section-{{ section.id }} .process-steps__subtext {
+      color: {{ section.settings.subtext_font_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .process-step__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  {%- for block in section.blocks -%}
+    {%- if block.settings.step_label_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__label {
+        font-size: {{ block.settings.step_label_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.step_label_font_weight != blank and block.settings.step_label_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__label {
+        font-weight: {{ block.settings.step_label_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.step_label_font_color != blank -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__label {
+        color: {{ block.settings.step_label_font_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__title {
+        font-size: {{ block.settings.title_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_weight != blank and block.settings.title_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__title {
+        font-weight: {{ block.settings.title_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_color != blank -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__title {
+        color: {{ block.settings.title_font_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text,
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text p {
+        font-size: {{ block.settings.text_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text,
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text p {
+        font-weight: {{ block.settings.text_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_color != blank -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text,
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text p,
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text a {
+        color: {{ block.settings.text_font_color }} !important;
+      }
+    {%- endif -%}
+  {%- endfor -%}
+</style>
 
 {% schema %}
 {
@@ -51,9 +180,39 @@
   "class": "section-process-steps",
   "settings": [
     {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
       "type": "text",
       "id": "heading",
       "label": "Heading (single line)"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Font size (single line heading)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "text",
@@ -62,10 +221,62 @@
       "default": "How It "
     },
     {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
       "type": "text",
       "id": "heading_highlight",
       "label": "Heading highlight",
       "default": "Works"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "select",
@@ -87,6 +298,117 @@
       "type": "textarea",
       "id": "subtext",
       "label": "Subtext"
+    },
+    {
+      "type": "color",
+      "id": "subtext_font_color",
+      "label": "Subtext color"
+    },
+    {
+      "type": "range",
+      "id": "subtext_font_size",
+      "label": "Subtext font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "subtext_font_weight",
+      "label": "Subtext font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Step divider (dots)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots divider between steps",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "dots_color",
+      "label": "Dots color",
+      "default": "#ADE8F6"
+    },
+    {
+      "type": "range",
+      "id": "dots_size",
+      "label": "Dot size",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "dots_spacing",
+      "label": "Dots spacing",
+      "info": "Distance between dot centers.",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "dots_shape",
+      "label": "Dot shape",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "circle"
+    },
+    {
+      "type": "range",
+      "id": "dots_width",
+      "label": "Divider width",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "info": "Width of the dots line under each step."
+    },
+    {
+      "type": "range",
+      "id": "dots_divider_spacing",
+      "label": "Space above divider",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "Gap between step content and the dots line."
+    },
+    {
+      "type": "range",
+      "id": "dots_offset_left",
+      "label": "Horizontal offset",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 0,
+      "info": "Shift the divider line from the left."
     },
     {
       "type": "header",
@@ -129,10 +451,72 @@
           "default": "Step 1"
         },
         {
+          "type": "color",
+          "id": "step_label_font_color",
+          "label": "Step label color"
+        },
+        {
+          "type": "range",
+          "id": "step_label_font_size",
+          "label": "Step label font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "step_label_font_weight",
+          "label": "Step label font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
           "type": "text",
           "id": "title",
           "label": "Title",
           "default": "Discover the Curriculum"
+        },
+        {
+          "type": "color",
+          "id": "title_font_color",
+          "label": "Title color"
+        },
+        {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Title font size",
+          "min": 0,
+          "max": 96,
+          "step": 2,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = heading scale only."
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Title font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
         },
         {
           "type": "richtext",
@@ -141,9 +525,44 @@
           "default": "<p>Explore our research-based math units designed for K-5.</p>"
         },
         {
+          "type": "color",
+          "id": "text_font_color",
+          "label": "Description color"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Description font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Description font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Media"
+        },
+        {
           "type": "image_picker",
           "id": "image",
-          "label": "Image (Polaroid)"
+          "label": "Image"
         },
         {
           "type": "text",
@@ -152,25 +571,13 @@
         },
         {
           "type": "select",
-          "id": "tape_color",
-          "label": "Tape accent color",
+          "id": "image_loading",
+          "label": "Image loading",
           "options": [
-            { "value": "yellow", "label": "Yellow" },
-            { "value": "teal", "label": "Teal" },
-            { "value": "pink", "label": "Pink" }
+            { "value": "lazy", "label": "Lazy (recommended)" },
+            { "value": "eager", "label": "Eager (above the fold)" }
           ],
-          "default": "yellow"
-        },
-        {
-          "type": "select",
-          "id": "rotation",
-          "label": "Image rotation",
-          "options": [
-            { "value": "left", "label": "Tilt left" },
-            { "value": "right", "label": "Tilt right" },
-            { "value": "none", "label": "No rotation" }
-          ],
-          "default": "left"
+          "default": "lazy"
         }
       ]
     }
@@ -178,9 +585,9 @@
   "presets": [{
     "name": "Process Steps",
     "blocks": [
-      { "type": "step", "settings": { "step_label": "Step 1", "tape_color": "yellow" } },
-      { "type": "step", "settings": { "step_label": "Step 2", "tape_color": "teal" } },
-      { "type": "step", "settings": { "step_label": "Step 3", "tape_color": "yellow" } }
+      { "type": "step", "settings": { "step_label": "Step 1" } },
+      { "type": "step", "settings": { "step_label": "Step 2" } },
+      { "type": "step", "settings": { "step_label": "Step 3" } }
     ]
   }]
 }

@@ -1,0 +1,25 @@
+---
+description: Re-read files from disk before editing; user may change them manually
+alwaysApply: true
+---
+
+# Read Before Modify
+
+The user may edit files manually between prompts. **Never assume file contents from earlier in the conversation are still current.**
+
+## Before any edit
+
+1. **Re-read** every file you plan to change using the Read tool (or an equivalent fresh read). Do this at the start of each new user request, even if you edited the same file in the previous turn.
+2. If the task touches related assets (e.g. a `.liquid` section), also re-read linked files the user might have changed: paired CSS (`assets/*.css`), snippets (`snippets/*.liquid`), templates (`templates/*.json`), and schema blocks in the same section.
+3. **Scan for manual differences** — unexpected settings, markup, or styles — and match the user's current structure and naming; do not revert their edits unless they ask.
+4. **Then** apply only the requested change with the smallest correct diff.
+
+## Do not
+
+- Patch from memory or from stale code citations in chat history.
+- Overwrite unrelated parts of a file the user may have customized.
+- Skip re-reading because "we just worked on this file."
+
+## When scope is unclear
+
+Ask which files to read, or read the file the user @-mentioned plus its obvious dependencies before modifying.

@@ -1,0 +1,104 @@
+{%- comment -%}
+  Decorative side graphics for mosaic grid rows.
+  Usage: {% render 'mosaic-side-graphics', section: section, side: 'left' %}
+  side: 'left' | 'right' — omit to render both sides (section toggles still apply).
+{%- endcomment -%}
+
+{%- liquid
+  assign render_left = false
+  assign render_right = false
+  if side == blank
+    assign render_left = true
+    assign render_right = true
+  elsif side == 'left'
+    assign render_left = true
+  elsif side == 'right'
+    assign render_right = true
+  endif
+-%}
+
+{%- if render_left and section.settings.show_left_graphics -%}
+  {%- if section.settings.left_graphic_1 != blank or section.settings.left_graphic_1_use_shape -%}
+    <div
+      class="mosaic-grid__graphic mosaic-grid__graphic--left mosaic-grid__graphic--1{% unless section.settings.left_graphic_1 != blank %} mosaic-grid__graphic--shape{% endunless %}"
+      style="
+        top: {{ section.settings.left_graphic_1_top }}%;
+        width: {{ section.settings.left_graphic_1_width }}px;
+        --graphic-color: {{ section.settings.graphic_color }};
+      "
+    >
+      {%- if section.settings.left_graphic_1 != blank -%}
+        {% render 'responsive-image',
+          image: section.settings.left_graphic_1,
+          alt: '',
+          class: 'mosaic-grid__graphic-image',
+          loading: 'lazy',
+          width: section.settings.left_graphic_1_width
+        %}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+  {%- if section.settings.left_graphic_2 != blank or section.settings.left_graphic_2_use_shape -%}
+    <div
+      class="mosaic-grid__graphic mosaic-grid__graphic--left mosaic-grid__graphic--2{% unless section.settings.left_graphic_2 != blank %} mosaic-grid__graphic--shape{% endunless %}"
+      style="
+        top: {{ section.settings.left_graphic_2_top }}%;
+        width: {{ section.settings.left_graphic_2_width }}px;
+        --graphic-color: {{ section.settings.graphic_color }};
+      "
+    >
+      {%- if section.settings.left_graphic_2 != blank -%}
+        {% render 'responsive-image',
+          image: section.settings.left_graphic_2,
+          alt: '',
+          class: 'mosaic-grid__graphic-image',
+          loading: 'lazy',
+          width: section.settings.left_graphic_2_width
+        %}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{%- if render_right and section.settings.show_right_graphics -%}
+  {%- if section.settings.right_graphic_1 != blank or section.settings.right_graphic_1_use_shape -%}
+    <div
+      class="mosaic-grid__graphic mosaic-grid__graphic--right mosaic-grid__graphic--1{% unless section.settings.right_graphic_1 != blank %} mosaic-grid__graphic--shape{% endunless %}"
+      style="
+        top: {{ section.settings.right_graphic_1_top }}%;
+        width: {{ section.settings.right_graphic_1_width }}px;
+        --graphic-color: {{ section.settings.graphic_color }};
+      "
+    >
+      {%- if section.settings.right_graphic_1 != blank -%}
+        {% render 'responsive-image',
+          image: section.settings.right_graphic_1,
+          alt: '',
+          class: 'mosaic-grid__graphic-image',
+          loading: 'lazy',
+          width: section.settings.right_graphic_1_width
+        %}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+  {%- if section.settings.right_graphic_2 != blank or section.settings.right_graphic_2_use_shape -%}
+    <div
+      class="mosaic-grid__graphic mosaic-grid__graphic--right mosaic-grid__graphic--2{% unless section.settings.right_graphic_2 != blank %} mosaic-grid__graphic--shape{% endunless %}"
+      style="
+        top: {{ section.settings.right_graphic_2_top }}%;
+        width: {{ section.settings.right_graphic_2_width }}px;
+        --graphic-color: {{ section.settings.graphic_color }};
+      "
+    >
+      {%- if section.settings.right_graphic_2 != blank -%}
+        {% render 'responsive-image',
+          image: section.settings.right_graphic_2,
+          alt: '',
+          class: 'mosaic-grid__graphic-image',
+          loading: 'lazy',
+          width: section.settings.right_graphic_2_width
+        %}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endif -%}

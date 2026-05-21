@@ -6,7 +6,12 @@
 
 {%- liquid
   assign col1 = section.settings.column_1_width | default: 50
-  assign col2 = 100 | minus: col1
+  assign col2_setting = section.settings.column_2_width | default: 0
+  if col2_setting > 0
+    assign col2 = col2_setting
+  else
+    assign col2 = 100 | minus: col1
+  endif
   assign column_gap = section.settings.column_gap | default: 48
 -%}
 

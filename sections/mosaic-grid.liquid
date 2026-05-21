@@ -1,53 +1,226 @@
 {% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'mosaic-grid__header' %}
 
-<section class="mosaic-grid section-spacing" aria-labelledby="mosaic-heading-{{ section.id }}">
-  <div class="page-width">
-    {% render 'highlighted-heading',
-      heading: section.settings.heading,
-      heading_before: section.settings.heading_before,
-      heading_highlight: section.settings.heading_highlight,
-      heading_after: section.settings.heading_after,
-      heading_tag: section.settings.heading_tag,
-      heading_size: section.settings.heading_tag,
-      highlight_color: section.settings.highlight_color
-    %}
+{%- liquid
+  assign bg_color = section.settings.background_color
+  assign header_col1 = section.settings.column_1_width | default: 55
+  assign header_col2_setting = section.settings.column_2_width | default: 0
+  if header_col2_setting > 0
+    assign header_col2 = header_col2_setting
+  else
+    assign header_col2 = 100 | minus: header_col1
+  endif
+  assign row_col1 = section.settings.row_column_1_width | default: 50
+  assign row_col2 = 100 | minus: row_col1
+  assign row_column_gap = section.settings.row_column_gap | default: 32
+  assign row_gap = section.settings.row_gap | default: 48
+-%}
 
-    <div class="mosaic-grid__items">
+<section
+  class="mosaic-grid section-spacing"
+  aria-labelledby="mosaic-heading-{{ section.id }}"
+>
+  <div class="page-width mosaic-grid__inner">
+    <header
+      class="mosaic-grid__header"
+      style="--header-col-1: {{ header_col1 }}; --header-col-2: {{ header_col2 }};"
+    >
+      <div class="mosaic-grid__header-left" id="mosaic-heading-{{ section.id }}">
+        {% render 'highlighted-heading',
+          heading: section.settings.heading,
+          heading_weight: section.settings.heading_weight,
+          heading_font_size: section.settings.heading_font_size,
+          heading_before: section.settings.heading_before,
+          heading_highlight: section.settings.heading_highlight,
+          heading_after: section.settings.heading_after,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_before_font_size: section.settings.heading_before_font_size,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_after_weight: section.settings.heading_after_weight,
+          heading_after_font_size: section.settings.heading_after_font_size,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_size,
+          highlight_color: section.settings.highlight_color
+        %}
+      </div>
+      {%- if section.settings.intro_text != blank -%}
+        <div class="mosaic-grid__header-right section-text rte">{{ section.settings.intro_text }}</div>
+      {%- endif -%}
+    </header>
+
+    <div class="mosaic-grid__rows" style="--row-gap: {{ row_gap }}px;">
       {%- for block in section.blocks -%}
-        <div class="mosaic-grid__item mosaic-grid__item--{{ block.settings.layout }}" {{ block.shopify_attributes }}>
-          {%- if block.settings.layout == 'image-left' or block.settings.layout == 'image-right' -%}
+        {%- liquid
+          assign media_width = block.settings.media_width | default: 520
+          assign img_loading = block.settings.media_loading | default: 'lazy'
+          assign block_col1 = block.settings.block_column_1_width | default: 0
+          if block_col1 == 0
+            assign block_col1 = row_col1
+          endif
+          assign block_col2 = 100 | minus: block_col1
+          assign block_col_gap = block.settings.block_column_gap | default: 0
+          if block_col_gap == 0
+            assign block_col_gap = row_column_gap
+          endif
+          assign show_row_graphics = block.settings.show_row_graphics
+          if show_row_graphics == nil
+            assign show_row_graphics = true
+          endif
+          assign graphics_position = block.settings.graphics_position | default: 'left'
+        -%}
+        <div
+          id="mosaic-row-wrap-{{ block.id }}"
+          class="mosaic-grid__row-wrap{% if show_row_graphics %} mosaic-grid__row-wrap--has-graphics{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          {%- if show_row_graphics -%}
+            <div
+              class="mosaic-grid__side-graphics mosaic-grid__side-graphics--{{ graphics_position }}"
+              aria-hidden="true"
+            >
+              {% render 'mosaic-side-graphics', section: section, side: graphics_position %}
+            </div>
+          {%- endif -%}
+          <div
+            id="mosaic-row-{{ block.id }}"
+            class="mosaic-grid__row mosaic-grid__row--{{ block.settings.layout }}"
+            style="
+              --row-col-1: {{ block_col1 }}fr;
+              --row-col-2: {{ block_col2 }}fr;
+              --row-column-gap: {{ block_col_gap }}px;
+              --media-max-width: {{ media_width }}px;
+            "
+          >
             <div class="mosaic-grid__media">
-              <div class="mosaic-grid__dots" aria-hidden="true"></div>
               {% render 'responsive-image',
-                image: block.settings.image,
-                alt: block.settings.image_alt,
-                class: 'mosaic-grid__image',
-                loading: 'lazy'
+                image: block.settings.media,
+                alt: block.settings.media_alt,
+                class: 'mosaic-grid__media-image',
+                loading: img_loading,
+                width: media_width
               %}
             </div>
             <div class="mosaic-grid__content">
               {%- if block.settings.title != blank -%}
-                <h3 class="section-heading section-heading--h3">{{ block.settings.title }}</h3>
+                <h3 class="section-heading section-heading--h3 mosaic-grid__row-title">{{ block.settings.title }}</h3>
               {%- endif -%}
               {%- if block.settings.text != blank -%}
-                <div class="section-text rte">{{ block.settings.text }}</div>
+                <div class="section-text rte mosaic-grid__row-text">{{ block.settings.text }}</div>
               {%- endif -%}
             </div>
-          {%- else -%}
-            <div class="mosaic-grid__content mosaic-grid__content--full">
-              {%- if block.settings.title != blank -%}
-                <h3 class="section-heading section-heading--h3">{{ block.settings.title }}</h3>
-              {%- endif -%}
-              {%- if block.settings.text != blank -%}
-                <div class="section-text rte">{{ block.settings.text }}</div>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
+          </div>
         </div>
       {%- endfor -%}
     </div>
+
+    {%- if section.settings.footer_text != blank -%}
+      <p class="mosaic-grid__footer section-text">{{ section.settings.footer_text }}</p>
+    {%- endif -%}
   </div>
 </section>
+
+<style>
+  {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ bg_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .mosaic-grid__header-left .section-heading {
+    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
+  }
+  {%- if section.settings.heading_color != blank -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__header-left .section-heading > span:not(.text-highlight) {
+      color: {{ section.settings.heading_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.intro_color != blank -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right,
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right p,
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right li,
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right a {
+      color: {{ section.settings.intro_color }} !important;
+    }
+  {%- endif -%}
+  {%- if section.settings.intro_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right,
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right p {
+      font-size: {{ section.settings.intro_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.intro_font_weight != blank and section.settings.intro_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right,
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right p {
+      font-weight: {{ section.settings.intro_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_color != blank -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__footer {
+      color: {{ section.settings.footer_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__footer {
+      font-size: {{ section.settings.footer_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_weight != blank and section.settings.footer_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__footer {
+      font-weight: {{ section.settings.footer_font_weight }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .mosaic-grid__header {
+    grid-template-columns: minmax(0, {{ header_col1 }}fr) minmax(0, {{ header_col2 }}fr);
+  }
+  #shopify-section-{{ section.id }} .mosaic-grid__rows {
+    gap: var(--row-gap, 48px);
+  }
+  #shopify-section-{{ section.id }} .mosaic-grid__row {
+    grid-template-columns: minmax(0, var(--row-col-1, 1fr)) minmax(0, var(--row-col-2, 1fr));
+    gap: var(--row-column-gap, 32px);
+  }
+  #shopify-section-{{ section.id }} .mosaic-grid__media-image,
+  #shopify-section-{{ section.id }} .mosaic-grid__media .responsive-image--placeholder {
+    max-width: var(--media-max-width, 100%);
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-inline: auto;
+  }
+  {%- for block in section.blocks -%}
+    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-title {
+      color: {{ block.settings.title_color | default: '#1BCDC4' }};
+    }
+    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text,
+    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text p,
+    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text li,
+    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text a {
+      color: {{ block.settings.text_color | default: '#0A1D3C' }} !important;
+    }
+    {%- if block.settings.title_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-title {
+        font-size: {{ block.settings.title_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_weight != blank and block.settings.title_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-title {
+        font-weight: {{ block.settings.title_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text,
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text p {
+        font-size: {{ block.settings.text_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text,
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text p {
+        font-weight: {{ block.settings.text_font_weight }};
+      }
+    {%- endif -%}
+  {%- endfor -%}
+</style>
 
 {% schema %}
 {
@@ -56,26 +229,154 @@
   "class": "section-mosaic-grid",
   "settings": [
     {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F8F9FA"
+    },
+    {
+      "type": "header",
+      "content": "Section heading"
+    },
+    {
       "type": "text",
       "id": "heading",
-      "label": "Heading (single line)"
+      "label": "Heading (single line)",
+      "info": "Optional. Or use split heading fields below."
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Font size (single line heading)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color (non-highlight)",
+      "default": "#0A1D3C"
     },
     {
       "type": "text",
       "id": "heading_before",
       "label": "Heading (before highlight)",
-      "default": "Why Next Gen CFLM "
+      "default": "Why Next Gen CFLM Works When Other Approaches "
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
     },
     {
       "type": "text",
       "id": "heading_highlight",
       "label": "Heading highlight",
-      "default": "Works"
+      "default": "Fall Short"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
     },
     {
       "type": "text",
       "id": "heading_after",
       "label": "Heading (after highlight)"
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
     },
     {
       "type": "select",
@@ -88,10 +389,320 @@
       "default": "h2"
     },
     {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading scale (theme)",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Intro text (header right)"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_text",
+      "label": "Intro text",
+      "default": "<p>Most programs improve parts of instruction. Few are designed to hold together over time.</p>"
+    },
+    {
       "type": "color",
-      "id": "highlight_color",
-      "label": "Highlight color",
-      "default": "#1BCDC4"
+      "id": "intro_color",
+      "label": "Intro font color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "intro_font_size",
+      "label": "Intro font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default."
+    },
+    {
+      "type": "select",
+      "id": "intro_font_weight",
+      "label": "Intro font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "header",
+      "content": "Header layout"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Left column width (heading)",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 55,
+      "info": "Relative width of the heading column. Right column uses the remaining space unless set below."
+    },
+    {
+      "type": "range",
+      "id": "column_2_width",
+      "label": "Right column width (intro text)",
+      "min": 0,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (100% minus left column). Set both columns for a custom ratio."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between header columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content rows layout"
+    },
+    {
+      "type": "range",
+      "id": "row_column_1_width",
+      "label": "Default first column width (rows)",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Default for all rows. Override per row in each Content row block."
+    },
+    {
+      "type": "range",
+      "id": "row_column_gap",
+      "label": "Default gap between row columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Gap between rows",
+      "min": 24,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "header",
+      "content": "Footer text"
+    },
+    {
+      "type": "textarea",
+      "id": "footer_text",
+      "label": "Footer text",
+      "default": "To realize deep, student-centered mathematics, intentional design that supports development over time is essential."
+    },
+    {
+      "type": "color",
+      "id": "footer_color",
+      "label": "Footer font color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "footer_font_size",
+      "label": "Footer font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "footer_font_weight",
+      "label": "Footer font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "header",
+      "content": "Side graphics (left)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_left_graphics",
+      "label": "Show left side graphics",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "graphic_color",
+      "label": "Shape color (when no image uploaded)",
+      "default": "#ADE8F6",
+      "info": "Used for CSS fallback pills if no image is set."
+    },
+    {
+      "type": "checkbox",
+      "id": "left_graphic_1_use_shape",
+      "label": "Left graphic 1 — use shape fallback",
+      "default": true,
+      "info": "Show teal pill shape when no image is uploaded."
+    },
+    {
+      "type": "image_picker",
+      "id": "left_graphic_1",
+      "label": "Left graphic 1 image"
+    },
+    {
+      "type": "range",
+      "id": "left_graphic_1_top",
+      "label": "Left graphic 1 vertical position",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "unit": "%",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "left_graphic_1_width",
+      "label": "Left graphic 1 width",
+      "min": 40,
+      "max": 320,
+      "step": 4,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "checkbox",
+      "id": "left_graphic_2_use_shape",
+      "label": "Left graphic 2 — use shape fallback",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "left_graphic_2",
+      "label": "Left graphic 2 image"
+    },
+    {
+      "type": "range",
+      "id": "left_graphic_2_top",
+      "label": "Left graphic 2 vertical position",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "unit": "%",
+      "default": 52
+    },
+    {
+      "type": "range",
+      "id": "left_graphic_2_width",
+      "label": "Left graphic 2 width",
+      "min": 40,
+      "max": 320,
+      "step": 4,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Side graphics (right)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_right_graphics",
+      "label": "Show right side graphics",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "right_graphic_1_use_shape",
+      "label": "Right graphic 1 — use shape fallback",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "right_graphic_1",
+      "label": "Right graphic 1 image"
+    },
+    {
+      "type": "range",
+      "id": "right_graphic_1_top",
+      "label": "Right graphic 1 vertical position",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "unit": "%",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "right_graphic_1_width",
+      "label": "Right graphic 1 width",
+      "min": 40,
+      "max": 320,
+      "step": 4,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "checkbox",
+      "id": "right_graphic_2_use_shape",
+      "label": "Right graphic 2 — use shape fallback",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "right_graphic_2",
+      "label": "Right graphic 2 image"
+    },
+    {
+      "type": "range",
+      "id": "right_graphic_2_top",
+      "label": "Right graphic 2 vertical position",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "unit": "%",
+      "default": 68
+    },
+    {
+      "type": "range",
+      "id": "right_graphic_2_width",
+      "label": "Right graphic 2 width",
+      "min": 40,
+      "max": 320,
+      "step": 4,
+      "unit": "px",
+      "default": 120
     },
     {
       "type": "header",
@@ -124,53 +735,213 @@
   ],
   "blocks": [
     {
-      "type": "item",
-      "name": "Grid Item",
+      "type": "row",
+      "name": "Content row",
       "settings": [
         {
           "type": "select",
           "id": "layout",
-          "label": "Layout",
+          "label": "Image position",
           "options": [
             { "value": "image-left", "label": "Image left, text right" },
-            { "value": "image-right", "label": "Image right, text left" },
-            { "value": "text-only", "label": "Text only" }
+            { "value": "image-right", "label": "Image right, text left" }
           ],
           "default": "image-left"
         },
         {
+          "type": "header",
+          "content": "Row layout"
+        },
+        {
+          "type": "range",
+          "id": "block_column_1_width",
+          "label": "First column width",
+          "min": 0,
+          "max": 70,
+          "step": 5,
+          "unit": "%",
+          "default": 0,
+          "info": "0 = use section default. First column is image or text depending on image position."
+        },
+        {
+          "type": "range",
+          "id": "block_column_gap",
+          "label": "Gap between columns",
+          "min": 0,
+          "max": 96,
+          "step": 8,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use section default."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_row_graphics",
+          "label": "Show side graphics on this row",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "graphics_position",
+          "label": "Side graphics position",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left",
+          "info": "Decorative graphics for this row. Upload images in section Side graphics settings."
+        },
+        {
+          "type": "header",
+          "content": "Media"
+        },
+        {
           "type": "image_picker",
-          "id": "image",
-          "label": "Image"
+          "id": "media",
+          "label": "Media image",
+          "info": "Upload image with dotted frame baked in (no CSS mosaic)."
         },
         {
           "type": "text",
-          "id": "image_alt",
-          "label": "Image alt text (SEO)"
+          "id": "media_alt",
+          "label": "Media alt text (SEO)"
+        },
+        {
+          "type": "range",
+          "id": "media_width",
+          "label": "Media display width",
+          "min": 200,
+          "max": 800,
+          "step": 20,
+          "unit": "px",
+          "default": 520,
+          "info": "Max width of the uploaded media on desktop."
+        },
+        {
+          "type": "select",
+          "id": "media_loading",
+          "label": "Media loading",
+          "options": [
+            { "value": "lazy", "label": "Lazy" },
+            { "value": "eager", "label": "Eager" }
+          ],
+          "default": "lazy"
+        },
+        {
+          "type": "header",
+          "content": "Text"
         },
         {
           "type": "text",
           "id": "title",
-          "label": "Title",
+          "label": "Row heading",
           "default": "Feature Title"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Row heading color",
+          "default": "#1BCDC4"
+        },
+        {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Row heading font size",
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme H3 scale."
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Row heading font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "700"
         },
         {
           "type": "richtext",
           "id": "text",
           "label": "Description",
           "default": "<p>Describe this feature.</p>"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Description color",
+          "default": "#0A1D3C"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Description font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Description font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" }
+          ],
+          "default": "400"
         }
       ]
     }
   ],
-  "presets": [{
-    "name": "Mosaic Feature Grid",
-    "blocks": [
-      { "type": "item", "settings": { "layout": "image-left" } },
-      { "type": "item", "settings": { "layout": "image-right" } },
-      { "type": "item", "settings": { "layout": "image-left" } },
-      { "type": "item", "settings": { "layout": "image-right" } }
-    ]
-  }]
+  "presets": [
+    {
+      "name": "Mosaic Feature Grid",
+      "blocks": [
+        {
+          "type": "row",
+          "settings": {
+            "layout": "image-right",
+            "title": "Cognitive Development vs. Coverage"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "layout": "image-left",
+            "title": "Sequences of Investigations vs. Isolated Tasks"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "layout": "image-right",
+            "title": "Fluency vs Rote Fact Memorization"
+          }
+        },
+        {
+          "type": "row",
+          "settings": {
+            "layout": "image-left",
+            "title": "Deep Professional Learning vs Publisher Trainings"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

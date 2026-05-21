@@ -1,7 +1,23 @@
 {% render 'section-font-vars', section: section %}
 
-<section class="testimonials section-spacing" aria-labelledby="testimonials-heading-{{ section.id }}">
-  <div class="page-width">
+{%- liquid
+  assign overlap_desktop = section.settings.overlap_margin | default: 100
+  assign overlap_mobile = section.settings.overlap_margin_mobile | default: 60
+  if overlap_mobile == blank
+    assign overlap_mobile = overlap_desktop
+  endif
+  assign card_gap = section.settings.card_gap | default: 24
+  assign card_gap_mobile = section.settings.card_gap_mobile | default: 0
+  if card_gap_mobile == 0
+    assign card_gap_mobile = card_gap
+  endif
+-%}
+
+<section
+  class="testimonials section-spacing{% if overlap_desktop > 0 %} testimonials--overlap{% endif %}"
+  aria-labelledby="testimonials-heading-{{ section.id }}"
+>
+  <div class="testimonials__inner">
     {%- if section.settings.heading != blank -%}
       <div class="testimonials__header text-center">
         {% render 'highlighted-heading',
@@ -11,13 +27,39 @@
         %}
       </div>
     {%- endif -%}
+  </div>
 
-    <div class="testimonials__slider" data-testimonials-slider>
-      <div class="testimonials__track" data-testimonials-track>
-        {%- for block in section.blocks -%}
-          <blockquote class="testimonial-card" {{ block.shopify_attributes }} data-testimonial-slide>
+  <div
+    class="testimonials__slider testimonials__slider--bleed"
+    data-testimonials-slider
+    style="--testimonials-card-gap: {{ card_gap }}px; --testimonials-card-gap-mobile: {{ card_gap_mobile }}px;"
+  >
+    <div class="testimonials__track" data-testimonials-track>
+      {%- for block in section.blocks -%}
+        <blockquote class="testimonial-card" {{ block.shopify_attributes }} data-testimonial-slide>
+            <img
+              class="testimonial-card__quote-mark testimonial-card__quote-mark--open"
+              src="{{ 'quote-icon-open.png' | asset_url }}"
+              alt=""
+              width="46"
+              height="40"
+              loading="lazy"
+              decoding="async"
+              aria-hidden="true"
+            >
+            <img
+              class="testimonial-card__quote-mark testimonial-card__quote-mark--close"
+              src="{{ 'quote-icon-close.png' | asset_url }}"
+              alt=""
+              width="46"
+              height="40"
+              loading="lazy"
+              decoding="async"
+              aria-hidden="true"
+            >
+            <div class="testimonial-card__inner">
             {%- if block.settings.quote != blank -%}
-              <p class="testimonial-card__quote section-text">"{{ block.settings.quote }}"</p>
+              <p class="testimonial-card__quote section-text">{{ block.settings.quote }}</p>
             {%- endif -%}
             <footer class="testimonial-card__author">
               {%- if block.settings.author_image != blank -%}
@@ -34,30 +76,77 @@
                 {%- endif -%}
               </cite>
             </footer>
+            </div>
           </blockquote>
-        {%- endfor -%}
-      </div>
-
-      {%- if section.blocks.size > 1 -%}
-        <div class="testimonials__controls">
-          <button class="testimonials__arrow testimonials__arrow--prev" data-testimonials-prev aria-label="Previous testimonial" type="button">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          </button>
-          <div class="testimonials__dots" data-testimonials-dots role="tablist" aria-label="Testimonial navigation"></div>
-          <button class="testimonials__arrow testimonials__arrow--next" data-testimonials-next aria-label="Next testimonial" type="button">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-      {%- endif -%}
+      {%- endfor -%}
     </div>
 
+    {%- if section.blocks.size > 1 -%}
+      <div class="testimonials__controls">
+        <button class="testimonials__arrow testimonials__arrow--prev" data-testimonials-prev aria-label="Previous testimonial" type="button">
+          <svg class="testimonials__arrow-icon" width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+            <path d="M12.5 1.5L2.5 8l10 6.5V1.5z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="testimonials__dots" data-testimonials-dots role="tablist" aria-label="Testimonial navigation"></div>
+        <button class="testimonials__arrow testimonials__arrow--next" data-testimonials-next aria-label="Next testimonial" type="button">
+          <svg class="testimonials__arrow-icon" width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+            <path d="M1.5 1.5l10 6.5-10 6.5V1.5z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="testimonials__inner">
     {%- if section.settings.button_label != blank -%}
       <div class="testimonials__cta text-center">
-        {% render 'button', label: section.settings.button_label, url: section.settings.button_url, style: 'yellow' %}
+        {% render 'button',
+          label: section.settings.button_label,
+          url: section.settings.button_url,
+          style: 'yellow',
+          class: 'testimonials__cta-btn'
+        %}
       </div>
     {%- endif -%}
   </div>
 </section>
+
+<style>
+  #shopify-section-{{ section.id }} {
+    overflow: visible;
+    position: relative;
+    z-index: 2;
+  }
+  #shopify-section-{{ section.id }} .testimonials__inner {
+    width: 100%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--section-padding-x, 40px);
+    padding-right: var(--section-padding-x, 40px);
+  }
+  #shopify-section-{{ section.id }} .testimonials__slider--bleed {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: {%- if overlap_desktop > 0 -%}-{{ overlap_desktop }}{%- else -%}40{%- endif -%}px;
+  }
+  #shopify-section-{{ section.id }} .testimonials__track {
+    gap: var(--testimonials-card-gap, 0);
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .testimonials__slider {
+      margin-top: {%- if overlap_mobile > 0 -%}-{{ overlap_mobile }}{%- else -%}32{%- endif -%}px;
+    }
+    #shopify-section-{{ section.id }} .testimonials__track {
+      gap: var(--testimonials-card-gap-mobile, var(--testimonials-card-gap, 0));
+    }
+  }
+</style>
 
 {% schema %}
 {
@@ -79,6 +168,54 @@
         { "value": "h3", "label": "H3" }
       ],
       "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "overlap_margin",
+      "label": "Slider overlap (pull up)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 100,
+      "info": "Negative top margin so testimonial cards overlap the section above. Set to 0 to disable."
+    },
+    {
+      "type": "range",
+      "id": "overlap_margin_mobile",
+      "label": "Slider overlap on mobile",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 60,
+      "info": "Overlap amount on screens under 768px."
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Space between cards",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24,
+      "info": "Horizontal gap between testimonial cards in the slider."
+    },
+    {
+      "type": "range",
+      "id": "card_gap_mobile",
+      "label": "Space between cards on mobile",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16,
+      "info": "Gap on screens under 768px. Leave at 0 to use the desktop value."
     },
     {
       "type": "header",

@@ -58,5 +58,12 @@
     /* Layout */
     --page-width: {{ settings.page_width }}px;
     --section-spacing: {{ settings.section_spacing }}px;
+    --section-padding-x: 40px;
+  }
+
+  @media screen and (max-width: 767px) {
+    :root {
+      --section-padding-x: 20px;
+    }
   }
 </style>

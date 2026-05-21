@@ -1,0 +1,17 @@
+---
+description: Do not edit Shopify template JSON unless the user explicitly asks
+alwaysApply: true
+---
+
+# Template JSON — do not edit by default
+
+Unless the user **explicitly** asks to change template or section-group JSON:
+
+- **Do not** modify files under `templates/*.json` (e.g. `index.json`, `page.json`, `product.json`).
+- **Do not** modify `sections/*-group.json` (e.g. `footer-group.json`, `header-group.json`).
+
+These files control default page layout and Theme Editor presets on deploy. Changing them can overwrite merchant customizations when pushed.
+
+**Instead:** change `sections/*.liquid`, `snippets/`, `assets/`, and `config/settings_schema.json` as needed. Tell the user to adjust section order, blocks, and homepage content in the Theme Editor if layout/preset updates are required.
+
+**Exception:** Only edit template/group JSON when the user clearly requests it (e.g. "update index.json", "add hero to homepage JSON").

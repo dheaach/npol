@@ -47,7 +47,7 @@
     });
   });
 
-  /* --- Testimonials slider --- */
+  /* --- Testimonials slider (1 centered slide, adjacent halves visible) --- */
   document.querySelectorAll('[data-testimonials-slider]').forEach(function (slider) {
     var track = slider.querySelector('[data-testimonials-track]');
     var slides = slider.querySelectorAll('[data-testimonial-slide]');
@@ -55,31 +55,22 @@
     var nextBtn = slider.querySelector('[data-testimonials-next]');
     var dotsContainer = slider.querySelector('[data-testimonials-dots]');
     var current = 0;
-    var visibleCount = 3;
-
-    function getVisibleCount() {
-      if (window.innerWidth < 768) return 1;
-      if (window.innerWidth < 1024) return 2;
-      return Math.min(3, slides.length);
-    }
 
     function updateSlider() {
-      visibleCount = getVisibleCount();
-      var slideWidth = 100 / visibleCount;
-      slides.forEach(function (slide) {
-        slide.style.flex = '0 0 ' + slideWidth + '%';
-      });
-      var maxIndex = Math.max(0, slides.length - visibleCount);
-      if (current > maxIndex) current = maxIndex;
-      track.style.transform = 'translateX(-' + (current * slideWidth) + '%)';
+      if (!track || !slides.length) return;
+      var sliderWidth = slider.clientWidth;
+      var slide = slides[current];
+      var offset = slide.offsetLeft + slide.offsetWidth / 2 - sliderWidth / 2;
+      var maxOffset = Math.max(0, track.scrollWidth - sliderWidth);
+      offset = Math.max(0, Math.min(offset, maxOffset));
+      track.style.transform = 'translateX(-' + offset + 'px)';
       updateDots();
     }
 
     function updateDots() {
       if (!dotsContainer) return;
       dotsContainer.innerHTML = '';
-      var maxIndex = Math.max(0, slides.length - visibleCount);
-      for (var i = 0; i <= maxIndex; i++) {
+      for (var i = 0; i < slides.length; i++) {
         var dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'testimonials__dot' + (i === current ? ' is-active' : '');
@@ -102,8 +93,7 @@
 
     if (nextBtn) {
       nextBtn.addEventListener('click', function () {
-        var maxIndex = Math.max(0, slides.length - visibleCount);
-        current = Math.min(maxIndex, current + 1);
+        current = Math.min(slides.length - 1, current + 1);
         updateSlider();
       });
     }

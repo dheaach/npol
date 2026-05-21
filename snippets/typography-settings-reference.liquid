@@ -1,1 +1,102 @@
-{%- comment -%}Reusable typography override settings — reference for section schemas{%- endcomment -%}
+{%- comment -%}
+  Typography schema & CSS reference — copy into section {% schema %} and <style> blocks.
+  Field prefix examples: text, subtext, caption, paragraph, list, heading, heading_before, heading_highlight, heading_after
+{%- endcomment -%}
+
+{%- comment -%}
+=== TEXT BODY (richtext / textarea label "Description") ===
+
+Schema (place immediately after the text/richtext/textarea setting):
+
+{
+  "type": "color",
+  "id": "PREFIX_font_color",
+  "label": "LABEL color"
+},
+{
+  "type": "range",
+  "id": "PREFIX_font_size",
+  "label": "LABEL font size",
+  "min": 0,
+  "max": 32,
+  "step": 1,
+  "unit": "px",
+  "default": 0,
+  "info": "0 = theme body size."
+},
+{
+  "type": "select",
+  "id": "PREFIX_font_weight",
+  "label": "LABEL font weight",
+  "options": [
+    { "value": "inherit", "label": "Theme default" },
+    { "value": "300", "label": "Light (300)" },
+    { "value": "400", "label": "Regular (400)" },
+    { "value": "500", "label": "Medium (500)" },
+    { "value": "600", "label": "Semi-bold (600)" },
+    { "value": "700", "label": "Bold (700)" },
+    { "value": "800", "label": "Extra-bold (800)" }
+  ],
+  "default": "inherit"
+}
+
+CSS (replace PREFIX, SELECTOR, e.g. .intro-content__description):
+
+{%- if section.settings.PREFIX_font_size > 0 -%}
+  #shopify-section-{{ section.id }} SELECTOR,
+  #shopify-section-{{ section.id }} SELECTOR p {
+    font-size: {{ section.settings.PREFIX_font_size }}px;
+  }
+{%- endif -%}
+{%- if section.settings.PREFIX_font_weight != blank and section.settings.PREFIX_font_weight != 'inherit' -%}
+  #shopify-section-{{ section.id }} SELECTOR,
+  #shopify-section-{{ section.id }} SELECTOR p {
+    font-weight: {{ section.settings.PREFIX_font_weight }};
+  }
+{%- endif -%}
+{%- if section.settings.PREFIX_font_color != blank -%}
+  #shopify-section-{{ section.id }} SELECTOR,
+  #shopify-section-{{ section.id }} SELECTOR p,
+  #shopify-section-{{ section.id }} SELECTOR a {
+    color: {{ section.settings.PREFIX_font_color }} !important;
+  }
+{%- endif -%}
+
+=== HEADING (single line, range max 96) ===
+
+{
+  "type": "range",
+  "id": "heading_font_size",
+  "label": "Font size (single line heading)",
+  "min": 0,
+  "max": 96,
+  "step": 2,
+  "unit": "px",
+  "default": 0,
+  "info": "0 = use heading scale only."
+},
+{
+  "type": "select",
+  "id": "heading_weight",
+  "label": "Font weight (single line heading)",
+  "options": [ inherit, 300–800 ],
+  "default": "inherit"
+},
+{
+  "type": "color",
+  "id": "heading_font_color",
+  "label": "Heading color"
+}
+
+Pass to {% render 'highlighted-heading', heading_font_size: section.settings.heading_font_size, heading_weight: section.settings.heading_weight, highlight_color: section.settings.highlight_color, ... %}
+
+=== SPLIT HEADING (before / highlight / after) ===
+
+Per segment: heading_before_font_size, heading_before_weight (+ highlight_color for highlight span).
+Mirror pattern for heading_highlight_* and heading_after_*.
+
+=== SUBTEXT / CAPTION (plain text <p>) ===
+
+Same as TEXT BODY; use PREFIX subtext or caption.
+
+{%- endcomment -%}

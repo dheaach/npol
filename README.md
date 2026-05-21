@@ -1,6 +1,6 @@
 # AGM Theme — Custom Shopify Theme
 
-Tema landing page K-5 Math dengan section Liquid reusable dan pengaturan penuh di Theme Editor.
+K-5 Math landing page theme with reusable Liquid sections and full Theme Editor controls.
 
 ## Deploy
 
@@ -8,43 +8,44 @@ Tema landing page K-5 Math dengan section Liquid reusable dan pengaturan penuh d
 shopify theme push --path "c:\DT360 Learn\npol"
 ```
 
-## Menu dari Shopify
+## Menus from Shopify
 
-1. Buka **Shopify Admin → Online Store → Navigation**
-2. Buat atau edit menu (mis. `main-menu`, `footer`)
-3. Di **Theme Editor**:
-   - **Header** → pilih menu di field **Menu**
-   - **Footer** → pilih menu di field **Footer menu**
+1. Open **Shopify Admin → Online Store → Navigation**
+2. Create or edit menus (e.g. `main-menu`, `footer`)
+3. In **Theme Editor**:
+   - **Header** → select a menu in **Menu**
+   - **Footer** → select a menu in **Footer menu**
 
-## Section Sesuai Desain
+## Design sections
 
-| Section | Fungsi |
-|---------|--------|
-| **Hero — K-5 Math** | Hero split: headline + highlight, 2 tombol, gambar + blob |
+| Section | Purpose |
+|---------|---------|
+| **Hero — K-5 Math** | Split hero: headline + highlight, 2 buttons, image + blob |
 | **Intro — Image & Text** | Polaroid + heading + bullet list |
-| **Dark Quote Banner** | Banner biru gelap + wave divider |
-| **Program Feature Cards** | 3 kartu dengan tag warna |
-| **Video Showcase** | Background light blue + video YouTube/Vimeo |
-| **Testimonials Slider** | Slider testimoni + tombol CTA |
-| **Mosaic Feature Grid** | Grid alternating gambar/teks |
-| **CTA — Teal Banner** | Banner teal + blob putih |
-| **Process Steps** | 3 langkah alternating + polaroid |
-| **Resources Cards** | 2 kartu resource + tombol |
-| **Footer CTA** | CTA biru gelap sebelum footer |
+| **Dark Quote Banner** | Dark blue banner + wave divider |
+| **Program Feature Cards** | 3 cards with colored tags |
+| **Video Showcase** | Light blue background + YouTube/Vimeo video |
+| **Testimonials Slider** | Testimonial slider + CTA button |
+| **Mosaic Feature Grid** | Alternating image/text grid |
+| **CTA — Teal Banner** | Teal banner + white blob |
+| **Process Steps** | 3 alternating steps + polaroid |
+| **Resources Cards** | 2 resource cards + button |
+| **Footer CTA** | Dark blue CTA before footer |
 
-## Semua Widget Bisa Disesuaikan
+## Customizable widgets
 
-Setiap section mendukung pengaturan di Theme Editor:
+Every section supports Theme Editor settings:
 
-- **Teks**: heading (split highlight), deskripsi, bullet list, caption
-- **Gambar**: image picker + alt text SEO
-- **Tombol**: label + URL
-- **Warna**: background, highlight, tag, card
-- **Font**: override heading/body per section
-- **Layout**: arah gambar, rotasi polaroid, tape color
-- **SEO**: pilihan tag H1–H4
+- **Text**: heading (split highlight), description, bullet list, caption
+- **Text & heading typography** (required for new fields): every heading or text input must include **font size**, **font weight**, and **font color** in the schema — see `.cursor/rules/section-typography.mdc` and `snippets/typography-settings-reference.liquid`
+- **Images**: image picker + SEO alt text
+- **Buttons**: label + URL
+- **Colors**: background, highlight, tag, card
+- **Fonts**: per-section heading/body override
+- **Layout**: image side, polaroid rotation, tape color
+- **SEO**: H1–H4 tag choice
 
-## Theme Settings Global
+## Global theme settings
 
 **Theme settings → Colors / Typography**
 
@@ -53,7 +54,7 @@ Setiap section mendukung pengaturan di Theme Editor:
 - Body: Montserrat 16px
 - Button: Poppins 20px medium
 
-## Responsif
+## Responsive
 
-- **Tablet (≤1023px)**: grid 2 kolom, font scaled
-- **Mobile (≤767px)**: 1 kolom, hamburger menu, slider 1 kartu
+- **Tablet (≤1023px)**: 2-column grid, scaled fonts
+- **Mobile (≤767px)**: 1 column, hamburger menu, 1 card per slider slide

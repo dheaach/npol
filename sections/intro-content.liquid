@@ -27,7 +27,7 @@
         %}
 
         {%- if section.settings.text != blank -%}
-          <div class="section-text rte">{{ section.settings.text }}</div>
+          <div class="section-text rte intro-content__description">{{ section.settings.text }}</div>
         {%- endif -%}
 
         {%- if section.settings.list_items != blank -%}
@@ -43,12 +43,71 @@
         {%- endif -%}
 
         {%- if section.settings.text_after_list != blank -%}
-          <div class="section-text rte">{{ section.settings.text_after_list }}</div>
+          <div class="section-text rte intro-content__text-after">{{ section.settings.text_after_list }}</div>
         {%- endif -%}
       </div>
     </div>
   </div>
 </section>
+
+<style>
+  {%- if section.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .intro-content__description,
+    #shopify-section-{{ section.id }} .intro-content__description p {
+      font-size: {{ section.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_weight != blank and section.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .intro-content__description,
+    #shopify-section-{{ section.id }} .intro-content__description p {
+      font-weight: {{ section.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .intro-content__description,
+    #shopify-section-{{ section.id }} .intro-content__description p,
+    #shopify-section-{{ section.id }} .intro-content__description a {
+      color: {{ section.settings.text_font_color }} !important;
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .intro-content__list,
+    #shopify-section-{{ section.id }} .intro-content__list li {
+      font-size: {{ section.settings.list_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_weight != blank and section.settings.list_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .intro-content__list,
+    #shopify-section-{{ section.id }} .intro-content__list li {
+      font-weight: {{ section.settings.list_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_color != blank -%}
+    #shopify-section-{{ section.id }} .intro-content__list,
+    #shopify-section-{{ section.id }} .intro-content__list li {
+      color: {{ section.settings.list_font_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_after_list_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .intro-content__text-after,
+    #shopify-section-{{ section.id }} .intro-content__text-after p {
+      font-size: {{ section.settings.text_after_list_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_after_list_font_weight != blank and section.settings.text_after_list_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .intro-content__text-after,
+    #shopify-section-{{ section.id }} .intro-content__text-after p {
+      font-weight: {{ section.settings.text_after_list_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_after_list_font_color != blank -%}
+    #shopify-section-{{ section.id }} .intro-content__text-after,
+    #shopify-section-{{ section.id }} .intro-content__text-after p,
+    #shopify-section-{{ section.id }} .intro-content__text-after a {
+      color: {{ section.settings.text_after_list_font_color }} !important;
+    }
+  {%- endif -%}
+</style>
 
 {% schema %}
 {
@@ -148,6 +207,37 @@
       "label": "Description"
     },
     {
+      "type": "color",
+      "id": "text_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
       "type": "textarea",
       "id": "list_items",
       "label": "Bullet list items",
@@ -155,9 +245,71 @@
       "default": "Research-based approach to math instruction\nStudent-centered learning design\nProven results in K-5 classrooms"
     },
     {
+      "type": "color",
+      "id": "list_font_color",
+      "label": "List color"
+    },
+    {
+      "type": "range",
+      "id": "list_font_size",
+      "label": "List font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "list_font_weight",
+      "label": "List font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
       "type": "richtext",
       "id": "text_after_list",
       "label": "Description (below list)"
+    },
+    {
+      "type": "color",
+      "id": "text_after_list_font_color",
+      "label": "Description (below list) color"
+    },
+    {
+      "type": "range",
+      "id": "text_after_list_font_size",
+      "label": "Description (below list) font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_after_list_font_weight",
+      "label": "Description (below list) font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "header",

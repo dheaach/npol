@@ -32,6 +32,10 @@
             </a>
           {%- endif -%}
         </div>
+
+        {%- if section.settings.paragraph != blank -%}
+          <p class="hero-math__paragraph section-text">{{ section.settings.paragraph }}</p>
+        {%- endif -%}
       </div>
 
       <div class="hero-math__media">
@@ -47,6 +51,43 @@
     </div>
   </div>
 </section>
+
+<style>
+  {%- if section.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .hero-math__text,
+    #shopify-section-{{ section.id }} .hero-math__text p {
+      font-size: {{ section.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_weight != blank and section.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .hero-math__text,
+    #shopify-section-{{ section.id }} .hero-math__text p {
+      font-weight: {{ section.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .hero-math__text,
+    #shopify-section-{{ section.id }} .hero-math__text p,
+    #shopify-section-{{ section.id }} .hero-math__text a {
+      color: {{ section.settings.text_font_color }} !important;
+    }
+  {%- endif -%}
+  {%- if section.settings.paragraph_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .hero-math__paragraph {
+      font-size: {{ section.settings.paragraph_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.paragraph_font_weight != blank and section.settings.paragraph_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .hero-math__paragraph {
+      font-weight: {{ section.settings.paragraph_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.paragraph_font_color != blank -%}
+    #shopify-section-{{ section.id }} .hero-math__paragraph {
+      color: {{ section.settings.paragraph_font_color }};
+    }
+  {%- endif -%}
+</style>
 
 {% schema %}
 {
@@ -100,6 +141,73 @@
       "id": "text",
       "label": "Description",
       "default": "<p>Empowering teachers with a research-based math curriculum that puts students at the center of learning.</p>"
+    },
+    {
+      "type": "color",
+      "id": "text_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph",
+      "label": "Paragraph (below buttons)"
+    },
+    {
+      "type": "color",
+      "id": "paragraph_font_color",
+      "label": "Paragraph color"
+    },
+    {
+      "type": "range",
+      "id": "paragraph_font_size",
+      "label": "Paragraph font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "paragraph_font_weight",
+      "label": "Paragraph font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "header",

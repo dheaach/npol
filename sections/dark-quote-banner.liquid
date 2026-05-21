@@ -48,15 +48,42 @@
 </section>
 
 <style>
-  #shopify-section-{{ section.id }} .section-heading,
-  #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
+  #shopify-section-{{ section.id }} .section-heading {
     color: {{ section.settings.text_color | default: '#FFFFFF' }};
   }
+  {%- liquid
+    assign subtext_color = section.settings.subtext_color
+    if subtext_color == blank
+      assign subtext_color = section.settings.text_color
+    endif
+    if subtext_color == blank
+      assign subtext_color = '#FFFFFF'
+    endif
+  -%}
+  #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
+    color: {{ subtext_color }};
+  }
+  {%- if section.settings.subtext_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
+      font-size: {{ section.settings.subtext_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_weight != blank and section.settings.subtext_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
+      font-weight: {{ section.settings.subtext_font_weight }};
+    }
+  {%- endif -%}
   #shopify-section-{{ section.id }} .text-highlight {
     color: {{ section.settings.highlight_color | default: '#1BCDC4' }} !important;
   }
+  {%- liquid
+    assign banner_bg_size = section.settings.background_size | default: '100% auto'
+    if banner_bg_size == 'contain'
+      assign banner_bg_size = '100% auto'
+    endif
+  -%}
   #shopify-section-{{ section.id }} .dark-quote-banner__bg {
-    background-size: {{ section.settings.background_size | default: 'cover' }};
+    background-size: {{ banner_bg_size }};
     background-position: {{ section.settings.background_position | default: 'center center' }};
   }
   #shopify-section-{{ section.id }} .dark-quote-banner {
@@ -195,6 +222,38 @@
       "label": "Subtext"
     },
     {
+      "type": "color",
+      "id": "subtext_color",
+      "label": "Subtext color",
+      "info": "If empty, uses heading text color."
+    },
+    {
+      "type": "range",
+      "id": "subtext_font_size",
+      "label": "Subtext font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "subtext_font_weight",
+      "label": "Subtext font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
       "type": "header",
       "content": "Colors"
     },
@@ -245,11 +304,12 @@
       "id": "background_size",
       "label": "Background size",
       "options": [
+        { "value": "100% auto", "label": "Contain (full width)" },
         { "value": "cover", "label": "Cover" },
-        { "value": "contain", "label": "Contain" },
+        { "value": "contain", "label": "Contain (fit in box)" },
         { "value": "100% 100%", "label": "Stretch" }
       ],
-      "default": "cover"
+      "default": "100% auto"
     },
     {
       "type": "select",

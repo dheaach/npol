@@ -1,0 +1,73 @@
+---
+description: Every heading or text field in sections must include font-size, font-weight, and font-color
+globs: sections/**/*.liquid,snippets/highlighted-heading.liquid,snippets/section-heading.liquid
+alwaysApply: true
+---
+
+# Section typography (required)
+
+When adding or editing **headings** or **text inputs** (`text`, `richtext`, `textarea`) in `sections/*.liquid`, always include **three Theme Editor settings** and apply them in markup/CSS.
+
+## Naming
+
+Use the content field id as prefix + suffix:
+
+| Suffix | Schema type | Default / info |
+|--------|-------------|----------------|
+| `_font_color` | `color` | Empty = theme color / inherit |
+| `_font_size` | `range` 0–32 px, step 1 | `0` = theme body or heading scale |
+| `_font_weight` | `select` | `inherit` + 300–800 |
+
+Examples: `text` → `text_font_color`, `text_font_size`, `text_font_weight`.  
+Subtext/caption/paragraph: `subtext_font_*`, `caption_font_*`, `paragraph_font_*`.
+
+**Split heading** (`heading_before` / `highlight` / `after`): per segment `heading_before_font_size`, `heading_before_weight`, etc.; highlight color = `highlight_color`; non-highlight segments may use `heading_before_color` when a different color is needed.
+
+## Schema (immediately after the content field)
+
+```json
+{ "type": "color", "id": "text_font_color", "label": "Description color" },
+{ "type": "range", "id": "text_font_size", "label": "Description font size", "min": 0, "max": 32, "step": 1, "unit": "px", "default": 0, "info": "0 = theme body size." },
+{ "type": "select", "id": "text_font_weight", "label": "Description font weight", "options": [
+  { "value": "inherit", "label": "Theme default" },
+  { "value": "300", "label": "Light (300)" }, { "value": "400", "label": "Regular (400)" },
+  { "value": "500", "label": "Medium (500)" }, { "value": "600", "label": "Semi-bold (600)" },
+  { "value": "700", "label": "Bold (700)" }, { "value": "800", "label": "Extra-bold (800)" }
+], "default": "inherit" }
+```
+
+Heading range: `min: 0`, `max: 96`, `step: 2`, info `0 = heading scale only.`
+
+## Markup & CSS
+
+1. BEM class on text elements (e.g. `hero-math__text`, `intro-content__description`).
+2. Scoped `<style>` block: `#shopify-section-{{ section.id }}`.
+3. Apply only when set: `font_size > 0`, `font_weight != inherit`, `font_color != blank`.
+4. RTE: also target `p`, `a`, `li` inside `.rte` when needed.
+
+```liquid
+{%- if section.settings.text_font_size > 0 -%}
+  #shopify-section-{{ section.id }} .my-section__text,
+  #shopify-section-{{ section.id }} .my-section__text p {
+    font-size: {{ section.settings.text_font_size }}px;
+  }
+{%- endif -%}
+```
+
+## Headings via snippets
+
+`highlighted-heading`: pass `heading_font_size`, `heading_weight`, `heading_before_font_size`, etc.  
+`section-heading`: add schema + styles if missing; consider migrating to `highlighted-heading` for split headings + typography.
+
+## Checklist before done
+
+- [ ] Every new heading/text field has `_font_color`, `_font_size`, `_font_weight`
+- [ ] Styles scoped to section id
+- [ ] Schema labels in English, consistent with other sections
+- [ ] See `snippets/typography-settings-reference.liquid` for full templates
+
+## Do not
+
+- Add heading/text fields without the typography trio
+- Rely only on global section color when the text field has its own settings
+- Skip re-reading files (see `read-before-modify` rule)

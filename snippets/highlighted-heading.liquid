@@ -18,33 +18,61 @@
     assign after_weight_style = 'font-weight: ' | append: heading_after_weight | append: ';'
   endif
 
+  assign after_font_style = ''
+  if heading_after_font_size != blank and heading_after_font_size > 0
+    assign after_font_style = 'font-size: ' | append: heading_after_font_size | append: 'px;'
+  endif
+
+  assign after_style = after_font_style | append: after_weight_style
+
   assign heading_weight_style = ''
   if heading_weight != blank and heading_weight != 'inherit'
     assign heading_weight_style = 'font-weight: ' | append: heading_weight | append: ';'
   endif
+
+  assign heading_font_style = ''
+  if heading_font_size != blank and heading_font_size > 0
+    assign heading_font_style = 'font-size: ' | append: heading_font_size | append: 'px;'
+  endif
+
+  assign before_font_style = ''
+  if heading_before_font_size != blank and heading_before_font_size > 0
+    assign before_font_style = 'font-size: ' | append: heading_before_font_size | append: 'px;'
+  endif
+
+  assign before_style = before_font_style | append: before_weight_style
+
+  assign highlight_font_style = ''
+  if heading_highlight_font_size != blank and heading_highlight_font_size > 0
+    assign highlight_font_style = 'font-size: ' | append: heading_highlight_font_size | append: 'px;'
+  endif
+
+  assign highlight_style = 'color: ' | append: highlight_color | append: ';' | append: highlight_font_style | append: highlight_weight_style
+
+  assign single_heading_style = heading_font_style | append: heading_weight_style
 -%}
 
 {%- if heading != blank -%}
-  <{{ tag }} class="section-heading section-heading--{{ size_class }}"{% if heading_weight_style != blank %} style="{{ heading_weight_style }}"{% endif %}>
+  <{{ tag }} class="section-heading section-heading--{{ size_class }}"{% if single_heading_style != blank %} style="{{ single_heading_style }}"{% endif %}>
     {{ heading }}
   </{{ tag }}>
 {%- elsif heading_before != blank or heading_highlight != blank or heading_after != blank -%}
   <{{ tag }} class="section-heading section-heading--{{ size_class }}">
     {%- if heading_before != blank -%}
-      {%- if before_weight_style != blank -%}
-        <span style="{{ before_weight_style }}">{{ heading_before }}</span>
+      {%- if before_style != blank -%}
+        <span style="{{ before_style }}">{{ heading_before }}</span>
       {%- else -%}
         {{ heading_before }}
       {%- endif -%}
     {%- endif -%}
     {%- if heading_highlight != blank -%}
       {%- if heading_before != blank -%} {%- endif -%}
-      <span class="text-highlight" style="color: {{ highlight_color }};{% if highlight_weight_style != blank %} {{ highlight_weight_style }}{% endif %}">{{ heading_highlight }}</span>
+      <span class="text-highlight" style="{{ highlight_style }}"> {{ heading_highlight }}</span>
     {%- endif -%}
     {%- if heading_after != blank -%}
       {%- if heading_before != blank or heading_highlight != blank -%} {%- endif -%}
-      {%- if after_weight_style != blank -%}
-        <span style="{{ after_weight_style }}">{{ heading_after }}</span>
+      {%- if after_style != blank -%}
+        <span style="{{ after_style }}"> {{ heading_after }}</span>
       {%- else -%}
         {{ heading_after }}
       {%- endif -%}

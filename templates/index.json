@@ -63,15 +63,15 @@
     "mosaic": {
       "type": "mosaic-grid",
       "blocks": {
-        "m-1": { "type": "item", "settings": { "layout": "image-left", "title": "Built for Teachers" } },
-        "m-2": { "type": "item", "settings": { "layout": "image-right", "title": "Designed for Students" } },
-        "m-3": { "type": "item", "settings": { "layout": "image-left", "title": "Backed by Research" } },
-        "m-4": { "type": "item", "settings": { "layout": "image-right", "title": "Proven in Classrooms" } }
+        "m-1": { "type": "row", "settings": { "layout": "image-right", "title": "Cognitive Development vs. Coverage" } },
+        "m-2": { "type": "row", "settings": { "layout": "image-left", "title": "Sequences of Investigations vs. Isolated Tasks" } },
+        "m-3": { "type": "row", "settings": { "layout": "image-right", "title": "Fluency vs Rote Fact Memorization" } },
+        "m-4": { "type": "row", "settings": { "layout": "image-left", "title": "Deep Professional Learning vs Publisher Trainings" } }
       },
       "block_order": ["m-1", "m-2", "m-3", "m-4"],
       "settings": {
-        "heading_before": "Why Next Gen CFLM ",
-        "heading_highlight": "Works"
+        "heading_before": "Why Next Gen CFLM Works When Other Approaches ",
+        "heading_highlight": "Fall Short"
       }
     },
     "cta-teal": {
@@ -85,9 +85,9 @@
     "process": {
       "type": "process-steps",
       "blocks": {
-        "s-1": { "type": "step", "settings": { "step_label": "Step 1", "title": "Discover the Curriculum", "tape_color": "yellow" } },
-        "s-2": { "type": "step", "settings": { "step_label": "Step 2", "title": "Implement in Your Classroom", "tape_color": "teal" } },
-        "s-3": { "type": "step", "settings": { "step_label": "Step 3", "title": "See Student Growth", "tape_color": "yellow" } }
+        "s-1": { "type": "step", "settings": { "step_label": "Step 1", "title": "Discover the Curriculum" } },
+        "s-2": { "type": "step", "settings": { "step_label": "Step 2", "title": "Implement in Your Classroom" } },
+        "s-3": { "type": "step", "settings": { "step_label": "Step 3", "title": "See Student Growth" } }
       },
       "block_order": ["s-1", "s-2", "s-3"],
       "settings": {

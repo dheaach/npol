@@ -5,6 +5,8 @@
   if section.settings.background_image != blank
     assign section_bg_url = section.settings.background_image | image_url: width: 2400
   endif
+  assign media_radius = section.settings.media_border_radius | default: 12
+  assign media_radius_mobile = section.settings.media_border_radius_mobile | default: 0
 -%}
 
 <section
@@ -44,7 +46,10 @@
       highlight_color: section.settings.highlight_color
     %}
 
-    <div class="video-showcase__player">
+    <div
+      class="video-showcase__player"
+      style="--video-showcase-media-radius: {{ media_radius }}px;"
+    >
       {%- if section.settings.video_url != blank -%}
         <deferred-media class="video-showcase__media" data-video-url="{{ section.settings.video_url | escape }}">
           <button class="video-showcase__poster" type="button" aria-label="{{ section.settings.play_label | default: 'Play video' | escape }}">
@@ -123,6 +128,28 @@
       color: {{ section.settings.caption_font_color }};
     }
   {%- endif -%}
+  #shopify-section-{{ section.id }} .video-showcase__player {
+    border-radius: var(--video-showcase-media-radius, {{ media_radius }}px);
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .video-showcase__media,
+  #shopify-section-{{ section.id }} .video-showcase__poster,
+  #shopify-section-{{ section.id }} .video-showcase__placeholder,
+  #shopify-section-{{ section.id }} .video-showcase__cover,
+  #shopify-section-{{ section.id }} .video-showcase__media iframe {
+    border-radius: var(--video-showcase-media-radius, {{ media_radius }}px);
+  }
+  #shopify-section-{{ section.id }} .video-showcase__poster,
+  #shopify-section-{{ section.id }} .video-showcase__placeholder {
+    overflow: hidden;
+  }
+  @media screen and (max-width: 767px) {
+    {%- if media_radius_mobile > 0 -%}
+    #shopify-section-{{ section.id }} .video-showcase__player {
+      --video-showcase-media-radius: {{ media_radius_mobile }}px;
+    }
+    {%- endif -%}
+  }
 </style>
 
 {% schema %}
@@ -307,6 +334,28 @@
       "label": "Play button aria label",
       "default": "Play video",
       "info": "Screen readers only; not shown on the page."
+    },
+    {
+      "type": "range",
+      "id": "media_border_radius",
+      "label": "Video corner radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 12,
+      "info": "Rounds the cover thumbnail and embedded player."
+    },
+    {
+      "type": "range",
+      "id": "media_border_radius_mobile",
+      "label": "Video corner radius on mobile",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use the desktop value."
     },
     {
       "type": "text",

@@ -32,7 +32,12 @@
   <div
     class="testimonials__slider testimonials__slider--bleed"
     data-testimonials-slider
-    style="--testimonials-card-gap: {{ card_gap }}px; --testimonials-card-gap-mobile: {{ card_gap_mobile }}px;"
+    style="
+      --testimonials-card-gap: {{ card_gap }}px;
+      --testimonials-card-gap-mobile: {{ card_gap_mobile }}px;
+      --testimonials-overlap: {{ overlap_desktop }}px;
+      --testimonials-overlap-mobile: {{ overlap_mobile }}px;
+    "
   >
     <div class="testimonials__track" data-testimonials-track>
       {%- for block in section.blocks -%}
@@ -59,7 +64,7 @@
             >
             <div class="testimonial-card__inner">
             {%- if block.settings.quote != blank -%}
-              <p class="testimonial-card__quote section-text">{{ block.settings.quote }}</p>
+              <div class="testimonial-card__quote section-text rte">{{ block.settings.quote }}</div>
             {%- endif -%}
             <footer class="testimonial-card__author">
               {%- if block.settings.author_image != blank -%}
@@ -69,7 +74,7 @@
               {%- endif -%}
               <cite>
                 {%- if block.settings.author_name != blank -%}
-                  <strong>{{ block.settings.author_name }}</strong>
+                  <span>{{ block.settings.author_name }}</span>
                 {%- endif -%}
                 {%- if block.settings.author_role != blank -%}
                   <span>{{ block.settings.author_role }}</span>
@@ -114,9 +119,15 @@
 
 <style>
   #shopify-section-{{ section.id }} {
-    overflow: visible;
+    overflow-x: clip;
+    overflow-y: visible;
     position: relative;
     z-index: 2;
+    max-width: 100%;
+  }
+  #shopify-section-{{ section.id }} .testimonials {
+    max-width: 100%;
+    overflow-x: clip;
   }
   #shopify-section-{{ section.id }} .testimonials__inner {
     width: 100%;
@@ -127,20 +138,34 @@
     padding-right: var(--section-padding-x, 40px);
   }
   #shopify-section-{{ section.id }} .testimonials__slider--bleed {
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
     padding-left: 0;
     padding-right: 0;
-    margin-top: {%- if overlap_desktop > 0 -%}-{{ overlap_desktop }}{%- else -%}40{%- endif -%}px;
+    overflow-x: clip;
+    overflow-y: visible;
+    {%- if overlap_desktop > 0 -%}
+    margin-top: -{{ overlap_desktop }}px;
+    padding-top: {{ overlap_desktop }}px;
+    {%- else -%}
+    margin-top: 40px;
+    padding-top: 0;
+    {%- endif -%}
   }
   #shopify-section-{{ section.id }} .testimonials__track {
     gap: var(--testimonials-card-gap, 0);
   }
   @media screen and (max-width: 767px) {
-    #shopify-section-{{ section.id }} .testimonials__slider {
-      margin-top: {%- if overlap_mobile > 0 -%}-{{ overlap_mobile }}{%- else -%}32{%- endif -%}px;
+    #shopify-section-{{ section.id }} .testimonials__slider--bleed {
+      {%- if overlap_mobile > 0 -%}
+      margin-top: -{{ overlap_mobile }}px;
+      padding-top: {{ overlap_mobile }}px;
+      {%- else -%}
+      margin-top: 32px;
+      padding-top: 0;
+      {%- endif -%}
     }
     #shopify-section-{{ section.id }} .testimonials__track {
       gap: var(--testimonials-card-gap-mobile, var(--testimonials-card-gap, 0));
@@ -182,7 +207,7 @@
       "step": 4,
       "unit": "px",
       "default": 100,
-      "info": "Negative top margin so testimonial cards overlap the section above. Set to 0 to disable."
+      "info": "Pulls cards up over the section above. If the top of a card looks cut off, lower this value or set to 0."
     },
     {
       "type": "range",
@@ -267,10 +292,10 @@
       "name": "Testimonial",
       "settings": [
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "quote",
           "label": "Quote",
-          "default": "This program transformed how our students approach math."
+          "default": "<p>This program transformed how our students approach math.</p>"
         },
         {
           "type": "text",

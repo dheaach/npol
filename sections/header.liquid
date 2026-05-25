@@ -15,20 +15,6 @@
         {%- endif -%}
       </a>
 
-      {%- if section.settings.menu != blank -%}
-        <nav class="site-header__nav-wrapper" data-nav-wrapper aria-label="{{ section.settings.menu_title | default: 'Main navigation' | escape }}">
-          <ul class="site-header__nav" data-site-nav id="site-nav">
-            {%- for link in section.settings.menu.links -%}
-              <li>
-                <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>
-                  {{ link.title }}
-                </a>
-              </li>
-            {%- endfor -%}
-          </ul>
-        </nav>
-      {%- endif -%}
-
       <div class="site-header__actions">
         {%- if section.settings.button_label != blank -%}
           <a href="{{ section.settings.button_url | default: '#' }}" class="btn btn--yellow site-header__cta">
@@ -36,19 +22,32 @@
           </a>
         {%- endif -%}
 
-        <button
-          class="site-header__menu-toggle"
-          data-menu-toggle
-          aria-label="Toggle menu"
-          aria-expanded="false"
-          aria-controls="site-nav"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
+        {%- if section.settings.menu != blank -%}
+          <button
+            type="button"
+            class="site-header__menu-toggle"
+            data-menu-toggle
+            aria-label="Toggle menu"
+            aria-expanded="false"
+            aria-controls="site-nav"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        {%- endif -%}
       </div>
     </div>
+
+    {%- if section.settings.menu != blank -%}
+      <nav class="site-header__nav-wrapper" data-nav-wrapper aria-label="{{ section.settings.menu_title | default: 'Main navigation' | escape }}">
+        <ul class="site-header__nav" data-site-nav id="site-nav">
+          {%- for link in section.settings.menu.links -%}
+            {%- render 'header-menu-item', link: link, section_id: section.id -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
   </div>
 </header>
 

@@ -1,4 +1,5 @@
 {% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'process-step__body' %}
 
 {%- liquid
   assign dots_size = section.settings.dots_size | default: 4
@@ -6,10 +7,17 @@
   if dots_spacing < dots_size
     assign dots_spacing = dots_size | plus: 2
   endif
+  assign content_col = section.settings.column_1_width | default: 50
+  assign image_col_setting = section.settings.column_2_width | default: 0
+  if image_col_setting > 0
+    assign image_col = image_col_setting
+  else
+    assign image_col = 100 | minus: content_col
+  endif
 -%}
 
 <section class="process-steps section-spacing" aria-labelledby="process-heading-{{ section.id }}">
-  <div class="page-width">
+  <div class="process-steps__inner">
     <div class="process-steps__header text-center">
       <div id="process-heading-{{ section.id }}">
         {% render 'highlighted-heading',
@@ -35,38 +43,39 @@
     <div class="process-steps__list">
       {%- for block in section.blocks -%}
         <div class="process-step{% if forloop.index0 == 1 or forloop.index0 == 3 or forloop.index0 == 5 %} process-step--reverse{% endif %}" {{ block.shopify_attributes }} id="process-step-{{ block.id }}">
-          <div class="process-step__content">
-            {%- if block.settings.step_label != blank -%}
-              <span class="process-step__label">{{ block.settings.step_label }}</span>
-            {%- endif -%}
-            {%- if block.settings.title != blank -%}
-              <h3 class="section-heading section-heading--h3 process-step__title">{{ block.settings.title }}</h3>
-            {%- endif -%}
-            {%- if block.settings.text != blank -%}
-              <div class="section-text rte process-step__text">{{ block.settings.text }}</div>
-            {%- endif -%}
+          {%- if block.settings.show_dots_top -%}
+            {% render 'process-step-dots', section: section, position: 'top', dots_size: dots_size, dots_spacing: dots_spacing %}
+          {%- endif -%}
+          <div class="process-step__body">
+            <div class="process-step__content">
+              {%- if block.settings.step_label != blank -%}
+                <span class="process-step__label">{{ block.settings.step_label }}</span>
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+                <h3 class="section-heading section-heading--h3 process-step__title">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="section-text rte process-step__text">{{ block.settings.text }}</div>
+              {%- endif -%}
+            </div>
+            <div class="process-step__media">
+              {%- if block.settings.image != blank -%}
+                {% render 'responsive-image',
+                  image: block.settings.image,
+                  alt: block.settings.image_alt,
+                  class: 'process-step__image',
+                  loading: block.settings.image_loading,
+                  width: block.settings.image_width | default: 800
+                %}
+              {%- else -%}
+                <div class="process-step__image process-step__image--placeholder" role="img" aria-label="{{ block.settings.image_alt | default: 'Step image' | escape }}">
+                  {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {%- endif -%}
+            </div>
           </div>
-          <div class="process-step__media">
-            {% render 'responsive-image',
-              image: block.settings.image,
-              alt: block.settings.image_alt,
-              class: 'process-step__image',
-              loading: block.settings.image_loading
-            %}
-          </div>
-          {%- if section.settings.show_dots and forloop.last == false -%}
-            <div
-              class="process-step__dots process-step__dots--{{ section.settings.dots_shape | default: 'circle' }}"
-              aria-hidden="true"
-              style="
-                --dots-color: {{ section.settings.dots_color | default: '#ADE8F6' }};
-                --dots-size: {{ dots_size }}px;
-                --dots-spacing: {{ dots_spacing }}px;
-                --dots-width: {{ section.settings.dots_width | default: 100 }}%;
-                --dots-divider-spacing: {{ section.settings.dots_divider_spacing | default: 32 }}px;
-                --dots-offset-left: {{ section.settings.dots_offset_left | default: 0 }}%;
-              "
-            ></div>
+          {%- if block.settings.show_dots_bottom -%}
+            {% render 'process-step-dots', section: section, position: 'bottom', dots_size: dots_size, dots_spacing: dots_spacing %}
           {%- endif -%}
         </div>
       {%- endfor -%}
@@ -75,16 +84,38 @@
 </section>
 
 <style>
-  {%- if section.settings.show_dots -%}
-    #shopify-section-{{ section.id }} .process-step__dots {
-      grid-column: 1 / -1;
+  #shopify-section-{{ section.id }} .process-steps__inner {
+    width: 100%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--section-padding-x, 40px);
+    padding-right: var(--section-padding-x, 40px);
+    box-sizing: border-box;
+  }
+  {%- comment -%} Reverse rows: swap column tracks so image keeps image width and content keeps content width {%- endcomment -%}
+  #shopify-section-{{ section.id }} .process-step--reverse .process-step__body {
+    grid-template-columns: minmax(0, {{ image_col }}fr) minmax(0, {{ content_col }}fr);
+  }
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body {
+      grid-template-columns: 1fr;
+    }
+  }
+  #shopify-section-{{ section.id }} .process-step__dots {
       width: var(--dots-width, 100%);
       height: var(--dots-spacing, 24px);
-      margin-top: var(--dots-divider-spacing, 32px);
       margin-left: var(--dots-offset-left, 0%);
       margin-right: auto;
       min-height: var(--dots-size, 4px);
       background-position: 0 50%;
+      flex-shrink: 0;
+    }
+    #shopify-section-{{ section.id }} .process-step__dots--top {
+      margin-bottom: {{ section.settings.dots_divider_spacing_top | default: 32 }}px;
+    }
+    #shopify-section-{{ section.id }} .process-step__dots--bottom {
+      margin-top: {{ section.settings.dots_divider_spacing_bottom | default: 32 }}px;
     }
     #shopify-section-{{ section.id }} .process-step__dots--circle {
       background-image: radial-gradient(
@@ -99,7 +130,6 @@
         linear-gradient(90deg, var(--dots-color) var(--dots-size), transparent var(--dots-size));
       background-size: var(--dots-spacing) var(--dots-spacing);
     }
-  {%- endif -%}
   {%- if section.settings.subtext_font_size > 0 -%}
     #shopify-section-{{ section.id }} .process-steps__subtext {
       font-size: {{ section.settings.subtext_font_size }}px;
@@ -118,6 +148,15 @@
   #shopify-section-{{ section.id }} .process-step__image {
     width: 100%;
     height: auto;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .process-step__image--placeholder {
+    aspect-ratio: 16 / 9;
+    background: rgba(10, 29, 60, 0.06);
+  }
+  #shopify-section-{{ section.id }} .process-step__image--placeholder .placeholder-svg {
+    width: 100%;
+    height: 100%;
     display: block;
   }
   {%- for block in section.blocks -%}
@@ -170,6 +209,26 @@
         color: {{ block.settings.text_font_color }} !important;
       }
     {%- endif -%}
+    #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__image {
+      object-fit: {{ block.settings.image_object_fit | default: 'cover' }};
+      {%- if block.settings.image_border_radius > 0 -%}
+      border-radius: {{ block.settings.image_border_radius }}px;
+      {%- endif -%}
+      {%- if block.settings.image_max_width > 0 -%}
+      max-width: {{ block.settings.image_max_width }}px;
+      margin-left: auto;
+      margin-right: auto;
+      {%- endif -%}
+    }
+    #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__media {
+      {%- if block.settings.image_align == 'center' -%}
+      display: flex;
+      justify-content: center;
+      {%- elsif block.settings.image_align == 'right' -%}
+      display: flex;
+      justify-content: flex-end;
+      {%- endif -%}
+    }
   {%- endfor -%}
 </style>
 
@@ -332,13 +391,43 @@
     },
     {
       "type": "header",
-      "content": "Step divider (dots)"
+      "content": "Step layout"
     },
     {
-      "type": "checkbox",
-      "id": "show_dots",
-      "label": "Show dots divider between steps",
-      "default": true
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Content column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Share of the row for text. Image column uses the remainder. Stacks on tablet and below."
+    },
+    {
+      "type": "range",
+      "id": "column_2_width",
+      "label": "Image column width (override)",
+      "min": 0,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (100% minus content width)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Step divider (dots)"
     },
     {
       "type": "color",
@@ -386,18 +475,29 @@
       "step": 5,
       "unit": "%",
       "default": 100,
-      "info": "Width of the dots line under each step."
+      "info": "Width of the dots divider line."
     },
     {
       "type": "range",
-      "id": "dots_divider_spacing",
-      "label": "Space above divider",
+      "id": "dots_divider_spacing_top",
+      "label": "Space below top dots",
       "min": 8,
       "max": 80,
       "step": 4,
       "unit": "px",
       "default": 32,
-      "info": "Gap between step content and the dots line."
+      "info": "Gap between the top dots line and step content."
+    },
+    {
+      "type": "range",
+      "id": "dots_divider_spacing_bottom",
+      "label": "Space above bottom dots",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "Gap between step content and the bottom dots line."
     },
     {
       "type": "range",
@@ -557,12 +657,12 @@
         },
         {
           "type": "header",
-          "content": "Media"
+          "content": "Image"
         },
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Image"
+          "label": "Step image"
         },
         {
           "type": "text",
@@ -578,6 +678,76 @@
             { "value": "eager", "label": "Eager (above the fold)" }
           ],
           "default": "lazy"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "label": "Image file width (src)",
+          "min": 400,
+          "max": 1600,
+          "step": 100,
+          "unit": "px",
+          "default": 800,
+          "info": "Max width requested from Shopify CDN for this step image."
+        },
+        {
+          "type": "range",
+          "id": "image_max_width",
+          "label": "Image display max width",
+          "min": 0,
+          "max": 900,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = full column width."
+        },
+        {
+          "type": "select",
+          "id": "image_object_fit",
+          "label": "Image fit",
+          "options": [
+            { "value": "cover", "label": "Cover" },
+            { "value": "contain", "label": "Contain" },
+            { "value": "fill", "label": "Fill" }
+          ],
+          "default": "cover"
+        },
+        {
+          "type": "select",
+          "id": "image_align",
+          "label": "Image alignment in column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "image_border_radius",
+          "label": "Image corner radius",
+          "min": 0,
+          "max": 48,
+          "step": 2,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Dots divider"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dots_top",
+          "label": "Show dots above this step",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dots_bottom",
+          "label": "Show dots below this step",
+          "default": false
         }
       ]
     }
@@ -585,8 +755,8 @@
   "presets": [{
     "name": "Process Steps",
     "blocks": [
-      { "type": "step", "settings": { "step_label": "Step 1" } },
-      { "type": "step", "settings": { "step_label": "Step 2" } },
+      { "type": "step", "settings": { "step_label": "Step 1", "show_dots_bottom": true } },
+      { "type": "step", "settings": { "step_label": "Step 2", "show_dots_bottom": true } },
       { "type": "step", "settings": { "step_label": "Step 3" } }
     ]
   }]

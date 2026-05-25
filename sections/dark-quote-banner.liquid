@@ -7,6 +7,11 @@
   elsif settings.dark_quote_banner_background != blank
     assign banner_bg_url = settings.dark_quote_banner_background | image_url: width: 2400
   endif
+
+  assign banner_bg_mobile_url = blank
+  if section.settings.background_image_mobile != blank
+    assign banner_bg_mobile_url = section.settings.background_image_mobile | image_url: width: 1200
+  endif
 -%}
 
 <section
@@ -14,9 +19,16 @@
   style="background-color: {{ section.settings.background_color | default: '#0A1D3C' }};"
   aria-labelledby="quote-heading-{{ section.id }}"
 >
+  {%- if banner_bg_mobile_url != blank -%}
+    <div
+      class="dark-quote-banner__bg dark-quote-banner__bg--mobile"
+      style="background-image: url({{ banner_bg_mobile_url }});"
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
   {%- if banner_bg_url != blank -%}
     <div
-      class="dark-quote-banner__bg"
+      class="dark-quote-banner__bg{% if banner_bg_mobile_url != blank %} dark-quote-banner__bg--desktop{% endif %}"
       style="background-image: url({{ banner_bg_url }});"
       aria-hidden="true"
     ></div>
@@ -77,24 +89,103 @@
     color: {{ section.settings.highlight_color | default: '#1BCDC4' }} !important;
   }
   {%- liquid
-    assign banner_bg_size = section.settings.background_size | default: '100% auto'
-    if banner_bg_size == 'contain'
-      assign banner_bg_size = '100% auto'
+    assign legacy_bg_mode = section.settings.background_size | default: 'fit_width'
+    if legacy_bg_mode == '100% auto' or legacy_bg_mode == 'contain'
+      assign legacy_bg_mode = 'fit_width'
+    elsif legacy_bg_mode == '100% 100%'
+      assign legacy_bg_mode = 'stretch'
     endif
+    assign bg_mode_mobile = section.settings.background_size_mobile | default: 'fit_width'
+    assign bg_mode_tablet = section.settings.background_size_tablet | default: 'fit_width'
+    assign bg_mode_laptop = section.settings.background_size_laptop | default: legacy_bg_mode
+    assign bg_mode_desktop = section.settings.background_size_desktop | default: 'fit_width'
+    assign bg_mode_4k = section.settings.background_size_4k | default: 'fit_width'
+    assign bg_position = section.settings.background_position | default: 'center center'
   -%}
+  {%- capture bg_size_mobile -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_mobile %}{%- endcapture -%}
+  {%- capture bg_size_tablet -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_tablet %}{%- endcapture -%}
+  {%- capture bg_size_laptop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_laptop %}{%- endcapture -%}
+  {%- capture bg_size_desktop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_desktop %}{%- endcapture -%}
+  {%- capture bg_size_4k -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_4k %}{%- endcapture -%}
   #shopify-section-{{ section.id }} .dark-quote-banner__bg {
-    background-size: {{ banner_bg_size }};
-    background-position: {{ section.settings.background_position | default: 'center center' }};
+    background-size: {{ bg_size_mobile | strip }};
+    background-position: {{ bg_position }};
   }
-  #shopify-section-{{ section.id }} .dark-quote-banner {
-    min-height: {{ section.settings.section_min_height | default: 320 }}px;
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner__bg {
+      background-size: {{ bg_size_tablet | strip }};
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner__bg {
+      background-size: {{ bg_size_laptop | strip }};
+    }
+  }
+  @media screen and (min-width: 1441px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner__bg {
+      background-size: {{ bg_size_desktop | strip }};
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner__bg {
+      background-size: {{ bg_size_4k | strip }};
+    }
+  }
+  {%- if banner_bg_mobile_url != blank and banner_bg_url != blank -%}
+    @media screen and (max-width: 767px) {
+      #shopify-section-{{ section.id }} .dark-quote-banner__bg--desktop {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- if banner_bg_mobile_url != blank -%}
+    @media screen and (min-width: 768px) {
+      #shopify-section-{{ section.id }} .dark-quote-banner__bg--mobile {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- liquid
+    assign legacy_min_height = section.settings.section_min_height | default: 320
+    assign min_height_mobile = section.settings.section_min_height_mobile | default: 240
+    assign min_height_tablet = section.settings.section_min_height_tablet | default: 280
+    assign min_height_laptop = section.settings.section_min_height_laptop | default: legacy_min_height
+    assign min_height_desktop = section.settings.section_min_height_desktop | default: 400
+    assign min_height_4k = section.settings.section_min_height_4k | default: 480
+  -%}
+  #shopify-section-{{ section.id }} .dark-quote-banner,
+  #shopify-section-{{ section.id }} .dark-quote-banner__content {
+    min-height: {{ min_height_mobile }}px;
   }
   #shopify-section-{{ section.id }} .dark-quote-banner__content {
-    min-height: {{ section.settings.section_min_height | default: 320 }}px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner,
+    #shopify-section-{{ section.id }} .dark-quote-banner__content {
+      min-height: {{ min_height_tablet }}px;
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner,
+    #shopify-section-{{ section.id }} .dark-quote-banner__content {
+      min-height: {{ min_height_laptop }}px;
+    }
+  }
+  @media screen and (min-width: 1441px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner,
+    #shopify-section-{{ section.id }} .dark-quote-banner__content {
+      min-height: {{ min_height_desktop }}px;
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner,
+    #shopify-section-{{ section.id }} .dark-quote-banner__content {
+      min-height: {{ min_height_4k }}px;
+    }
   }
   #shopify-section-{{ section.id }} .dark-quote-banner__heading--single .section-heading {
     max-width: {{ section.settings.heading_max_width | default: 720 }}px;
@@ -280,14 +371,58 @@
       "content": "Layout"
     },
     {
+      "type": "header",
+      "content": "Section minimum height"
+    },
+    {
       "type": "range",
-      "id": "section_min_height",
-      "label": "Section minimum height",
+      "id": "section_min_height_4k",
+      "label": "4K (2560px and up)",
+      "min": 160,
+      "max": 1000,
+      "step": 20,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_desktop",
+      "label": "Desktop (1441px – 2559px)",
+      "min": 160,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_laptop",
+      "label": "Laptop (1024px – 1440px)",
       "min": 160,
       "max": 800,
       "step": 20,
       "unit": "px",
       "default": 320
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_tablet",
+      "label": "Tablet (768px – 1023px)",
+      "min": 160,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_mobile",
+      "label": "Mobile (767px and below)",
+      "min": 160,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 240
     },
     {
       "type": "header",
@@ -296,20 +431,82 @@
     {
       "type": "image_picker",
       "id": "background_image",
-      "label": "Background image (wave graphic)",
-      "info": "Upload in the theme customizer. If empty, uses Theme settings → Brand → Dark quote banner background."
+      "label": "Background image — tablet and up (768px+)",
+      "info": "Used from tablet breakpoint upward. If empty, uses Theme settings → Brand → Dark quote banner background."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image — mobile (767px and below)",
+      "info": "Optional separate graphic for phones. If empty, the tablet/desktop image above is used on all sizes."
+    },
+    {
+      "type": "header",
+      "content": "Background size (per breakpoint)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Fit width (squeeze) keeps the graphic full width without cropping. Cover fills the section and may crop edges."
     },
     {
       "type": "select",
-      "id": "background_size",
-      "label": "Background size",
+      "id": "background_size_4k",
+      "label": "4K — background fit (2560px+)",
       "options": [
-        { "value": "100% auto", "label": "Contain (full width)" },
-        { "value": "cover", "label": "Cover" },
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
         { "value": "contain", "label": "Contain (fit in box)" },
-        { "value": "100% 100%", "label": "Stretch" }
+        { "value": "stretch", "label": "Stretch" }
       ],
-      "default": "100% auto"
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_desktop",
+      "label": "Desktop — background fit (1441px–2559px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_laptop",
+      "label": "Laptop — background fit (1024px–1440px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_tablet",
+      "label": "Tablet — background fit (768px–1023px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_mobile",
+      "label": "Mobile — background fit (767px and below)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
     },
     {
       "type": "select",

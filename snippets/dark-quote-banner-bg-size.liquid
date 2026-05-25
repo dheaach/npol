@@ -1,0 +1,23 @@
+{%- comment -%}
+  Maps Theme Editor mode to CSS background-size.
+  fit_width = squeeze to section width (100% auto)
+{%- endcomment -%}
+{%- liquid
+  assign mode = mode | default: 'fit_width'
+  case mode
+    when 'fit_width'
+      echo '100% auto'
+    when 'cover'
+      echo 'cover'
+    when 'contain'
+      echo 'contain'
+    when 'stretch'
+      echo '100% 100%'
+    when '100% auto', 'contain'
+      echo '100% auto'
+    when '100% 100%'
+      echo '100% 100%'
+    else
+      echo mode
+  endcase
+-%}

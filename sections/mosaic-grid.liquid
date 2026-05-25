@@ -20,7 +20,7 @@
   class="mosaic-grid section-spacing"
   aria-labelledby="mosaic-heading-{{ section.id }}"
 >
-  <div class="page-width mosaic-grid__inner">
+  <div class="page-width">
     <header
       class="mosaic-grid__header"
       style="--header-col-1: {{ header_col1 }}; --header-col-2: {{ header_col2 }};"
@@ -48,40 +48,58 @@
         <div class="mosaic-grid__header-right section-text rte">{{ section.settings.intro_text }}</div>
       {%- endif -%}
     </header>
+  </div>
 
-    <div class="mosaic-grid__rows" style="--row-gap: {{ row_gap }}px;">
-      {%- for block in section.blocks -%}
-        {%- liquid
-          assign media_width = block.settings.media_width | default: 520
-          assign img_loading = block.settings.media_loading | default: 'lazy'
-          assign block_col1 = block.settings.block_column_1_width | default: 0
-          if block_col1 == 0
-            assign block_col1 = row_col1
-          endif
-          assign block_col2 = 100 | minus: block_col1
-          assign block_col_gap = block.settings.block_column_gap | default: 0
-          if block_col_gap == 0
-            assign block_col_gap = row_column_gap
-          endif
-          assign show_row_graphics = block.settings.show_row_graphics
-          if show_row_graphics == nil
-            assign show_row_graphics = true
-          endif
-          assign graphics_position = block.settings.graphics_position | default: 'left'
-        -%}
+  <div class="mosaic-grid__rows" style="--row-gap: {{ row_gap }}px;">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign media_width = block.settings.media_width | default: 520
+        assign img_loading = block.settings.media_loading | default: 'lazy'
+        assign block_col1 = block.settings.block_column_1_width | default: 0
+        if block_col1 == 0
+          assign block_col1 = row_col1
+        endif
+        assign block_col2 = 100 | minus: block_col1
+        assign block_col_gap = block.settings.block_column_gap | default: 0
+        if block_col_gap == 0
+          assign block_col_gap = row_column_gap
+        endif
+        assign show_row_graphics = block.settings.show_row_graphics
+        if show_row_graphics == nil
+          assign show_row_graphics = true
+        endif
+        assign graphics_position = block.settings.graphics_position | default: 'left'
+        assign row_pad_left = section.settings.row_padding_left | default: 0
+        assign row_pad_right = section.settings.row_padding_right | default: 0
+        if block.settings.row_padding_left > 0
+          assign row_pad_left = block.settings.row_padding_left
+        endif
+        if block.settings.row_padding_right > 0
+          assign row_pad_right = block.settings.row_padding_right
+        endif
+      -%}
+      <div
+        id="mosaic-row-wrap-{{ block.id }}"
+        class="mosaic-grid__row-wrap{% if show_row_graphics %} mosaic-grid__row-wrap--has-graphics{% endif %}"
+        {{ block.shopify_attributes }}
+      >
+        {%- if show_row_graphics -%}
+          <div
+            class="mosaic-grid__side-graphics mosaic-grid__side-graphics--{{ graphics_position }}"
+            aria-hidden="true"
+          >
+            {% render 'mosaic-side-graphics', section: section, side: graphics_position %}
+          </div>
+        {%- endif -%}
+        {%- capture row_inner_style -%}
+          {%- if row_pad_left > 0 -%}padding-left: {{ row_pad_left }}px;{%- endif -%}
+          {%- if row_pad_right > 0 -%}padding-right: {{ row_pad_right }}px;{%- endif -%}
+        {%- endcapture -%}
         <div
-          id="mosaic-row-wrap-{{ block.id }}"
-          class="mosaic-grid__row-wrap{% if show_row_graphics %} mosaic-grid__row-wrap--has-graphics{% endif %}"
-          {{ block.shopify_attributes }}
+          id="mosaic-row-inner-{{ block.id }}"
+          class="page-width mosaic-grid__row-inner"
+          {%- if row_inner_style != blank -%}style="{{ row_inner_style | strip }}"{%- endif -%}
         >
-          {%- if show_row_graphics -%}
-            <div
-              class="mosaic-grid__side-graphics mosaic-grid__side-graphics--{{ graphics_position }}"
-              aria-hidden="true"
-            >
-              {% render 'mosaic-side-graphics', section: section, side: graphics_position %}
-            </div>
-          {%- endif -%}
           <div
             id="mosaic-row-{{ block.id }}"
             class="mosaic-grid__row mosaic-grid__row--{{ block.settings.layout }}"
@@ -111,13 +129,15 @@
             </div>
           </div>
         </div>
-      {%- endfor -%}
-    </div>
-
-    {%- if section.settings.footer_text != blank -%}
-      <p class="mosaic-grid__footer section-text">{{ section.settings.footer_text }}</p>
-    {%- endif -%}
+      </div>
+    {%- endfor -%}
   </div>
+
+  {%- if section.settings.footer_text != blank -%}
+    <div class="page-width">
+      <p class="mosaic-grid__footer section-text">{{ section.settings.footer_text }}</p>
+    </div>
+  {%- endif -%}
 </section>
 
 <style>
@@ -176,8 +196,37 @@
     gap: var(--row-gap, 48px);
   }
   #shopify-section-{{ section.id }} .mosaic-grid__row {
-    grid-template-columns: minmax(0, var(--row-col-1, 1fr)) minmax(0, var(--row-col-2, 1fr));
-    gap: var(--row-column-gap, 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--row-column-gap, 24px);
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .mosaic-grid__row .mosaic-grid__media {
+    order: 1;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .mosaic-grid__row .mosaic-grid__content {
+    order: 2;
+    width: 100%;
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .mosaic-grid__row {
+      display: grid;
+      grid-template-columns: minmax(0, var(--row-col-1, 1fr)) minmax(0, var(--row-col-2, 1fr));
+      gap: var(--row-column-gap, 32px);
+      align-items: center;
+    }
+    #shopify-section-{{ section.id }} .mosaic-grid__row--image-right .mosaic-grid__media {
+      order: 2;
+    }
+    #shopify-section-{{ section.id }} .mosaic-grid__row--image-right .mosaic-grid__content {
+      order: 1;
+    }
+    #shopify-section-{{ section.id }} .mosaic-grid__row--image-left .mosaic-grid__media,
+    #shopify-section-{{ section.id }} .mosaic-grid__row--image-left .mosaic-grid__content {
+      order: unset;
+    }
   }
   #shopify-section-{{ section.id }} .mosaic-grid__media-image,
   #shopify-section-{{ section.id }} .mosaic-grid__media .responsive-image--placeholder {
@@ -513,6 +562,28 @@
       "default": 56
     },
     {
+      "type": "range",
+      "id": "row_padding_left",
+      "label": "Row content padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme section horizontal padding only. Applies to all rows unless overridden per row."
+    },
+    {
+      "type": "range",
+      "id": "row_padding_right",
+      "label": "Row content padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme section horizontal padding only. Applies to all rows unless overridden per row."
+    },
+    {
       "type": "header",
       "content": "Footer text"
     },
@@ -773,6 +844,28 @@
           "unit": "px",
           "default": 0,
           "info": "0 = use section default."
+        },
+        {
+          "type": "range",
+          "id": "row_padding_left",
+          "label": "Padding left",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use section default row padding."
+        },
+        {
+          "type": "range",
+          "id": "row_padding_right",
+          "label": "Padding right",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use section default row padding."
         },
         {
           "type": "checkbox",

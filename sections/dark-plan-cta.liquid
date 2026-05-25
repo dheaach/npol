@@ -1,0 +1,941 @@
+{% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'dark-plan-cta__inner' %}
+
+{%- liquid
+  assign bg_url = blank
+  if section.settings.background_image != blank
+    assign bg_url = section.settings.background_image | image_url: width: 3840
+  endif
+
+  assign bg_mobile_url = blank
+  if section.settings.background_image_mobile != blank
+    assign bg_mobile_url = section.settings.background_image_mobile | image_url: width: 1200
+  endif
+
+  assign image_position = section.settings.image_position | default: 'left'
+  assign content_gap = section.settings.content_gap | default: 24
+  assign image_align = section.settings.image_align | default: 'center'
+  assign image_aspect = section.settings.image_aspect_ratio | default: 'auto'
+-%}
+
+<section
+  class="dark-plan-cta"
+  style="background-color: {{ section.settings.background_color | default: '#0A1D3C' }};"
+  aria-labelledby="dark-plan-cta-heading-{{ section.id }}"
+>
+  {%- if bg_mobile_url != blank -%}
+    <div
+      class="dark-plan-cta__bg dark-plan-cta__bg--mobile"
+      style="background-image: url({{ bg_mobile_url }});"
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
+  {%- if bg_url != blank -%}
+    <div
+      class="dark-plan-cta__bg{% if bg_mobile_url != blank %} dark-plan-cta__bg--desktop{% endif %}"
+      style="background-image: url({{ bg_url }});"
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
+
+  <div class="dark-plan-cta__content section-spacing">
+    <div class="page-width">
+      <div
+        class="dark-plan-cta__inner{% if image_position == 'right' %} dark-plan-cta__inner--image-right{% endif %}"
+        style="--dark-plan-cta-gap: {{ content_gap }}px;"
+      >
+        <div class="dark-plan-cta__media dark-plan-cta__media--align-{{ image_align }}">
+          <div class="dark-plan-cta__image-wrap{% if image_aspect == 'auto' %} dark-plan-cta__image-wrap--auto{% endif %}">
+            {% render 'responsive-image',
+              image: section.settings.image,
+              alt: section.settings.image_alt,
+              class: 'dark-plan-cta__image',
+              loading: section.settings.image_loading,
+              width: section.settings.image_width | default: 800
+            %}
+          </div>
+        </div>
+
+        <div class="dark-plan-cta__body">
+          <div id="dark-plan-cta-heading-{{ section.id }}">
+            {% render 'highlighted-heading',
+              heading: section.settings.heading,
+              heading_font_size: section.settings.heading_font_size,
+              heading_weight: section.settings.heading_weight,
+              heading_before: section.settings.heading_before,
+              heading_highlight: section.settings.heading_highlight,
+              heading_after: section.settings.heading_after,
+              heading_before_weight: section.settings.heading_before_weight,
+              heading_before_font_size: section.settings.heading_before_font_size,
+              heading_highlight_weight: section.settings.heading_highlight_weight,
+              heading_highlight_font_size: section.settings.heading_highlight_font_size,
+              heading_after_weight: section.settings.heading_after_weight,
+              heading_after_font_size: section.settings.heading_after_font_size,
+              heading_tag: section.settings.heading_tag,
+              heading_size: section.settings.heading_tag,
+              highlight_color: section.settings.highlight_color
+            %}
+          </div>
+
+          {%- if section.settings.text != blank -%}
+            <div class="section-text rte dark-plan-cta__text">{{ section.settings.text }}</div>
+          {%- endif -%}
+
+          <div class="dark-plan-cta__actions">
+            {%- if section.settings.button_primary_label != blank -%}
+              {% render 'button',
+                label: section.settings.button_primary_label,
+                url: section.settings.button_primary_url,
+                style: 'yellow'
+              %}
+            {%- endif -%}
+            {%- if section.settings.button_secondary_label != blank -%}
+              {% render 'button',
+                label: section.settings.button_secondary_label,
+                url: section.settings.button_secondary_url,
+                style: 'primary'
+              %}
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.caption != blank -%}
+            <p class="dark-plan-cta__caption section-text">{{ section.settings.caption }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #shopify-section-{{ section.id }} .section-heading {
+    color: {{ section.settings.heading_color | default: '#FFFFFF' }};
+  }
+  {%- if section.settings.heading_font_color != blank -%}
+    #shopify-section-{{ section.id }} .section-heading {
+      color: {{ section.settings.heading_font_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .text-highlight {
+    color: {{ section.settings.highlight_color | default: '#1BCDC4' }} !important;
+  }
+  {%- if section.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__text,
+    #shopify-section-{{ section.id }} .dark-plan-cta__text p {
+      font-size: {{ section.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_weight != blank and section.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__text,
+    #shopify-section-{{ section.id }} .dark-plan-cta__text p {
+      font-weight: {{ section.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__text,
+    #shopify-section-{{ section.id }} .dark-plan-cta__text p,
+    #shopify-section-{{ section.id }} .dark-plan-cta__text a {
+      color: {{ section.settings.text_font_color }} !important;
+    }
+  {%- elsif section.settings.text_color != blank -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__text,
+    #shopify-section-{{ section.id }} .dark-plan-cta__text p {
+      color: {{ section.settings.text_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.caption_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__caption {
+      font-size: {{ section.settings.caption_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.caption_font_weight != blank and section.settings.caption_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__caption {
+      font-weight: {{ section.settings.caption_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.caption_font_color != blank -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__caption {
+      color: {{ section.settings.caption_font_color }};
+    }
+  {%- elsif section.settings.text_color != blank -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__caption {
+      color: {{ section.settings.text_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .dark-plan-cta__body {
+    gap: var(--dark-plan-cta-gap, 24px);
+  }
+  {%- if image_position == 'right' -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__inner--image-right .dark-plan-cta__media {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    #shopify-section-{{ section.id }} .dark-plan-cta__inner--image-right .dark-plan-cta__body {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .dark-plan-cta__image-wrap {
+    width: 100%;
+    {%- if section.settings.image_max_width > 0 -%}
+    max-width: {{ section.settings.image_max_width }}px;
+    {%- endif -%}
+    {%- if image_aspect != 'auto' -%}
+    aspect-ratio: {{ image_aspect }};
+    overflow: hidden;
+    {%- endif -%}
+  }
+  #shopify-section-{{ section.id }} .dark-plan-cta__image-wrap--auto .dark-plan-cta__image {
+    height: auto;
+  }
+  #shopify-section-{{ section.id }} .dark-plan-cta__image {
+    width: 100%;
+    display: block;
+    object-fit: {{ section.settings.image_object_fit | default: 'cover' }};
+    {%- if image_aspect != 'auto' -%}
+    height: 100%;
+    {%- endif -%}
+    {%- if section.settings.image_border_radius > 0 -%}
+    border-radius: {{ section.settings.image_border_radius }}px;
+    {%- endif -%}
+  }
+  #shopify-section-{{ section.id }} .dark-plan-cta__image-wrap .responsive-image--placeholder {
+    width: 100%;
+    {%- if image_aspect != 'auto' -%}
+    height: 100%;
+    min-height: 200px;
+    {%- endif -%}
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta__image-wrap {
+      {%- if section.settings.image_max_width_mobile > 0 -%}
+      max-width: {{ section.settings.image_max_width_mobile }}px;
+      {%- elsif section.settings.image_max_width > 0 -%}
+      max-width: {{ section.settings.image_max_width }}px;
+      {%- endif -%}
+    }
+  }
+  {%- liquid
+    assign bg_mode_mobile = section.settings.background_size_mobile | default: 'cover'
+    assign bg_mode_tablet = section.settings.background_size_tablet | default: 'cover'
+    assign bg_mode_laptop = section.settings.background_size_laptop | default: 'cover'
+    assign bg_mode_desktop = section.settings.background_size_desktop | default: 'cover'
+    assign bg_mode_4k = section.settings.background_size_4k | default: 'cover'
+    assign bg_position = section.settings.background_position | default: 'center center'
+  -%}
+  {%- capture bg_size_mobile -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_mobile %}{%- endcapture -%}
+  {%- capture bg_size_tablet -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_tablet %}{%- endcapture -%}
+  {%- capture bg_size_laptop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_laptop %}{%- endcapture -%}
+  {%- capture bg_size_desktop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_desktop %}{%- endcapture -%}
+  {%- capture bg_size_4k -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_4k %}{%- endcapture -%}
+  #shopify-section-{{ section.id }} .dark-plan-cta__bg {
+    background-size: {{ bg_size_mobile | strip }};
+    background-position: {{ bg_position }};
+    background-repeat: no-repeat;
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta__bg {
+      background-size: {{ bg_size_tablet | strip }};
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta__bg {
+      background-size: {{ bg_size_laptop | strip }};
+    }
+  }
+  @media screen and (min-width: 1441px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta__bg {
+      background-size: {{ bg_size_desktop | strip }};
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta__bg {
+      background-size: {{ bg_size_4k | strip }};
+    }
+  }
+  {%- if bg_mobile_url != blank and bg_url != blank -%}
+    @media screen and (max-width: 767px) {
+      #shopify-section-{{ section.id }} .dark-plan-cta__bg--desktop {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- if bg_mobile_url != blank -%}
+    @media screen and (min-width: 768px) {
+      #shopify-section-{{ section.id }} .dark-plan-cta__bg--mobile {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- liquid
+    assign min_height_mobile = section.settings.section_min_height_mobile | default: 480
+    assign min_height_tablet = section.settings.section_min_height_tablet | default: 520
+    assign min_height_laptop = section.settings.section_min_height_laptop | default: 560
+    assign min_height_desktop = section.settings.section_min_height_desktop | default: 600
+    assign min_height_4k = section.settings.section_min_height_4k | default: 640
+  -%}
+  #shopify-section-{{ section.id }} .dark-plan-cta,
+  #shopify-section-{{ section.id }} .dark-plan-cta__content {
+    min-height: {{ min_height_mobile }}px;
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta,
+    #shopify-section-{{ section.id }} .dark-plan-cta__content {
+      min-height: {{ min_height_tablet }}px;
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta,
+    #shopify-section-{{ section.id }} .dark-plan-cta__content {
+      min-height: {{ min_height_laptop }}px;
+    }
+  }
+  @media screen and (min-width: 1441px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta,
+    #shopify-section-{{ section.id }} .dark-plan-cta__content {
+      min-height: {{ min_height_desktop }}px;
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }} .dark-plan-cta,
+    #shopify-section-{{ section.id }} .dark-plan-cta__content {
+      min-height: {{ min_height_4k }}px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Dark Plan CTA",
+  "tag": "section",
+  "class": "section-dark-plan-cta",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)",
+      "default": "Plan Your Next Steps Toward Student-Centered Mathematics",
+      "info": "Or use split heading fields below."
+    },
+    {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size (single line)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading font weight (single line)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)"
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color (fallback)",
+      "default": "#FFFFFF",
+      "info": "Used when Heading color above is empty."
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>We'll look at your current approach, share how CFLM supports the development of mathematics over time, and explore what this could look like in your classrooms.</p>"
+    },
+    {
+      "type": "color",
+      "id": "text_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Description color (fallback)",
+      "default": "#FFFFFF",
+      "info": "Used when Description color above is empty."
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "button_primary_label",
+      "label": "Primary button label",
+      "default": "Schedule a Conversation"
+    },
+    {
+      "type": "url",
+      "id": "button_primary_url",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "button_secondary_label",
+      "label": "Secondary button label",
+      "default": "See CFLM in Action"
+    },
+    {
+      "type": "url",
+      "id": "button_secondary_url",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Footer note"
+    },
+    {
+      "type": "textarea",
+      "id": "caption",
+      "label": "Caption below buttons",
+      "default": "No commitment. No generic demo. Just a focused conversation about your system."
+    },
+    {
+      "type": "color",
+      "id": "caption_font_color",
+      "label": "Caption color"
+    },
+    {
+      "type": "range",
+      "id": "caption_font_size",
+      "label": "Caption font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "caption_font_weight",
+      "label": "Caption font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (SEO)"
+    },
+    {
+      "type": "select",
+      "id": "image_loading",
+      "label": "Image loading",
+      "options": [
+        { "value": "lazy", "label": "Lazy" },
+        { "value": "eager", "label": "Eager" }
+      ],
+      "default": "lazy"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image file width (src)",
+      "min": 400,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "default": 800,
+      "info": "Max width requested from Shopify CDN."
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image display max width (desktop)",
+      "min": 0,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 420,
+      "info": "0 = full column width."
+    },
+    {
+      "type": "range",
+      "id": "image_max_width_mobile",
+      "label": "Image display max width (mobile)",
+      "min": 0,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop max width on mobile."
+    },
+    {
+      "type": "select",
+      "id": "image_object_fit",
+      "label": "Image fit",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "fill", "label": "Fill" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        { "value": "auto", "label": "Natural (auto)" },
+        { "value": "4 / 3", "label": "4:3" },
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "16 / 9", "label": "16:9" },
+        { "value": "1 / 1", "label": "Square (1:1)" }
+      ],
+      "default": "auto",
+      "info": "Natural keeps the uploaded image proportions. Other ratios crop with Image fit."
+    },
+    {
+      "type": "select",
+      "id": "image_align",
+      "label": "Image alignment in column",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position (desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Image column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 40,
+      "info": "Content column uses the remaining width unless overridden below. Stacks on tablet and below."
+    },
+    {
+      "type": "range",
+      "id": "column_2_width",
+      "label": "Content column width (override)",
+      "min": 0,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (100% minus image column)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Gap between content blocks",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Section minimum height"
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_4k",
+      "label": "4K (2560px and up)",
+      "min": 320,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 640
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_desktop",
+      "label": "Desktop (1441px – 2559px)",
+      "min": 320,
+      "max": 1000,
+      "step": 20,
+      "unit": "px",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_laptop",
+      "label": "Laptop (1024px – 1440px)",
+      "min": 320,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 560
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_tablet",
+      "label": "Tablet (768px – 1023px)",
+      "min": 320,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_mobile",
+      "label": "Mobile (767px and below)",
+      "min": 320,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background fallback color",
+      "default": "#0A1D3C",
+      "info": "Shown behind the image or when no image is uploaded."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image — tablet and up (768px+)",
+      "info": "Upload the full wave artwork. Recommended width 2560px or larger."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image — mobile (767px and below)",
+      "info": "Optional separate graphic for phones. If empty, the tablet/desktop image is used on all sizes."
+    },
+    {
+      "type": "header",
+      "content": "Background fit (per breakpoint)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Cover fills the section (like object-fit: cover). Fit width keeps the graphic full width without cropping. Contain fits the image inside the box."
+    },
+    {
+      "type": "select",
+      "id": "background_size_4k",
+      "label": "4K — background fit (2560px+)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_size_desktop",
+      "label": "Desktop — background fit (1441px–2559px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_size_laptop",
+      "label": "Laptop — background fit (1024px–1440px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_size_tablet",
+      "label": "Tablet — background fit (768px–1023px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_size_mobile",
+      "label": "Mobile — background fit (767px and below)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top" },
+        { "value": "center bottom", "label": "Bottom" },
+        { "value": "left center", "label": "Left" },
+        { "value": "right center", "label": "Right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dark Plan CTA",
+      "settings": {
+        "heading": "Plan Your Next Steps Toward Student-Centered Mathematics"
+      }
+    }
+  ]
+}
+{% endschema %}

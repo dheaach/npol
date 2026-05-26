@@ -1,0 +1,68 @@
+{%- comment -%}
+  Spacing schema & CSS reference — copy into section {% schema %} and <style> blocks.
+  Breakpoints: desktop (default), tablet 768–1023px, mobile ≤767px.
+{%- endcomment -%}
+
+{%- comment -%}
+=== SCHEMA: Section padding & margin (12 fields per group × 3 breakpoints) ===
+
+Headers + range fields. Repeat for margin_* with label "Margin top", etc.
+
+Desktop example (padding_top; duplicate for bottom, left, right):
+
+{ "type": "header", "content": "Section padding — Desktop" },
+{ "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0, "info": "0 = theme default section spacing." },
+{ "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0, "info": "0 = theme default section spacing." },
+{ "type": "range", "id": "padding_left", "label": "Padding left", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0, "info": "0 = theme horizontal padding." },
+{ "type": "range", "id": "padding_right", "label": "Padding right", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0, "info": "0 = theme horizontal padding." },
+
+Tablet: ids padding_top_tablet, padding_bottom_tablet, padding_left_tablet, padding_right_tablet
+Mobile: ids padding_top_mobile, padding_bottom_mobile, padding_left_mobile, padding_right_mobile
+
+Margin desktop: margin_top, margin_bottom, margin_left, margin_right (info: "0 = none")
+Margin tablet: margin_top_tablet, …
+Margin mobile: margin_top_mobile, …
+
+=== SCHEMA: Column gap (multi-column sections only) ===
+
+{ "type": "header", "content": "Column spacing" },
+{ "type": "range", "id": "column_gap", "label": "Gap between columns (desktop)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 48 },
+{ "type": "range", "id": "column_gap_tablet", "label": "Gap between columns (tablet)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 32 },
+{ "type": "range", "id": "column_gap_mobile", "label": "Gap between columns (mobile)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 24 }
+
+=== CSS: Apply to SECTION_ROOT (e.g. .my-section or .my-section__inner) ===
+
+Desktop padding (when > 0):
+{%- if section.settings.padding_top > 0 -%}
+  #shopify-section-{{ section.id }} .SECTION_ROOT { padding-top: {{ section.settings.padding_top }}px; }
+{%- endif -%}
+
+Tablet example:
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  {%- if section.settings.padding_top_tablet > 0 -%}
+    #shopify-section-{{ section.id }} .SECTION_ROOT { padding-top: {{ section.settings.padding_top_tablet }}px; }
+  {%- endif -%}
+}
+
+Mobile example:
+@media screen and (max-width: 767px) {
+  {%- if section.settings.padding_top_mobile > 0 -%}
+    #shopify-section-{{ section.id }} .SECTION_ROOT { padding-top: {{ section.settings.padding_top_mobile }}px; }
+  {%- endif -%}
+}
+
+Column gap desktop (grid/flex wrapper .SECTION_COLUMNS):
+{%- if section.settings.column_gap > 0 -%}
+  #shopify-section-{{ section.id }} .SECTION_COLUMNS { gap: {{ section.settings.column_gap }}px; }
+{%- endif -%}
+
+Use column_gap_tablet / column_gap_mobile inside the matching @media blocks.
+
+=== CSS: section-spacing-styles snippet (recommended) ===
+
+{% render 'section-spacing-styles', root: '.my-section', pad_x: '.page-width' %}
+{% render 'section-spacing-styles', root: '.my-section', pad_y: '.my-section__inner', pad_x: '.page-width' %}
+{% render 'section-spacing-gap', section: section, selector: '.my-section__grid', gap_id: 'cards_grid_gap', stack_breakpoint: '0' %}
+
+Requires the full padding/margin schema (see hero-math.liquid).
+{%- endcomment -%}

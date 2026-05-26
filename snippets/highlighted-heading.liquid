@@ -23,7 +23,12 @@
     assign after_font_style = 'font-size: ' | append: heading_after_font_size | append: 'px;'
   endif
 
-  assign after_style = after_font_style | append: after_weight_style
+  assign after_color_style = ''
+  if heading_after_color != blank
+    assign after_color_style = 'color: ' | append: heading_after_color | append: ';'
+  endif
+
+  assign after_style = after_color_style | append: after_font_style | append: after_weight_style
 
   assign heading_weight_style = ''
   if heading_weight != blank and heading_weight != 'inherit'
@@ -40,7 +45,12 @@
     assign before_font_style = 'font-size: ' | append: heading_before_font_size | append: 'px;'
   endif
 
-  assign before_style = before_font_style | append: before_weight_style
+  assign before_color_style = ''
+  if heading_before_color != blank
+    assign before_color_style = 'color: ' | append: heading_before_color | append: ';'
+  endif
+
+  assign before_style = before_color_style | append: before_font_style | append: before_weight_style
 
   assign highlight_font_style = ''
   if heading_highlight_font_size != blank and heading_highlight_font_size > 0
@@ -49,7 +59,12 @@
 
   assign highlight_style = 'color: ' | append: highlight_color | append: ';' | append: highlight_font_style | append: highlight_weight_style
 
-  assign single_heading_style = heading_font_style | append: heading_weight_style
+  assign heading_color_style = ''
+  if heading_font_color != blank
+    assign heading_color_style = 'color: ' | append: heading_font_color | append: ';'
+  endif
+
+  assign single_heading_style = heading_color_style | append: heading_font_style | append: heading_weight_style
 -%}
 
 {%- if heading != blank -%}

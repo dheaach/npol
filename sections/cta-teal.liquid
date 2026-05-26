@@ -4,7 +4,7 @@
 <section class="cta-teal section-spacing" style="background-color: {{ section.settings.background_color | default: '#1BCDC4' }};" aria-labelledby="cta-teal-heading-{{ section.id }}">
   <div class="page-width">
     <div
-      class="cta-teal__inner"
+      class="cta-teal__inner{% if section.settings.mobile_stack_order == 'decoration-first' %} cta-teal__inner--mobile-decoration-first{% endif %}"
       style="--cta-teal-content-gap: {{ section.settings.content_gap | default: 24 }}px;"
     >
       <div class="cta-teal__content">
@@ -18,19 +18,32 @@
         {%- endif -%}
 
         <div id="cta-teal-heading-{{ section.id }}">
+          {%- liquid
+            assign cta_heading_font_color = section.settings.heading_font_color
+            if cta_heading_font_color == blank
+              assign cta_heading_font_color = section.settings.heading_color
+            endif
+            assign cta_heading_before_color = section.settings.heading_before_color
+            if cta_heading_before_color == blank
+              assign cta_heading_before_color = section.settings.heading_color
+            endif
+          -%}
           {% render 'highlighted-heading',
             heading: section.settings.heading,
             heading_font_size: section.settings.heading_font_size,
             heading_weight: section.settings.heading_weight,
+            heading_font_color: cta_heading_font_color,
             heading_before: section.settings.heading_before,
-            heading_highlight: section.settings.heading_highlight,
-            heading_after: section.settings.heading_after,
             heading_before_weight: section.settings.heading_before_weight,
             heading_before_font_size: section.settings.heading_before_font_size,
+            heading_before_color: cta_heading_before_color,
+            heading_highlight: section.settings.heading_highlight,
             heading_highlight_weight: section.settings.heading_highlight_weight,
             heading_highlight_font_size: section.settings.heading_highlight_font_size,
+            heading_after: section.settings.heading_after,
             heading_after_weight: section.settings.heading_after_weight,
             heading_after_font_size: section.settings.heading_after_font_size,
+            heading_after_color: section.settings.heading_after_color,
             heading_tag: section.settings.heading_tag,
             heading_size: section.settings.heading_tag,
             highlight_color: section.settings.highlight_color
@@ -61,9 +74,25 @@
 </section>
 
 <style>
-  #shopify-section-{{ section.id }} .section-heading {
-    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
-  }
+  {% render 'section-spacing-styles', root: '.cta-teal', pad_x: '.page-width' %}
+  {%- liquid
+    assign cta_heading_base_color = section.settings.heading_before_color
+    if cta_heading_base_color == blank
+      assign cta_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if cta_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #cta-teal-heading-{{ section.id }} .section-heading {
+      color: {{ cta_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #cta-teal-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#0A1D3C' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #cta-teal-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
   {%- if section.settings.text_font_size > 0 -%}
     #shopify-section-{{ section.id }} .cta-teal__text,
     #shopify-section-{{ section.id }} .cta-teal__text p {
@@ -79,11 +108,15 @@
   {%- if section.settings.text_font_color != blank -%}
     #shopify-section-{{ section.id }} .cta-teal__text,
     #shopify-section-{{ section.id }} .cta-teal__text p,
+    #shopify-section-{{ section.id }} .cta-teal__text li,
     #shopify-section-{{ section.id }} .cta-teal__text a {
       color: {{ section.settings.text_font_color }} !important;
     }
   {%- elsif section.settings.text_color != blank -%}
-    #shopify-section-{{ section.id }} .cta-teal__text {
+    #shopify-section-{{ section.id }} .cta-teal__text,
+    #shopify-section-{{ section.id }} .cta-teal__text p,
+    #shopify-section-{{ section.id }} .cta-teal__text li,
+    #shopify-section-{{ section.id }} .cta-teal__text a {
       color: {{ section.settings.text_color }};
     }
   {%- endif -%}
@@ -130,6 +163,29 @@
     max-width: 100%;
     object-fit: contain;
   }
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .cta-teal__inner--mobile-decoration-first .cta-teal__decoration {
+      order: -1;
+    }
+  }
+  {%- if section.settings.decoration_image_width_tablet > 0 -%}
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .cta-teal__decoration .cta-teal__decoration-image {
+      width: {{ section.settings.decoration_image_width_tablet }}%;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+  }
+  {%- endif -%}
+  {%- if section.settings.decoration_image_width_mobile > 0 -%}
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .cta-teal__decoration .cta-teal__decoration-image {
+      width: {{ section.settings.decoration_image_width_mobile }}%;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+  }
+  {%- endif -%}
 </style>
 
 {% schema %}
@@ -233,6 +289,12 @@
       "info": "Optional. Or use split heading fields below."
     },
     {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color",
+      "info": "Empty = theme heading color. Used when the single heading field is filled."
+    },
+    {
       "type": "range",
       "id": "heading_font_size",
       "label": "Font size (single line heading)",
@@ -263,6 +325,12 @@
       "id": "heading_before",
       "label": "Heading (before highlight)",
       "default": "Empowering Teachers to Build "
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "info": "Empty = theme heading color."
     },
     {
       "type": "range",
@@ -297,6 +365,12 @@
       "default": "Confident Mathematicians"
     },
     {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#0A1D3C"
+    },
+    {
       "type": "range",
       "id": "heading_highlight_font_size",
       "label": "Font size (highlight)",
@@ -326,6 +400,12 @@
       "type": "text",
       "id": "heading_after",
       "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = same as color before highlight."
     },
     {
       "type": "range",
@@ -461,6 +541,19 @@
       "unit": "px",
       "default": 32
     },
+        {"type": "range", "id": "column_gap_tablet", "label": "Gap between columns (tablet)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "768px–1023px when stacked. 0 = theme default (32px)."},
+    {"type": "range", "id": "column_gap_mobile", "label": "Gap between columns (mobile)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "767px and below when stacked. 0 = theme default (32px)."},
+    {
+      "type": "select",
+      "id": "mobile_stack_order",
+      "label": "Tablet & mobile column order",
+      "info": "When the layout stacks (1023px and below), controls whether the content block or decoration image appears first.",
+      "options": [
+        { "value": "content-first", "label": "Content first" },
+        { "value": "decoration-first", "label": "Decoration image first" }
+      ],
+      "default": "content-first"
+    },
     {
       "type": "header",
       "content": "Decoration"
@@ -477,8 +570,30 @@
       "info": "Decorative images can use an empty alt when aria-hidden."
     },
     {
+      "type": "range",
+      "id": "decoration_image_width_tablet",
+      "label": "Decoration image width (tablet)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "768px-1023px. 0 = theme default (full width)."
+    },
+    {
+      "type": "range",
+      "id": "decoration_image_width_mobile",
+      "label": "Decoration image width (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "767px and below. 0 = theme default (full width)."
+    },
+    {
       "type": "header",
-      "content": "Colors"
+      "content": "Section colors"
     },
     {
       "type": "color",
@@ -489,21 +604,304 @@
     {
       "type": "color",
       "id": "heading_color",
-      "label": "Heading color",
+      "label": "Heading color (legacy)",
+      "info": "Used when per-segment heading colors above are empty.",
       "default": "#0A1D3C"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text color (legacy)",
+      "label": "Description color (legacy)",
       "info": "Used when Description color is empty.",
       "default": "#0A1D3C"
     },
     {
-      "type": "color",
-      "id": "highlight_color",
-      "label": "Highlight color",
-      "default": "#0A1D3C"
+      "type": "header",
+      "content": "Section padding \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",

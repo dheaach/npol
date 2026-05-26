@@ -3,7 +3,7 @@
 
 <section class="intro-content section-spacing" aria-labelledby="intro-heading-{{ section.id }}">
   <div class="page-width">
-    <div class="intro-content__inner{% if section.settings.layout == 'reverse' %} intro-content__inner--reverse{% endif %}">
+    <div class="intro-content__inner{% if section.settings.layout == 'reverse' %} intro-content__inner--reverse{% endif %}{% if section.settings.mobile_stack_order == 'content-first' %} intro-content__inner--mobile-content-first{% endif %}">
       <div class="intro-content__media">
         {% render 'responsive-image',
           image: section.settings.image,
@@ -14,17 +14,34 @@
       </div>
 
       <div class="intro-content__text">
-        {% render 'highlighted-heading',
-          heading_before: section.settings.heading_before,
-          heading_highlight: section.settings.heading_highlight,
-          heading_after: section.settings.heading_after,
-          heading_before_weight: section.settings.heading_before_weight,
-          heading_highlight_weight: section.settings.heading_highlight_weight,
-          heading_after_weight: section.settings.heading_after_weight,
-          heading_tag: section.settings.heading_tag,
-          heading_size: section.settings.heading_tag,
-          highlight_color: section.settings.highlight_color
-        %}
+        <div id="intro-heading-{{ section.id }}">
+          {%- liquid
+            assign intro_heading_before_color = section.settings.heading_before_color
+            if intro_heading_before_color == blank
+              assign intro_heading_before_color = section.settings.heading_color
+            endif
+            assign intro_heading_after_color = section.settings.heading_after_color
+            if intro_heading_after_color == blank
+              assign intro_heading_after_color = section.settings.heading_color
+            endif
+          -%}
+          {% render 'highlighted-heading',
+            heading_before: section.settings.heading_before,
+            heading_before_weight: section.settings.heading_before_weight,
+            heading_before_font_size: section.settings.heading_before_font_size,
+            heading_before_color: intro_heading_before_color,
+            heading_highlight: section.settings.heading_highlight,
+            heading_highlight_weight: section.settings.heading_highlight_weight,
+            heading_highlight_font_size: section.settings.heading_highlight_font_size,
+            heading_after: section.settings.heading_after,
+            heading_after_weight: section.settings.heading_after_weight,
+            heading_after_font_size: section.settings.heading_after_font_size,
+            heading_after_color: intro_heading_after_color,
+            heading_tag: section.settings.heading_tag,
+            heading_size: section.settings.heading_tag,
+            highlight_color: section.settings.highlight_color
+          %}
+        </div>
 
         {%- if section.settings.text != blank -%}
           <div class="section-text rte intro-content__description">{{ section.settings.text }}</div>
@@ -51,6 +68,25 @@
 </section>
 
 <style>
+  {% render 'section-spacing-styles', root: '.intro-content', pad_x: '.page-width' %}
+  {%- liquid
+    assign intro_heading_base_color = section.settings.heading_before_color
+    if intro_heading_base_color == blank
+      assign intro_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if intro_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #intro-heading-{{ section.id }} .section-heading {
+      color: {{ intro_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #intro-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#1BCDC4' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #intro-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
   {%- if section.settings.text_font_size > 0 -%}
     #shopify-section-{{ section.id }} .intro-content__description,
     #shopify-section-{{ section.id }} .intro-content__description p {
@@ -107,6 +143,30 @@
       color: {{ section.settings.text_after_list_font_color }} !important;
     }
   {%- endif -%}
+
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .intro-content__inner--mobile-content-first .intro-content__text {
+      order: -1;
+    }
+  }
+  {%- if section.settings.image_width_tablet > 0 -%}
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .intro-content__media .intro-content__image {
+      width: {{ section.settings.image_width_tablet }}%;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+  }
+  {%- endif -%}
+  {%- if section.settings.image_width_mobile > 0 -%}
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .intro-content__media .intro-content__image {
+      width: {{ section.settings.image_width_mobile }}%;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+  }
+  {%- endif -%}
 </style>
 
 {% schema %}
@@ -126,15 +186,22 @@
       "default": "Why Students Can't Solve Problems and"
     },
     {
-      "type": "text",
-      "id": "heading_highlight",
-      "label": "Heading highlight",
-      "default": "How to Help Them"
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
     },
     {
-      "type": "text",
-      "id": "heading_after",
-      "label": "Heading (after highlight)"
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
     },
     {
       "type": "select",
@@ -152,6 +219,29 @@
       "default": "inherit"
     },
     {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "How to Help Them"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
       "type": "select",
       "id": "heading_highlight_weight",
       "label": "Font weight (highlight)",
@@ -165,6 +255,28 @@
         { "value": "800", "label": "Extra-bold (800)" }
       ],
       "default": "700"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = same as color before highlight."
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
     },
     {
       "type": "select",
@@ -193,9 +305,10 @@
     },
     {
       "type": "color",
-      "id": "highlight_color",
-      "label": "Highlight color",
-      "default": "#1BCDC4"
+      "id": "heading_color",
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
     },
     {
       "type": "header",
@@ -209,7 +322,9 @@
     {
       "type": "color",
       "id": "text_font_color",
-      "label": "Description color"
+      "label": "Description color",
+      "default": "#0A1D3C",
+      "info": "Empty = theme body color."
     },
     {
       "type": "range",
@@ -247,7 +362,9 @@
     {
       "type": "color",
       "id": "list_font_color",
-      "label": "List color"
+      "label": "List color",
+      "default": "#0A1D3C",
+      "info": "Empty = theme body color."
     },
     {
       "type": "range",
@@ -283,7 +400,9 @@
     {
       "type": "color",
       "id": "text_after_list_font_color",
-      "label": "Description (below list) color"
+      "label": "Description (below list) color",
+      "default": "#0A1D3C",
+      "info": "Empty = theme body color."
     },
     {
       "type": "range",
@@ -336,6 +455,28 @@
       "default": "lazy"
     },
     {
+      "type": "range",
+      "id": "image_width_tablet",
+      "label": "Image width (tablet)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "768px–1023px. 0 = theme default (full width)."
+    },
+    {
+      "type": "range",
+      "id": "image_width_mobile",
+      "label": "Image width (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "767px and below. 0 = theme default (full width)."
+    },
+    {
       "type": "header",
       "content": "Layout"
     },
@@ -369,6 +510,307 @@
       "step": 8,
       "unit": "px",
       "default": 64
+    },
+        {"type": "range", "id": "column_gap_tablet", "label": "Gap between columns (tablet)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "768px–1023px when stacked. 0 = theme default (32px)."},
+    {"type": "range", "id": "column_gap_mobile", "label": "Gap between columns (mobile)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "767px and below when stacked. 0 = theme default (32px)."},
+    {
+      "type": "select",
+      "id": "mobile_stack_order",
+      "label": "Tablet & mobile column order",
+      "info": "When the layout stacks (1023px and below), controls whether the image block or the text block appears first. On desktop use the Layout setting above.",
+      "options": [
+        { "value": "content-first", "label": "Content first" },
+        { "value": "image-first", "label": "Image first" }
+      ],
+      "default": "image-first"
+    },
+        {
+      "type": "header",
+      "content": "Section padding \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",

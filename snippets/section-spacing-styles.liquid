@@ -1,0 +1,166 @@
+{%- comment -%}
+  Responsive section padding and margin (desktop / tablet / mobile).
+  {% render 'section-spacing-styles', root: '.hero-math', pad_x: '.page-width' %}
+  root: margin + vertical padding (required)
+  pad_y: vertical padding target (default: root)
+  pad_x: horizontal padding target (optional; when blank, horizontal uses pad_y)
+  pad_x_fallback: when true and pad_x L/R is 0, output var(--section-padding-x). Use false for .page-width.
+{%- endcomment -%}
+
+{%- liquid
+  assign scope = '#shopify-section-' | append: section.id | append: ' '
+  assign root_target = scope | append: root
+  assign pad_y_target = root_target
+  if pad_y != blank
+    assign pad_y_target = scope | append: pad_y
+  endif
+  if pad_x != blank
+    assign pad_x_target = scope | append: pad_x
+  else
+    assign pad_x_target = pad_y_target
+  endif
+  assign x_fallback = pad_x_fallback
+  if x_fallback == nil
+    if pad_x != blank
+      assign x_fallback = false
+    else
+      assign x_fallback = true
+    endif
+  endif
+-%}
+
+{%- if section.settings.padding_top > 0 -%}
+  {{ pad_y_target }} {
+    padding-top: {{ section.settings.padding_top }}px;
+  }
+{%- endif -%}
+{%- if section.settings.padding_bottom > 0 -%}
+  {{ pad_y_target }} {
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endif -%}
+{%- if section.settings.padding_left > 0 -%}
+  {{ pad_x_target }} {
+    padding-left: {{ section.settings.padding_left }}px;
+  }
+{%- elsif x_fallback -%}
+  {{ pad_x_target }} {
+    padding-left: var(--section-padding-x, 40px);
+  }
+{%- endif -%}
+{%- if section.settings.padding_right > 0 -%}
+  {{ pad_x_target }} {
+    padding-right: {{ section.settings.padding_right }}px;
+  }
+{%- elsif x_fallback -%}
+  {{ pad_x_target }} {
+    padding-right: var(--section-padding-x, 40px);
+  }
+{%- endif -%}
+
+{%- if section.settings.margin_top > 0 -%}
+  {{ root_target }} {
+    margin-top: {{ section.settings.margin_top }}px;
+  }
+{%- endif -%}
+{%- if section.settings.margin_bottom > 0 -%}
+  {{ root_target }} {
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+  }
+{%- endif -%}
+{%- if section.settings.margin_left > 0 -%}
+  {{ root_target }} {
+    margin-left: {{ section.settings.margin_left }}px;
+  }
+{%- endif -%}
+{%- if section.settings.margin_right > 0 -%}
+  {{ root_target }} {
+    margin-right: {{ section.settings.margin_right }}px;
+  }
+{%- endif -%}
+
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  {%- if section.settings.padding_top_tablet > 0 -%}
+    {{ pad_y_target }} {
+      padding-top: {{ section.settings.padding_top_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.padding_bottom_tablet > 0 -%}
+    {{ pad_y_target }} {
+      padding-bottom: {{ section.settings.padding_bottom_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.padding_left_tablet > 0 -%}
+    {{ pad_x_target }} {
+      padding-left: {{ section.settings.padding_left_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.padding_right_tablet > 0 -%}
+    {{ pad_x_target }} {
+      padding-right: {{ section.settings.padding_right_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_top_tablet > 0 -%}
+    {{ root_target }} {
+      margin-top: {{ section.settings.margin_top_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_bottom_tablet > 0 -%}
+    {{ root_target }} {
+      margin-bottom: {{ section.settings.margin_bottom_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_left_tablet > 0 -%}
+    {{ root_target }} {
+      margin-left: {{ section.settings.margin_left_tablet }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_right_tablet > 0 -%}
+    {{ root_target }} {
+      margin-right: {{ section.settings.margin_right_tablet }}px;
+    }
+  {%- endif -%}
+}
+
+@media screen and (max-width: 767px) {
+  {%- if section.settings.padding_top_mobile > 0 -%}
+    {{ pad_y_target }} {
+      padding-top: {{ section.settings.padding_top_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.padding_bottom_mobile > 0 -%}
+    {{ pad_y_target }} {
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.padding_left_mobile > 0 -%}
+    {{ pad_x_target }} {
+      padding-left: {{ section.settings.padding_left_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.padding_right_mobile > 0 -%}
+    {{ pad_x_target }} {
+      padding-right: {{ section.settings.padding_right_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_top_mobile > 0 -%}
+    {{ root_target }} {
+      margin-top: {{ section.settings.margin_top_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_bottom_mobile > 0 -%}
+    {{ root_target }} {
+      margin-bottom: {{ section.settings.margin_bottom_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_left_mobile > 0 -%}
+    {{ root_target }} {
+      margin-left: {{ section.settings.margin_left_mobile }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.margin_right_mobile > 0 -%}
+    {{ root_target }} {
+      margin-right: {{ section.settings.margin_right_mobile }}px;
+    }
+  {%- endif -%}
+}

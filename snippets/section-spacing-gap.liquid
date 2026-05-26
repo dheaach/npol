@@ -1,0 +1,65 @@
+{%- comment -%}
+  Responsive gap for a grid/flex container.
+  Usage: {% render 'section-spacing-gap', selector: '.program-cards__grid', gap_id: 'cards_grid_gap' %}
+  gap_id: base setting id (tablet/mobile use gap_id + '_tablet' / '_mobile'). Falls back to column_gap when base is 0.
+  stack_breakpoint: '1023' (default) stacks to 1 col below; use '0' for always apply side-by-side gaps.
+  standalone: true — wrap output in <style> (use when rendering outside a parent <style> block).
+{%- endcomment -%}
+
+{%- liquid
+  assign gap_base_id = gap_id | default: 'column_gap'
+  assign gap_desktop = section.settings[gap_base_id] | default: 0
+  if gap_desktop == 0
+    assign gap_desktop = section.settings.column_gap | default: 0
+  endif
+  assign gap_tablet_key = gap_base_id | append: '_tablet'
+  assign gap_mobile_key = gap_base_id | append: '_mobile'
+  assign gap_tablet = section.settings[gap_tablet_key] | default: 0
+  assign gap_mobile = section.settings[gap_mobile_key] | default: 0
+  if gap_tablet == 0 and gap_fallback_tablet != blank
+    assign gap_tablet = gap_fallback_tablet
+  endif
+  if gap_mobile == 0 and gap_fallback_mobile != blank
+    assign gap_mobile = gap_fallback_mobile
+  endif
+  assign scope = '#shopify-section-' | append: section.id | append: ' '
+  assign target = scope | append: selector
+  assign stack_at = stack_breakpoint | default: '1023'
+-%}
+
+{%- capture gap_css -%}
+{%- if gap_desktop > 0 -%}
+  {%- if stack_at == '0' -%}
+  {{ target }} {
+    gap: {{ gap_desktop }}px;
+  }
+  {%- else -%}
+  @media screen and (min-width: 1024px) {
+    {{ target }} {
+      gap: {{ gap_desktop }}px;
+    }
+  }
+  {%- endif -%}
+{%- endif -%}
+{%- if gap_tablet > 0 -%}
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  {{ target }} {
+    gap: {{ gap_tablet }}px;
+  }
+}
+{%- endif -%}
+{%- if gap_mobile > 0 -%}
+@media screen and (max-width: 767px) {
+  {{ target }} {
+    gap: {{ gap_mobile }}px;
+  }
+}
+{%- endif -%}
+{%- endcapture -%}
+
+{%- assign gap_css = gap_css | strip -%}
+{%- if gap_css != blank -%}
+  {%- if standalone -%}<style>{%- endif -%}
+  {{ gap_css }}
+  {%- if standalone -%}</style>{%- endif -%}
+{%- endif -%}

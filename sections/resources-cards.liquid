@@ -34,7 +34,14 @@
       {%- endif -%}
     </div>
 
-    <div class="resources-cards__grid">
+    <div
+      class="resources-cards__grid"
+      style="
+        --resources-cards-columns: {{ section.settings.cards_per_row | default: 2 }};
+        --resources-cards-columns-tablet: {{ section.settings.cards_per_row_tablet | default: 2 }};
+        --resources-cards-columns-mobile: {{ section.settings.cards_per_row_mobile | default: 1 }};
+      "
+    >
       {%- for block in section.blocks -%}
         <article class="resource-card" {{ block.shopify_attributes }} id="resource-card-{{ block.id }}">
           {%- if block.settings.image != blank -%}
@@ -74,6 +81,8 @@
 </section>
 
 <style>
+  {% render 'section-spacing-styles', root: '.resources-cards', pad_x: '.resources-cards__inner', pad_x_fallback: true %}
+  {% render 'section-spacing-gap', section: section, selector: '.resources-cards__grid', gap_id: 'cards_grid_gap', stack_breakpoint: '0' %}
   #shopify-section-{{ section.id }} .resources-cards {
     width: 100%;
     background-color: {{ bg_color_rgba }};
@@ -84,27 +93,7 @@
     margin-left: auto;
     margin-right: auto;
     box-sizing: border-box;
-    {%- if section.settings.padding_left > 0 -%}
-    padding-left: {{ section.settings.padding_left }}px;
-    {%- else -%}
-    padding-left: var(--section-padding-x, 40px);
-    {%- endif -%}
-    {%- if section.settings.padding_right > 0 -%}
-    padding-right: {{ section.settings.padding_right }}px;
-    {%- else -%}
-    padding-right: var(--section-padding-x, 40px);
-    {%- endif -%}
   }
-  {%- if section.settings.padding_top > 0 -%}
-    #shopify-section-{{ section.id }} .resources-cards {
-      padding-top: {{ section.settings.padding_top }}px;
-    }
-  {%- endif -%}
-  {%- if section.settings.padding_bottom > 0 -%}
-    #shopify-section-{{ section.id }} .resources-cards {
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    }
-  {%- endif -%}
   {%- if section.settings.heading_before_color != blank -%}
     #shopify-section-{{ section.id }} #resources-heading-{{ section.id }} .section-heading {
       color: {{ section.settings.heading_before_color }};
@@ -131,6 +120,19 @@
       color: {{ section.settings.description_font_color }};
     }
   {%- endif -%}
+  #shopify-section-{{ section.id }} .resources-cards__grid {
+    grid-template-columns: repeat(var(--resources-cards-columns, 2), minmax(0, 1fr));
+  }
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .resources-cards__grid {
+      grid-template-columns: repeat(var(--resources-cards-columns-tablet, 2), minmax(0, 1fr));
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .resources-cards__grid {
+      grid-template-columns: repeat(var(--resources-cards-columns-mobile, 1), minmax(0, 1fr));
+    }
+  }
   {%- for block in section.blocks -%}
     {%- liquid
       assign card_shadow_alpha = block.settings.card_shadow_opacity | default: 10 | times: 1.0 | divided_by: 100.0
@@ -144,6 +146,54 @@
       box-shadow: {{ block.settings.card_shadow_offset_x | default: 0 }}px {{ block.settings.card_shadow_offset_y | default: 4 }}px {{ block.settings.card_shadow_blur | default: 24 }}px {{ card_shadow_rgba }};
       {%- endif -%}
     }
+    #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media .resource-card__image {
+      object-fit: {{ block.settings.image_object_fit | default: 'cover' }};
+      object-position: {{ block.settings.image_position | default: 'center center' }};
+    }
+    {%- liquid
+      assign card_img_h_desktop = block.settings.image_height
+      assign card_img_h_tablet = block.settings.image_height_tablet
+      assign card_img_h_mobile = block.settings.image_height_mobile
+      if card_img_h_tablet == 0 and card_img_h_desktop > 0
+        assign card_img_h_tablet = card_img_h_desktop
+      endif
+      if card_img_h_mobile == 0 and card_img_h_tablet > 0
+        assign card_img_h_mobile = card_img_h_tablet
+      endif
+    -%}
+    {%- if card_img_h_desktop > 0 -%}
+    @media screen and (min-width: 1024px) {
+      #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media {
+        height: {{ card_img_h_desktop }}px;
+      }
+      #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media .resource-card__image {
+        height: 100%;
+        aspect-ratio: auto;
+      }
+    }
+    {%- endif -%}
+    {%- if card_img_h_tablet > 0 -%}
+    @media screen and (min-width: 768px) and (max-width: 1023px) {
+      #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media {
+        height: {{ card_img_h_tablet }}px;
+      }
+      #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media .resource-card__image {
+        height: 100%;
+        aspect-ratio: auto;
+      }
+    }
+    {%- endif -%}
+    {%- if card_img_h_mobile > 0 -%}
+    @media screen and (max-width: 767px) {
+      #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media {
+        height: {{ card_img_h_mobile }}px;
+      }
+      #shopify-section-{{ section.id }} #resource-card-{{ block.id }} .resource-card__media .resource-card__image {
+        height: 100%;
+        aspect-ratio: auto;
+      }
+    }
+    {%- endif -%}
   {%- endfor -%}
 </style>
 
@@ -313,6 +363,77 @@
     },
     {
       "type": "header",
+      "content": "Cards grid spacing"
+    },
+    {
+      "type": "range",
+      "id": "cards_grid_gap",
+      "label": "Gap between cards (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "1024px and up. 0 = theme default (24px)."
+    },
+    {
+      "type": "range",
+      "id": "cards_grid_gap_tablet",
+      "label": "Gap between cards (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px\u20131023px. 0 = theme default."
+    },
+    {
+      "type": "range",
+      "id": "cards_grid_gap_mobile",
+      "label": "Gap between cards (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = theme default."
+    },
+    {
+      "type": "header",
+      "content": "Cards grid layout"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row",
+      "label": "Cards per row (desktop)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "info": "1024px and above."
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_tablet",
+      "label": "Cards per row (tablet)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2,
+      "info": "768px–1023px."
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_mobile",
+      "label": "Cards per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1,
+      "info": "767px and below."
+    },
+    {
+      "type": "header",
       "content": "Background"
     },
     {
@@ -332,9 +453,9 @@
       "default": 100,
       "info": "100 = solid. Lower values make the background more transparent."
     },
-    {
+            {
       "type": "header",
-      "content": "Section padding"
+      "content": "Section padding \u2014 Desktop"
     },
     {
       "type": "range",
@@ -367,7 +488,7 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = 40px (20px on mobile)."
+      "info": "0 = theme horizontal padding."
     },
     {
       "type": "range",
@@ -378,7 +499,247 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = 40px (20px on mobile)."
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",
@@ -489,6 +850,72 @@
           "type": "text",
           "id": "image_alt",
           "label": "Image alt text (SEO)"
+        },
+        {
+          "type": "header",
+          "content": "Image layout"
+        },
+        {
+          "type": "range",
+          "id": "image_height",
+          "label": "Image height (desktop)",
+          "min": 0,
+          "max": 600,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme default (16:10 aspect ratio). Fixed height crops with Image fit and position below."
+        },
+        {
+          "type": "range",
+          "id": "image_height_tablet",
+          "label": "Image height (tablet)",
+          "min": 0,
+          "max": 600,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "768px–1023px. 0 = use desktop height or theme default."
+        },
+        {
+          "type": "range",
+          "id": "image_height_mobile",
+          "label": "Image height (mobile)",
+          "min": 0,
+          "max": 500,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "767px and below. 0 = use tablet/desktop height or theme default."
+        },
+        {
+          "type": "select",
+          "id": "image_object_fit",
+          "label": "Image fit",
+          "options": [
+            { "value": "cover", "label": "Cover (crop to fill)" },
+            { "value": "contain", "label": "Contain (fit inside)" },
+            { "value": "fill", "label": "Fill (stretch)" }
+          ],
+          "default": "cover"
+        },
+        {
+          "type": "select",
+          "id": "image_position",
+          "label": "Image focal position",
+          "info": "Which part of the image stays visible when the area is cropped.",
+          "options": [
+            { "value": "center center", "label": "Center" },
+            { "value": "center top", "label": "Top center" },
+            { "value": "center bottom", "label": "Bottom center" },
+            { "value": "left center", "label": "Center left" },
+            { "value": "right center", "label": "Center right" },
+            { "value": "left top", "label": "Top left" },
+            { "value": "right top", "label": "Top right" },
+            { "value": "left bottom", "label": "Bottom left" },
+            { "value": "right bottom", "label": "Bottom right" }
+          ],
+          "default": "center center"
         },
         {
           "type": "text",

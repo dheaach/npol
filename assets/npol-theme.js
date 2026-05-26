@@ -32,16 +32,35 @@
       if (!media) return;
 
       var template = media.querySelector('template');
-      if (template) {
-        var content = template.content.cloneNode(true);
-        media.innerHTML = '';
-        media.appendChild(content);
-        var iframe = media.querySelector('iframe');
-        if (iframe) {
-          iframe.style.width = '100%';
-          iframe.style.aspectRatio = '16/9';
-          iframe.style.border = 'none';
-          iframe.style.borderRadius = '12px';
+      if (!template) return;
+
+      var content = template.content.cloneNode(true);
+      media.innerHTML = '';
+      media.appendChild(content);
+
+      var player = media.closest('.video-showcase__player');
+      var radius = player
+        ? getComputedStyle(player).getPropertyValue('--video-showcase-media-radius').trim()
+        : '';
+
+      var iframe = media.querySelector('iframe');
+      if (iframe) {
+        iframe.style.width = '100%';
+        iframe.style.aspectRatio = '16/9';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = radius || '12px';
+        return;
+      }
+
+      var video = media.querySelector('video');
+      if (video) {
+        video.style.width = '100%';
+        video.style.aspectRatio = '16/9';
+        video.style.border = 'none';
+        video.style.borderRadius = radius || '12px';
+        var playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(function () {});
         }
       }
     });

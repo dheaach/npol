@@ -26,19 +26,36 @@
       style="--header-col-1: {{ header_col1 }}; --header-col-2: {{ header_col2 }};"
     >
       <div class="mosaic-grid__header-left" id="mosaic-heading-{{ section.id }}">
+        {%- liquid
+          assign mosaic_heading_font_color = section.settings.heading_font_color
+          if mosaic_heading_font_color == blank
+            assign mosaic_heading_font_color = section.settings.heading_color
+          endif
+          assign mosaic_heading_before_color = section.settings.heading_before_color
+          if mosaic_heading_before_color == blank
+            assign mosaic_heading_before_color = section.settings.heading_color
+          endif
+          assign mosaic_heading_after_color = section.settings.heading_after_color
+          if mosaic_heading_after_color == blank
+            assign mosaic_heading_after_color = section.settings.heading_color
+          endif
+        -%}
         {% render 'highlighted-heading',
           heading: section.settings.heading,
           heading_weight: section.settings.heading_weight,
           heading_font_size: section.settings.heading_font_size,
+          heading_font_color: mosaic_heading_font_color,
           heading_before: section.settings.heading_before,
-          heading_highlight: section.settings.heading_highlight,
-          heading_after: section.settings.heading_after,
           heading_before_weight: section.settings.heading_before_weight,
           heading_before_font_size: section.settings.heading_before_font_size,
+          heading_before_color: mosaic_heading_before_color,
+          heading_highlight: section.settings.heading_highlight,
           heading_highlight_weight: section.settings.heading_highlight_weight,
           heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_after: section.settings.heading_after,
           heading_after_weight: section.settings.heading_after_weight,
           heading_after_font_size: section.settings.heading_after_font_size,
+          heading_after_color: mosaic_heading_after_color,
           heading_tag: section.settings.heading_tag,
           heading_size: section.settings.heading_size,
           highlight_color: section.settings.highlight_color
@@ -141,17 +158,30 @@
 </section>
 
 <style>
+  {% render 'section-spacing-styles', root: '.mosaic-grid', pad_x: '.page-width' %}
+  {% render 'section-spacing-gap', section: section, selector: '.mosaic-grid__header', stack_breakpoint: '1023' %}
+  {% render 'section-spacing-gap', section: section, selector: '.mosaic-grid__row', gap_id: 'row_column_gap', stack_breakpoint: '0' %}
   {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
     #shopify-section-{{ section.id }} {
       background-color: {{ bg_color }};
     }
   {%- endif -%}
-  #shopify-section-{{ section.id }} .mosaic-grid__header-left .section-heading {
-    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
-  }
-  {%- if section.settings.heading_color != blank -%}
-    #shopify-section-{{ section.id }} .mosaic-grid__header-left .section-heading > span:not(.text-highlight) {
-      color: {{ section.settings.heading_color }};
+  {%- liquid
+    assign mosaic_heading_base_color = section.settings.heading_before_color
+    if mosaic_heading_base_color == blank
+      assign mosaic_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if mosaic_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #mosaic-heading-{{ section.id }} .section-heading {
+      color: {{ mosaic_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #mosaic-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#1BCDC4' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #mosaic-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
     }
   {%- endif -%}
   {%- if section.settings.intro_color != blank -%}
@@ -160,6 +190,11 @@
     #shopify-section-{{ section.id }} .mosaic-grid__header-right li,
     #shopify-section-{{ section.id }} .mosaic-grid__header-right a {
       color: {{ section.settings.intro_color }} !important;
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_color != blank -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__footer {
+      color: {{ section.settings.footer_color }};
     }
   {%- endif -%}
   {%- if section.settings.intro_font_size > 0 -%}
@@ -174,11 +209,6 @@
       font-weight: {{ section.settings.intro_font_weight }};
     }
   {%- endif -%}
-  {%- if section.settings.footer_color != blank -%}
-    #shopify-section-{{ section.id }} .mosaic-grid__footer {
-      color: {{ section.settings.footer_color }};
-    }
-  {%- endif -%}
   {%- if section.settings.footer_font_size > 0 -%}
     #shopify-section-{{ section.id }} .mosaic-grid__footer {
       font-size: {{ section.settings.footer_font_size }}px;
@@ -189,8 +219,19 @@
       font-weight: {{ section.settings.footer_font_weight }};
     }
   {%- endif -%}
-  #shopify-section-{{ section.id }} .mosaic-grid__header {
-    grid-template-columns: minmax(0, {{ header_col1 }}fr) minmax(0, {{ header_col2 }}fr);
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .mosaic-grid__header {
+      grid-template-columns: minmax(0, {{ header_col1 }}fr) minmax(0, {{ header_col2 }}fr);
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .mosaic-grid__header {
+      grid-template-columns: 1fr;
+    }
+    #shopify-section-{{ section.id }} .mosaic-grid__header-right {
+      justify-self: stretch;
+      max-width: 100%;
+    }
   }
   #shopify-section-{{ section.id }} .mosaic-grid__rows {
     gap: var(--row-gap, 48px);
@@ -237,15 +278,19 @@
     margin-inline: auto;
   }
   {%- for block in section.blocks -%}
-    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-title {
-      color: {{ block.settings.title_color | default: '#1BCDC4' }};
-    }
-    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text,
-    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text p,
-    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text li,
-    #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text a {
-      color: {{ block.settings.text_color | default: '#0A1D3C' }} !important;
-    }
+    {%- if block.settings.title_color != blank -%}
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-title {
+        color: {{ block.settings.title_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_color != blank -%}
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text,
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text p,
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text li,
+      #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-text a {
+        color: {{ block.settings.text_color }} !important;
+      }
+    {%- endif -%}
     {%- if block.settings.title_font_size > 0 -%}
       #shopify-section-{{ section.id }} #mosaic-row-{{ block.id }} .mosaic-grid__row-title {
         font-size: {{ block.settings.title_font_size }}px;
@@ -298,6 +343,12 @@
       "info": "Optional. Or use split heading fields below."
     },
     {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color (single line)",
+      "info": "Empty = theme heading color. Used when the single heading field is filled."
+    },
+    {
       "type": "range",
       "id": "heading_font_size",
       "label": "Font size (single line heading)",
@@ -324,16 +375,17 @@
       "default": "inherit"
     },
     {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading color (non-highlight)",
-      "default": "#0A1D3C"
-    },
-    {
       "type": "text",
       "id": "heading_before",
       "label": "Heading (before highlight)",
       "default": "Why Next Gen CFLM Works When Other Approaches "
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
     },
     {
       "type": "range",
@@ -367,6 +419,12 @@
       "default": "Fall Short"
     },
     {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
+    },
+    {
       "type": "range",
       "id": "heading_highlight_font_size",
       "label": "Font size (highlight)",
@@ -397,6 +455,12 @@
       "label": "Heading (after highlight)"
     },
     {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = same as color before highlight."
+    },
+    {
       "type": "range",
       "id": "heading_after_font_size",
       "label": "Font size (after highlight)",
@@ -423,9 +487,10 @@
     },
     {
       "type": "color",
-      "id": "highlight_color",
-      "label": "Highlight color",
-      "default": "#1BCDC4"
+      "id": "heading_color",
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
     },
     {
       "type": "select",
@@ -526,6 +591,8 @@
       "unit": "px",
       "default": 40
     },
+        {"type": "range", "id": "column_gap_tablet", "label": "Gap between columns (tablet)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "768px–1023px when stacked. 0 = theme default (32px)."},
+    {"type": "range", "id": "column_gap_mobile", "label": "Gap between columns (mobile)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "767px and below when stacked. 0 = theme default (32px)."},
     {
       "type": "header",
       "content": "Content rows layout"
@@ -550,6 +617,28 @@
       "step": 8,
       "unit": "px",
       "default": 32
+    },
+    {
+      "type": "range",
+      "id": "row_column_gap_tablet",
+      "label": "Default gap between row columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px\u20131023px. 0 = use desktop row gap."
+    },
+    {
+      "type": "range",
+      "id": "row_column_gap_mobile",
+      "label": "Default gap between row columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet or desktop row gap."
     },
     {
       "type": "range",
@@ -774,6 +863,294 @@
       "step": 4,
       "unit": "px",
       "default": 120
+    },
+        {
+      "type": "header",
+      "content": "Section padding \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",

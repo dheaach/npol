@@ -13,6 +13,7 @@
 -%}
 
 <style>
+  {% render 'section-spacing-styles', root: '.site-footer', pad_x: '.site-footer__inner', pad_x_fallback: true %}
   #shopify-section-{{ section.id }} .site-footer {
     background-color: {{ footer_bg }};
     --site-footer-scroll-bg: {{ scroll_bg }};
@@ -22,33 +23,12 @@
     --site-footer-divider: {{ divider_color }};
   }
 
-  {%- if section.settings.padding_top > 0 -%}
-    #shopify-section-{{ section.id }} .site-footer {
-      padding-top: {{ section.settings.padding_top }}px;
-    }
-  {%- endif -%}
-  {%- if section.settings.padding_bottom > 0 -%}
-    #shopify-section-{{ section.id }} .site-footer {
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    }
-  {%- endif -%}
-
   #shopify-section-{{ section.id }} .site-footer__inner {
     width: 100%;
     max-width: {{ content_max_width }}px;
     margin-left: auto;
     margin-right: auto;
     box-sizing: border-box;
-    {%- if section.settings.padding_left > 0 -%}
-    padding-left: {{ section.settings.padding_left }}px;
-    {%- else -%}
-    padding-left: var(--section-padding-x, 40px);
-    {%- endif -%}
-    {%- if section.settings.padding_right > 0 -%}
-    padding-right: {{ section.settings.padding_right }}px;
-    {%- else -%}
-    padding-right: var(--section-padding-x, 40px);
-    {%- endif -%}
   }
 
   {%- if section.settings.copyright_text_font_size > 0 -%}
@@ -268,7 +248,7 @@
     },
     {
       "type": "header",
-      "content": "Section padding"
+      "content": "Section padding \u2014 Desktop"
     },
     {
       "type": "range",
@@ -279,7 +259,7 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = theme default (48px)."
+      "info": "0 = theme default section spacing."
     },
     {
       "type": "range",
@@ -290,7 +270,7 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = theme default (32px)."
+      "info": "0 = theme default section spacing."
     },
     {
       "type": "range",
@@ -301,7 +281,7 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = 40px (20px on mobile)."
+      "info": "0 = theme horizontal padding."
     },
     {
       "type": "range",
@@ -312,7 +292,247 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = 40px (20px on mobile)."
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",
@@ -349,6 +569,28 @@
       "step": 8,
       "unit": "px",
       "default": 64
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = desktop value."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = tablet or desktop value."
     },
     {
       "type": "header",

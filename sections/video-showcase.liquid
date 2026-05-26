@@ -7,6 +7,31 @@
   endif
   assign media_radius = section.settings.media_border_radius | default: 12
   assign media_radius_mobile = section.settings.media_border_radius_mobile | default: 0
+
+  assign video_use_hosted = false
+  assign video_use_external = false
+  if section.settings.video_source == 'hosted' and section.settings.hosted_video != blank
+    assign video_use_hosted = true
+  elsif section.settings.video_source == 'external' and section.settings.video_url != blank
+    assign video_use_external = true
+  elsif section.settings.hosted_video != blank
+    assign video_use_hosted = true
+  elsif section.settings.video_url != blank
+    assign video_use_external = true
+  endif
+
+  assign video_poster_image = section.settings.cover_image
+  if video_poster_image == blank and section.settings.hosted_video != blank
+    assign video_poster_image = section.settings.hosted_video.preview_image
+  endif
+
+  assign video_player_title = section.settings.heading
+  if video_player_title == blank and section.settings.hosted_video != blank
+    assign video_player_title = section.settings.hosted_video.alt
+  endif
+  if video_player_title == blank
+    assign video_player_title = 'Video'
+  endif
 -%}
 
 <section
@@ -28,33 +53,56 @@
   {%- endif -%}
 
   <div class="page-width text-center video-showcase__inner">
-    {% render 'highlighted-heading',
-      heading: section.settings.heading,
-      heading_weight: section.settings.heading_weight,
-      heading_font_size: section.settings.heading_font_size,
-      heading_before: section.settings.heading_before,
-      heading_highlight: section.settings.heading_highlight,
-      heading_after: section.settings.heading_after,
-      heading_before_weight: section.settings.heading_before_weight,
-      heading_before_font_size: section.settings.heading_before_font_size,
-      heading_highlight_weight: section.settings.heading_highlight_weight,
-      heading_highlight_font_size: section.settings.heading_highlight_font_size,
-      heading_after_weight: section.settings.heading_after_weight,
-      heading_after_font_size: section.settings.heading_after_font_size,
-      heading_tag: section.settings.heading_tag,
-      heading_size: section.settings.heading_tag,
-      highlight_color: section.settings.highlight_color
-    %}
+    <div id="video-heading-{{ section.id }}">
+      {%- liquid
+        assign video_heading_font_color = section.settings.heading_font_color
+        if video_heading_font_color == blank
+          assign video_heading_font_color = section.settings.heading_color
+        endif
+        assign video_heading_before_color = section.settings.heading_before_color
+        if video_heading_before_color == blank
+          assign video_heading_before_color = section.settings.heading_color
+        endif
+        assign video_heading_after_color = section.settings.heading_after_color
+        if video_heading_after_color == blank
+          assign video_heading_after_color = section.settings.heading_color
+        endif
+      -%}
+      {% render 'highlighted-heading',
+        heading: section.settings.heading,
+        heading_weight: section.settings.heading_weight,
+        heading_font_size: section.settings.heading_font_size,
+        heading_font_color: video_heading_font_color,
+        heading_before: section.settings.heading_before,
+        heading_before_weight: section.settings.heading_before_weight,
+        heading_before_font_size: section.settings.heading_before_font_size,
+        heading_before_color: video_heading_before_color,
+        heading_highlight: section.settings.heading_highlight,
+        heading_highlight_weight: section.settings.heading_highlight_weight,
+        heading_highlight_font_size: section.settings.heading_highlight_font_size,
+        heading_after: section.settings.heading_after,
+        heading_after_weight: section.settings.heading_after_weight,
+        heading_after_font_size: section.settings.heading_after_font_size,
+        heading_after_color: video_heading_after_color,
+        heading_tag: section.settings.heading_tag,
+        heading_size: section.settings.heading_tag,
+        highlight_color: section.settings.highlight_color
+      %}
+    </div>
 
     <div
       class="video-showcase__player"
       style="--video-showcase-media-radius: {{ media_radius }}px;"
     >
-      {%- if section.settings.video_url != blank -%}
-        <deferred-media class="video-showcase__media" data-video-url="{{ section.settings.video_url | escape }}">
+      {%- if video_use_hosted or video_use_external -%}
+        <deferred-media
+          class="video-showcase__media"
+          {% if video_use_external %}data-video-url="{{ section.settings.video_url | escape }}"{% endif %}
+          {% if video_use_hosted %}data-video-type="hosted"{% endif %}
+        >
           <button class="video-showcase__poster" type="button" aria-label="{{ section.settings.play_label | default: 'Play video' | escape }}">
             {% render 'responsive-image',
-              image: section.settings.cover_image,
+              image: video_poster_image,
               alt: section.settings.cover_alt,
               class: 'video-showcase__cover',
               loading: 'lazy'
@@ -64,17 +112,30 @@
             </span>
           </button>
           <template>
-            {%- if section.settings.video_url.type == 'youtube' -%}
-              <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen title="{{ section.settings.heading | escape }}"></iframe>
+            {%- if video_use_hosted -%}
+              {{
+                section.settings.hosted_video
+                | video_tag:
+                  class: 'video-showcase__video',
+                  autoplay: true,
+                  controls: true,
+                  playsinline: true,
+                  loop: section.settings.hosted_video_loop,
+                  muted: section.settings.hosted_video_muted,
+                  preload: 'none',
+                  image_size: '1920x'
+              }}
+            {%- elsif section.settings.video_url.type == 'youtube' -%}
+              <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen title="{{ video_player_title | escape }}"></iframe>
             {%- elsif section.settings.video_url.type == 'vimeo' -%}
-              <iframe src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen title="{{ section.settings.heading | escape }}"></iframe>
+              <iframe src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen title="{{ video_player_title | escape }}"></iframe>
             {%- endif -%}
           </template>
         </deferred-media>
       {%- else -%}
         <div class="video-showcase__placeholder">
           {% render 'responsive-image',
-            image: section.settings.cover_image,
+            image: video_poster_image,
             alt: section.settings.cover_alt,
             class: 'video-showcase__cover'
           %}
@@ -92,25 +153,32 @@
 </section>
 
 <style>
+  {% render 'section-spacing-styles', root: '.video-showcase', pad_x: '.page-width' %}
   #shopify-section-{{ section.id }} .video-showcase {
     min-height: {{ section.settings.section_min_height | default: 0 }}px;
-    {%- if section.settings.padding_top > 0 -%}
-      padding-top: {{ section.settings.padding_top }}px;
-    {%- endif -%}
-    {%- if section.settings.padding_bottom > 0 -%}
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    {%- endif -%}
-    {%- if section.settings.padding_left > 0 -%}
-      padding-left: {{ section.settings.padding_left }}px;
-    {%- endif -%}
-    {%- if section.settings.padding_right > 0 -%}
-      padding-right: {{ section.settings.padding_right }}px;
-    {%- endif -%}
   }
   {%- if section_bg_url != blank -%}
     #shopify-section-{{ section.id }} .video-showcase__bg-image {
       object-fit: {{ section.settings.background_object_fit | default: 'cover' }};
       object-position: {{ section.settings.background_position | default: 'center center' }};
+    }
+  {%- endif -%}
+  {%- liquid
+    assign video_heading_base_color = section.settings.heading_before_color
+    if video_heading_base_color == blank
+      assign video_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if video_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #video-heading-{{ section.id }} .section-heading {
+      color: {{ video_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #video-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#1BCDC4' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #video-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
     }
   {%- endif -%}
   {%- if section.settings.caption_font_size > 0 -%}
@@ -136,8 +204,16 @@
   #shopify-section-{{ section.id }} .video-showcase__poster,
   #shopify-section-{{ section.id }} .video-showcase__placeholder,
   #shopify-section-{{ section.id }} .video-showcase__cover,
-  #shopify-section-{{ section.id }} .video-showcase__media iframe {
+  #shopify-section-{{ section.id }} .video-showcase__media iframe,
+  #shopify-section-{{ section.id }} .video-showcase__media .video-showcase__video {
     border-radius: var(--video-showcase-media-radius, {{ media_radius }}px);
+  }
+  #shopify-section-{{ section.id }} .video-showcase__video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: block;
+    object-fit: cover;
+    background: #000;
   }
   #shopify-section-{{ section.id }} .video-showcase__poster,
   #shopify-section-{{ section.id }} .video-showcase__placeholder {
@@ -167,6 +243,12 @@
       "id": "heading",
       "label": "Heading",
       "info": "Single line. Or use split heading fields below."
+    },
+    {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color (single line)",
+      "info": "Empty = theme heading color. Used when the single heading field is filled."
     },
     {
       "type": "range",
@@ -201,6 +283,13 @@
       "default": "See How Our "
     },
     {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
+    },
+    {
       "type": "range",
       "id": "heading_before_font_size",
       "label": "Font size (before highlight)",
@@ -231,6 +320,12 @@
       "id": "heading_highlight",
       "label": "Heading highlight",
       "default": "Activity Units"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
     },
     {
       "type": "range",
@@ -265,6 +360,12 @@
       "default": " Look in Action"
     },
     {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = same as color before highlight."
+    },
+    {
       "type": "range",
       "id": "heading_after_font_size",
       "label": "Font size (after highlight)",
@@ -291,6 +392,13 @@
       "default": "inherit"
     },
     {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
+    },
+    {
       "type": "select",
       "id": "heading_tag",
       "label": "Heading tag (SEO)",
@@ -301,21 +409,44 @@
       "default": "h2"
     },
     {
-      "type": "color",
-      "id": "highlight_color",
-      "label": "Highlight color",
-      "default": "#1BCDC4"
-    },
-    {
       "type": "header",
       "content": "Video"
+    },
+    {
+      "type": "select",
+      "id": "video_source",
+      "label": "Video source",
+      "options": [
+        { "value": "external", "label": "YouTube or Vimeo" },
+        { "value": "hosted", "label": "Uploaded video (Shopify)" }
+      ],
+      "default": "external"
     },
     {
       "type": "video_url",
       "id": "video_url",
       "label": "Video URL",
       "accept": ["youtube", "vimeo"],
-      "info": "Paste a YouTube or Vimeo link"
+      "info": "Used when Video source is YouTube or Vimeo."
+    },
+    {
+      "type": "video",
+      "id": "hosted_video",
+      "label": "Uploaded video",
+      "info": "MP4 or WebM from Shopify Files. Used when Video source is Uploaded video."
+    },
+    {
+      "type": "checkbox",
+      "id": "hosted_video_loop",
+      "label": "Loop uploaded video",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hosted_video_muted",
+      "label": "Mute uploaded video",
+      "default": false,
+      "info": "Some browsers require mute for autoplay after click."
     },
     {
       "type": "image_picker",
@@ -365,7 +496,9 @@
     {
       "type": "color",
       "id": "caption_font_color",
-      "label": "Caption color"
+      "label": "Caption color",
+      "default": "#0A1D3C",
+      "info": "Empty = theme body color."
     },
     {
       "type": "range",
@@ -447,7 +580,7 @@
     },
     {
       "type": "header",
-      "content": "Section padding"
+      "content": "Section padding \u2014 Desktop"
     },
     {
       "type": "range",
@@ -480,7 +613,7 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = no extra padding (page-width still applies)."
+      "info": "0 = theme horizontal padding."
     },
     {
       "type": "range",
@@ -491,7 +624,247 @@
       "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "0 = no extra padding (page-width still applies)."
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",

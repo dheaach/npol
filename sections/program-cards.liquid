@@ -5,15 +5,27 @@
 
   <div class="page-width">
     <div class="program-cards__header">
-      <div class="program-cards__header-left">
+      <div class="program-cards__header-left" id="program-heading-{{ section.id }}">
+        {%- liquid
+          assign program_heading_font_color = section.settings.heading_font_color
+          if program_heading_font_color == blank
+            assign program_heading_font_color = section.settings.heading_color
+          endif
+          assign program_heading_before_color = section.settings.heading_before_color
+          if program_heading_before_color == blank
+            assign program_heading_before_color = section.settings.heading_color
+          endif
+        -%}
         {% render 'highlighted-heading',
           heading: section.settings.heading,
           heading_weight: section.settings.heading_weight,
           heading_font_size: section.settings.heading_font_size,
+          heading_font_color: program_heading_font_color,
           heading_before: section.settings.heading_before,
-          heading_highlight: section.settings.heading_highlight,
           heading_before_weight: section.settings.heading_before_weight,
           heading_before_font_size: section.settings.heading_before_font_size,
+          heading_before_color: program_heading_before_color,
+          heading_highlight: section.settings.heading_highlight,
           heading_highlight_weight: section.settings.heading_highlight_weight,
           heading_highlight_font_size: section.settings.heading_highlight_font_size,
           heading_tag: section.settings.heading_tag,
@@ -26,7 +38,14 @@
       {%- endif -%}
     </div>
 
-    <div class="program-cards__grid">
+    <div
+      class="program-cards__grid"
+      style="
+        --program-cards-columns: {{ section.settings.cards_per_row | default: 3 }};
+        --program-cards-columns-tablet: {{ section.settings.cards_per_row_tablet | default: 2 }};
+        --program-cards-justify: {{ section.settings.grid_alignment | default: 'stretch' }};
+      "
+    >
       {%- for block in section.blocks -%}
         {%- liquid
           assign text_align = block.settings.text_alignment | default: 'left'
@@ -125,13 +144,72 @@
 </section>
 
 <style>
-  #shopify-section-{{ section.id }} .program-cards__header-left .section-heading {
-    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
-  }
+  {% render 'section-spacing-styles', root: '.program-cards', pad_x: '.page-width' %}
+  {% render 'section-spacing-gap', section: section, selector: '.program-cards__grid', gap_id: 'cards_grid_gap', stack_breakpoint: '0' %}
+  {%- liquid
+    assign program_heading_color = section.settings.heading_font_color
+    if program_heading_color == blank
+      assign program_heading_color = section.settings.heading_before_color
+    endif
+    if program_heading_color == blank
+      assign program_heading_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if program_heading_color != blank -%}
+    #shopify-section-{{ section.id }} #program-heading-{{ section.id }} .section-heading {
+      color: {{ program_heading_color }};
+    }
+    #shopify-section-{{ section.id }} #program-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#1BCDC4' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #program-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .program-cards__header-right,
+    #shopify-section-{{ section.id }} .program-cards__header-right p {
+      font-size: {{ section.settings.description_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_weight != blank and section.settings.description_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .program-cards__header-right,
+    #shopify-section-{{ section.id }} .program-cards__header-right p {
+      font-weight: {{ section.settings.description_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_color != blank -%}
+    #shopify-section-{{ section.id }} .program-cards__header-right,
+    #shopify-section-{{ section.id }} .program-cards__header-right p,
+    #shopify-section-{{ section.id }} .program-cards__header-right li,
+    #shopify-section-{{ section.id }} .program-cards__header-right a {
+      color: {{ section.settings.description_font_color }} !important;
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .program-cards__footer {
+      font-size: {{ section.settings.footer_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_weight != blank and section.settings.footer_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .program-cards__footer {
+      font-weight: {{ section.settings.footer_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_color != blank -%}
+    #shopify-section-{{ section.id }} .program-cards__footer {
+      color: {{ section.settings.footer_font_color }};
+    }
+  {%- endif -%}
   #shopify-section-{{ section.id }} .program-card__title,
   #shopify-section-{{ section.id }} .program-card__text,
   #shopify-section-{{ section.id }} .program-card__title-group {
     width: 100%;
+  }
+  #shopify-section-{{ section.id }} .program-cards__grid {
+    grid-template-columns: repeat(var(--program-cards-columns, 3), minmax(0, 1fr));
+    justify-content: var(--program-cards-justify, stretch);
   }
   #shopify-section-{{ section.id }} .program-card__icon {
     width: var(--icon-size, 48px);
@@ -174,13 +252,51 @@
     gap: var(--dots-line-spacing, 12px);
   }
   {%- for block in section.blocks -%}
-    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title,
-    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text,
-    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text p,
-    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text li,
-    #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text a {
-      color: {{ block.settings.text_color | default: '#0A1D3C' }} !important;
-    }
+    {%- liquid
+      assign card_title_color = block.settings.title_font_color
+      if card_title_color == blank
+        assign card_title_color = block.settings.text_color
+      endif
+      assign card_text_color = block.settings.text_font_color
+      if card_text_color == blank
+        assign card_text_color = block.settings.text_color
+      endif
+      assign card_tag_color = block.settings.tag_font_color
+    -%}
+    {%- if card_title_color != blank -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title {
+        color: {{ card_title_color }};
+      }
+    {%- endif -%}
+    {%- if card_text_color != blank -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text p,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text li,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text a {
+        color: {{ card_text_color }} !important;
+      }
+    {%- endif -%}
+    {%- if card_tag_color != blank -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__tag-label {
+        color: {{ card_tag_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.tag_font_weight != blank and block.settings.tag_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__tag-label {
+        font-weight: {{ block.settings.tag_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_weight != blank and block.settings.title_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title {
+        font-weight: {{ block.settings.title_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text p {
+        font-weight: {{ block.settings.text_font_weight }};
+      }
+    {%- endif -%}
     {%- if block.settings.title_font_size > 0 -%}
       #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title {
         font-size: {{ block.settings.title_font_size }}px;
@@ -199,6 +315,55 @@
       }
     {%- endif -%}
   {%- endfor -%}
+  {%- comment -%}
+    justify-content on the grid only shifts column tracks when they do not fill the row.
+    repeat(N, 1fr) always grows to 100% width, so a lone card on the last row stays in column 1.
+    When alignment is center, span the orphan and justify-self: center at one column width.
+  {%- endcomment -%}
+  {%- if section.settings.grid_alignment == 'center' -%}
+    {%- liquid
+      assign cols_d = section.settings.cards_per_row | default: 3
+      assign cols_t = section.settings.cards_per_row_tablet | default: 2
+      assign gap_d = section.settings.cards_grid_gap | default: 0
+      if gap_d == 0
+        assign gap_d = 24
+      endif
+      assign gap_t = section.settings.cards_grid_gap_tablet | default: 0
+      if gap_t == 0
+        assign gap_t = gap_d
+      endif
+    -%}
+    {%- if cols_d > 1 -%}
+      {%- assign gap_sum_d = cols_d | minus: 1 | times: gap_d -%}
+      @media screen and (min-width: 1024px) {
+        #shopify-section-{{ section.id }} .program-cards__grid .program-card:last-child:nth-child({{ cols_d }}n+1) {
+          grid-column: 1 / -1;
+          justify-self: center;
+          width: calc((100% - {{ gap_sum_d }}px) / {{ cols_d }});
+        }
+      }
+    {%- endif -%}
+    {%- if cols_t > 1 -%}
+      {%- assign gap_sum_t = cols_t | minus: 1 | times: gap_t -%}
+      @media screen and (min-width: 768px) and (max-width: 1023px) {
+        #shopify-section-{{ section.id }} .program-cards__grid .program-card:last-child:nth-child({{ cols_t }}n+1) {
+          grid-column: 1 / -1;
+          justify-self: center;
+          width: calc((100% - {{ gap_sum_t }}px) / {{ cols_t }});
+        }
+      }
+    {%- endif -%}
+  {%- endif -%}
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .program-cards__grid {
+      grid-template-columns: repeat(var(--program-cards-columns-tablet, 2), minmax(0, 1fr));
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .program-cards__grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 {% schema %}
@@ -217,16 +382,34 @@
       "label": "Heading"
     },
     {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color",
+      "info": "Empty = theme heading color. Used when the single Heading field is filled."
+    },
+    {
       "type": "text",
       "id": "heading_before",
       "label": "Heading (before highlight)",
       "default": "Not Another "
     },
     {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "info": "Empty = theme heading color."
+    },
+    {
       "type": "text",
       "id": "heading_highlight",
       "label": "Heading highlight",
       "default": "Program"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#1BCDC4"
     },
     {
       "type": "header",
@@ -339,19 +522,45 @@
     {
       "type": "color",
       "id": "heading_color",
-      "label": "Heading color",
-      "default": "#0A1D3C"
-    },
-    {
-      "type": "color",
-      "id": "highlight_color",
-      "label": "Highlight color",
-      "default": "#1BCDC4"
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
     },
     {
       "type": "richtext",
       "id": "description",
       "label": "Description (right side)"
+    },
+    {
+      "type": "color",
+      "id": "description_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "description_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "header",
@@ -379,9 +588,425 @@
       "default": 32
     },
     {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px when stacked. 0 = theme default (32px)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below when stacked. 0 = theme default (32px)."
+    },
+    {
+      "type": "header",
+      "content": "Cards grid spacing"
+    },
+    {
+      "type": "range",
+      "id": "cards_grid_gap",
+      "label": "Gap between cards (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "1024px and up. 0 = theme default (24px)."
+    },
+    {
+      "type": "range",
+      "id": "cards_grid_gap_tablet",
+      "label": "Gap between cards (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px\u20131023px. 0 = theme default."
+    },
+    {
+      "type": "range",
+      "id": "cards_grid_gap_mobile",
+      "label": "Gap between cards (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = theme default."
+    },
+    {
+      "type": "header",
+      "content": "Cards grid layout"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row",
+      "label": "Cards per row (desktop)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_tablet",
+      "label": "Cards per row (tablet)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "grid_alignment",
+      "label": "Grid alignment",
+      "info": "With 1fr columns, Start/End/Center mainly affect incomplete last rows (e.g. one card centered when tablet is 2 columns and you have 3 cards). Stretch fills the row.",
+      "options": [
+        { "value": "stretch", "label": "Stretch" },
+        { "value": "start", "label": "Start" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "End" },
+        { "value": "space-between", "label": "Space between" },
+        { "value": "space-around", "label": "Space around" },
+        { "value": "space-evenly", "label": "Space evenly" }
+      ],
+      "default": "stretch"
+    },
+    {
       "type": "text",
       "id": "footer_text",
       "label": "Footer text below cards"
+    },
+    {
+      "type": "color",
+      "id": "footer_font_color",
+      "label": "Footer font color"
+    },
+    {
+      "type": "range",
+      "id": "footer_font_size",
+      "label": "Footer font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "footer_font_weight",
+      "label": "Footer font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",
@@ -428,6 +1053,11 @@
           "default": "Feature"
         },
         {
+          "type": "color",
+          "id": "tag_font_color",
+          "label": "Tag label color"
+        },
+        {
           "type": "range",
           "id": "tag_font_size",
           "label": "Tag font size",
@@ -437,6 +1067,21 @@
           "unit": "px",
           "default": 0,
           "info": "0 = theme default (14px)."
+        },
+        {
+          "type": "select",
+          "id": "tag_font_weight",
+          "label": "Tag label font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
         },
         {
           "type": "image_picker",
@@ -463,8 +1108,9 @@
         {
           "type": "color",
           "id": "text_color",
-          "label": "Text color",
-          "default": "#0A1D3C"
+          "label": "Text color (fallback)",
+          "default": "#0A1D3C",
+          "info": "Used when title or description colors below are empty."
         },
         {
           "type": "select",
@@ -645,6 +1291,11 @@
           "default": "Feature Title"
         },
         {
+          "type": "color",
+          "id": "title_font_color",
+          "label": "Title color"
+        },
+        {
           "type": "range",
           "id": "title_font_size",
           "label": "Title font size",
@@ -656,10 +1307,30 @@
           "info": "0 = theme default (H3 scale)."
         },
         {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Title font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
           "type": "richtext",
           "id": "text",
           "label": "Description",
           "default": "<p>Describe this feature.</p>"
+        },
+        {
+          "type": "color",
+          "id": "text_font_color",
+          "label": "Description color"
         },
         {
           "type": "range",
@@ -671,6 +1342,21 @@
           "unit": "px",
           "default": 0,
           "info": "0 = theme default body size."
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Description font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
         }
       ]
     }

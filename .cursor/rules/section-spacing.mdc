@@ -1,0 +1,84 @@
+---
+description: New sections must expose padding, margin, and column gap per breakpoint (desktop, tablet, mobile)
+globs: sections/**/*.liquid
+alwaysApply: true
+---
+
+# Section spacing (required for new sections)
+
+When **creating a new** `sections/*.liquid` file, include Theme Editor controls for **padding**, **margin**, and **column gap** (when applicable) at **three breakpoints**.
+
+## Breakpoints
+
+| Breakpoint | Viewport | Media query |
+|------------|----------|-------------|
+| Desktop | 1024px and up | Default (base styles) |
+| Tablet | 768px–1023px | `@media screen and (min-width: 768px) and (max-width: 1023px)` |
+| Mobile | 767px and below | `@media screen and (max-width: 767px)` |
+
+## Setting IDs
+
+**Desktop** — no suffix: `padding_top`, `padding_bottom`, `padding_left`, `padding_right`, `margin_top`, `margin_bottom`, `margin_left`, `margin_right`.
+
+**Tablet** — `_tablet` suffix: `padding_top_tablet`, `margin_left_tablet`, etc.
+
+**Mobile** — `_mobile` suffix: `padding_top_mobile`, `margin_left_mobile`, etc.
+
+**Multi-column layouts** (grid/flex with 2+ columns): `column_gap`, `column_gap_tablet`, `column_gap_mobile`.
+
+Schema: group under headers — `Section padding — Desktop`, `Section padding — Tablet`, `Section padding — Mobile`, same for margin; `Column spacing` for gap fields.
+
+Range fields: padding/margin `min: 0`, `max: 120`, `step: 4`, `unit: px`, `default: 0`. Column gap `min: 0`, `max: 96`, `step: 4` or `8`, `default: 0` or a sensible layout default (e.g. 48 desktop).
+
+Info text: `0 = theme default` for top/bottom padding (use `section-spacing` class); `0 = theme horizontal padding` for left/right (`var(--section-padding-x, 40px)`); margin `0 = none`.
+
+## Markup & CSS
+
+1. Root element: `<section class="my-section section-spacing">` (or inner `__inner` wrapper) with BEM class.
+2. Scoped `<style>`: `#shopify-section-{{ section.id }}`.
+3. Apply padding/margin only when value `> 0` (per side, per breakpoint).
+4. Desktop rules first (no media), then tablet block, then mobile block.
+5. Column gap: set `gap` (or `column-gap` / `row-gap`) on the multi-column container; use breakpoint-specific settings, not a single hardcoded gap when columns exist side by side.
+
+```liquid
+{%- if section.settings.padding_top > 0 -%}
+  #shopify-section-{{ section.id }} .my-section {
+    padding-top: {{ section.settings.padding_top }}px;
+  }
+{%- endif -%}
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  {%- if section.settings.padding_top_tablet > 0 -%}
+    #shopify-section-{{ section.id }} .my-section {
+      padding-top: {{ section.settings.padding_top_tablet }}px;
+    }
+  {%- endif -%}
+}
+@media screen and (max-width: 767px) {
+  {%- if section.settings.padding_top_mobile > 0 -%}
+    #shopify-section-{{ section.id }} .my-section {
+      padding-top: {{ section.settings.padding_top_mobile }}px;
+    }
+  {%- endif -%}
+}
+```
+
+When tablet/mobile padding is `0`, inherit desktop/theme (do not zero out unless intentional).
+
+## Multi-column
+
+Required when the section has **two or more columns** on any breakpoint (e.g. content + image, card grid columns). Apply `column_gap` / `column_gap_tablet` / `column_gap_mobile` to the grid/flex wrapper. If columns **stack** on tablet/mobile, gap still controls vertical spacing between stacked items.
+
+## Checklist before done
+
+- [ ] 12 padding settings (4 sides × 3 breakpoints)
+- [ ] 12 margin settings (4 sides × 3 breakpoints)
+- [ ] `column_gap` trio if multi-column
+- [ ] Styles scoped to `#shopify-section-{{ section.id }}`
+- [ ] Schema labels in English
+- [ ] See `snippets/spacing-settings-reference.liquid` for copy-paste templates
+
+## Do not
+
+- Ship new sections with only global `section-spacing` and no per-side/per-breakpoint controls
+- Use one `column_gap` for all breakpoints when layout stacks differently
+- Skip re-reading files (see `read-before-modify` rule)

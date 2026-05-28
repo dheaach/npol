@@ -12,7 +12,38 @@
   endif
   assign row_col1 = section.settings.row_column_1_width | default: 50
   assign row_col2 = 100 | minus: row_col1
-  assign row_column_gap = section.settings.row_column_gap | default: 32
+  assign row_unit_desktop = section.settings.row_column_gap_unit | default: 'px'
+  assign row_unit_tablet = section.settings.row_column_gap_tablet_unit
+  if row_unit_tablet == blank
+    assign row_unit_tablet = row_unit_desktop
+  endif
+  assign row_unit_mobile = section.settings.row_column_gap_mobile_unit
+  if row_unit_mobile == blank
+    assign row_unit_mobile = row_unit_tablet
+  endif
+  assign row_column_gap_val = section.settings.row_column_gap | default: 32
+  capture row_gap_desktop_css
+    render 'spacing-gap-value', value: row_column_gap_val, unit: row_unit_desktop
+  endcapture
+  assign row_gap_desktop_css = row_gap_desktop_css | strip
+  assign row_column_gap_tablet_val = section.settings.row_column_gap_tablet | default: 0
+  if row_column_gap_tablet_val > 0
+    capture row_gap_tablet_css
+      render 'spacing-gap-value', value: row_column_gap_tablet_val, unit: row_unit_tablet
+    endcapture
+    assign row_gap_tablet_css = row_gap_tablet_css | strip
+  else
+    assign row_gap_tablet_css = row_gap_desktop_css
+  endif
+  assign row_column_gap_mobile_val = section.settings.row_column_gap_mobile | default: 0
+  if row_column_gap_mobile_val > 0
+    capture row_gap_mobile_css
+      render 'spacing-gap-value', value: row_column_gap_mobile_val, unit: row_unit_mobile
+    endcapture
+    assign row_gap_mobile_css = row_gap_mobile_css | strip
+  else
+    assign row_gap_mobile_css = row_gap_tablet_css
+  endif
   assign row_gap = section.settings.row_gap | default: 48
 -%}
 
@@ -77,9 +108,47 @@
           assign block_col1 = row_col1
         endif
         assign block_col2 = 100 | minus: block_col1
-        assign block_col_gap = block.settings.block_column_gap | default: 0
-        if block_col_gap == 0
-          assign block_col_gap = row_column_gap
+        assign block_unit_desktop = block.settings.block_column_gap_unit | default: 'px'
+        assign block_unit_tablet = block.settings.block_column_gap_tablet_unit
+        if block_unit_tablet == blank
+          assign block_unit_tablet = block_unit_desktop
+        endif
+        assign block_unit_mobile = block.settings.block_column_gap_mobile_unit
+        if block_unit_mobile == blank
+          assign block_unit_mobile = block_unit_tablet
+        endif
+        assign block_gap_val = block.settings.block_column_gap | default: 0
+        if block_gap_val == 0
+          assign block_col_gap_css = row_gap_desktop_css
+        else
+          capture block_col_gap_css
+            render 'spacing-gap-value', value: block_gap_val, unit: block_unit_desktop
+          endcapture
+          assign block_col_gap_css = block_col_gap_css | strip
+        endif
+        assign block_gap_tablet_val = block.settings.block_column_gap_tablet | default: 0
+        if block_gap_tablet_val > 0
+          capture block_col_gap_tablet_css
+            render 'spacing-gap-value', value: block_gap_tablet_val, unit: block_unit_tablet
+          endcapture
+          assign block_col_gap_tablet_css = block_col_gap_tablet_css | strip
+        elsif block_gap_val > 0
+          assign block_col_gap_tablet_css = block_col_gap_css
+        else
+          assign block_col_gap_tablet_css = row_gap_tablet_css
+        endif
+        assign block_gap_mobile_val = block.settings.block_column_gap_mobile | default: 0
+        if block_gap_mobile_val > 0
+          capture block_col_gap_mobile_css
+            render 'spacing-gap-value', value: block_gap_mobile_val, unit: block_unit_mobile
+          endcapture
+          assign block_col_gap_mobile_css = block_col_gap_mobile_css | strip
+        elsif block_gap_tablet_val > 0
+          assign block_col_gap_mobile_css = block_col_gap_tablet_css
+        elsif block_gap_val > 0
+          assign block_col_gap_mobile_css = block_col_gap_css
+        else
+          assign block_col_gap_mobile_css = row_gap_mobile_css
         endif
         assign show_row_graphics = block.settings.show_row_graphics
         if show_row_graphics == nil
@@ -123,7 +192,9 @@
             style="
               --row-col-1: {{ block_col1 }}fr;
               --row-col-2: {{ block_col2 }}fr;
-              --row-column-gap: {{ block_col_gap }}px;
+              --row-column-gap: {{ block_col_gap_css }};
+              --row-column-gap-tablet: {{ block_col_gap_tablet_css }};
+              --row-column-gap-mobile: {{ block_col_gap_mobile_css }};
               --media-max-width: {{ media_width }}px;
             "
           >
@@ -159,8 +230,6 @@
 
 <style>
   {% render 'section-spacing-styles', root: '.mosaic-grid', pad_x: '.page-width' %}
-  {% render 'section-spacing-gap', section: section, selector: '.mosaic-grid__header', stack_breakpoint: '1023' %}
-  {% render 'section-spacing-gap', section: section, selector: '.mosaic-grid__row', gap_id: 'row_column_gap', stack_breakpoint: '0' %}
   {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
     #shopify-section-{{ section.id }} {
       background-color: {{ bg_color }};
@@ -224,10 +293,12 @@
       grid-template-columns: minmax(0, {{ header_col1 }}fr) minmax(0, {{ header_col2 }}fr);
     }
   }
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 1023px) {
     #shopify-section-{{ section.id }} .mosaic-grid__header {
       grid-template-columns: 1fr;
     }
+  }
+  @media screen and (max-width: 767px) {
     #shopify-section-{{ section.id }} .mosaic-grid__header-right {
       justify-self: stretch;
       max-width: 100%;
@@ -237,10 +308,10 @@
     gap: var(--row-gap, 48px);
   }
   #shopify-section-{{ section.id }} .mosaic-grid__row {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     align-items: stretch;
-    gap: var(--row-column-gap, 24px);
+    gap: var(--row-column-gap-mobile, var(--row-column-gap-tablet, var(--row-column-gap, 24px)));
     width: 100%;
   }
   #shopify-section-{{ section.id }} .mosaic-grid__row .mosaic-grid__media {
@@ -250,6 +321,16 @@
   #shopify-section-{{ section.id }} .mosaic-grid__row .mosaic-grid__content {
     order: 2;
     width: 100%;
+  }
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .mosaic-grid__row {
+      gap: var(--row-column-gap-tablet, var(--row-column-gap, 32px));
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .mosaic-grid__row {
+      gap: var(--row-column-gap-mobile, var(--row-column-gap-tablet, var(--row-column-gap, 24px)));
+    }
   }
   @media screen and (min-width: 1024px) {
     #shopify-section-{{ section.id }} .mosaic-grid__row {
@@ -584,15 +665,36 @@
     {
       "type": "range",
       "id": "column_gap",
-      "label": "Gap between header columns",
+      "label": "Gap between header columns (desktop)",
       "min": 16,
       "max": 96,
       "step": 8,
       "unit": "px",
-      "default": 40
+      "default": 40,
+      "info": "1024px and up (side by side). Also used as fallback when tablet/mobile gaps are 0."
     },
-        {"type": "range", "id": "column_gap_tablet", "label": "Gap between columns (tablet)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "768px–1023px when stacked. 0 = theme default (32px)."},
-    {"type": "range", "id": "column_gap_mobile", "label": "Gap between columns (mobile)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "767px and below when stacked. 0 = theme default (32px)."},
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between header blocks (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px — columns stack vertically; this controls spacing between heading and intro. 0 = use desktop gap."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between header blocks (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below — stacked layout. 0 = use tablet, then desktop gap."
+    },
     {
       "type": "header",
       "content": "Content rows layout"
@@ -609,36 +711,69 @@
       "info": "Default for all rows. Override per row in each Content row block."
     },
     {
+      "type": "select",
+      "id": "row_column_gap_unit",
+      "label": "Default row column gap unit",
+      "options": [
+        { "value": "px", "label": "Pixels (px)" },
+        { "value": "%", "label": "Percent (%)" }
+      ],
+      "default": "px"
+    },
+    {
       "type": "range",
       "id": "row_column_gap",
-      "label": "Default gap between row columns",
-      "min": 16,
+      "label": "Default gap between row columns (desktop)",
+      "min": 0,
       "max": 96,
-      "step": 8,
+      "step": 4,
       "unit": "px",
-      "default": 32
+      "default": 32,
+      "info": "1024px and up (side by side). Uses desktop gap unit. With %, typical values are 2–20."
+    },
+    {
+      "type": "select",
+      "id": "row_column_gap_tablet_unit",
+      "label": "Tablet gap unit",
+      "options": [
+        { "value": "", "label": "Same as desktop unit" },
+        { "value": "px", "label": "Pixels (px)" },
+        { "value": "%", "label": "Percent (%)" }
+      ],
+      "default": ""
     },
     {
       "type": "range",
       "id": "row_column_gap_tablet",
-      "label": "Default gap between row columns (tablet)",
+      "label": "Default gap between row blocks (tablet)",
       "min": 0,
       "max": 96,
-      "step": 8,
+      "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "768px\u20131023px. 0 = use desktop row gap."
+      "info": "768px–1023px — stacked layout (vertical spacing). 0 = use desktop default."
+    },
+    {
+      "type": "select",
+      "id": "row_column_gap_mobile_unit",
+      "label": "Mobile gap unit",
+      "options": [
+        { "value": "", "label": "Same as tablet unit" },
+        { "value": "px", "label": "Pixels (px)" },
+        { "value": "%", "label": "Percent (%)" }
+      ],
+      "default": ""
     },
     {
       "type": "range",
       "id": "row_column_gap_mobile",
-      "label": "Default gap between row columns (mobile)",
+      "label": "Default gap between row blocks (mobile)",
       "min": 0,
       "max": 96,
-      "step": 8,
+      "step": 4,
       "unit": "px",
       "default": 0,
-      "info": "767px and below. 0 = use tablet or desktop row gap."
+      "info": "767px and below — stacked layout. 0 = use tablet, then desktop default."
     },
     {
       "type": "range",
@@ -1212,15 +1347,69 @@
           "info": "0 = use section default. First column is image or text depending on image position."
         },
         {
+          "type": "select",
+          "id": "block_column_gap_unit",
+          "label": "Gap unit (desktop)",
+          "options": [
+            { "value": "px", "label": "Pixels (px)" },
+            { "value": "%", "label": "Percent (%)" }
+          ],
+          "default": "px"
+        },
+        {
           "type": "range",
           "id": "block_column_gap",
-          "label": "Gap between columns",
+          "label": "Gap between columns (desktop)",
           "min": 0,
           "max": 96,
-          "step": 8,
+          "step": 4,
           "unit": "px",
           "default": 0,
-          "info": "0 = use section default."
+          "info": "1024px and up. 0 = section default. With % unit, use values like 2–20."
+        },
+        {
+          "type": "select",
+          "id": "block_column_gap_tablet_unit",
+          "label": "Gap unit (tablet)",
+          "options": [
+            { "value": "", "label": "Same as desktop unit" },
+            { "value": "px", "label": "Pixels (px)" },
+            { "value": "%", "label": "Percent (%)" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "range",
+          "id": "block_column_gap_tablet",
+          "label": "Gap between blocks (tablet)",
+          "min": 0,
+          "max": 96,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "768px–1023px — stacked (vertical spacing). 0 = desktop or section default."
+        },
+        {
+          "type": "select",
+          "id": "block_column_gap_mobile_unit",
+          "label": "Gap unit (mobile)",
+          "options": [
+            { "value": "", "label": "Same as tablet unit" },
+            { "value": "px", "label": "Pixels (px)" },
+            { "value": "%", "label": "Percent (%)" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "range",
+          "id": "block_column_gap_mobile",
+          "label": "Gap between blocks (mobile)",
+          "min": 0,
+          "max": 96,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "767px and below — stacked. 0 = tablet, then desktop, then section default."
         },
         {
           "type": "range",

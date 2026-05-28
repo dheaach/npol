@@ -69,7 +69,7 @@
 
 {%- if heading != blank -%}
   <{{ tag }} class="section-heading section-heading--{{ size_class }}"{% if single_heading_style != blank %} style="{{ single_heading_style }}"{% endif %}>
-    {{ heading }}
+    {{ heading | newline_to_br }}
   </{{ tag }}>
 {%- elsif heading_before != blank or heading_highlight != blank or heading_after != blank -%}
   <{{ tag }} class="section-heading section-heading--{{ size_class }}">

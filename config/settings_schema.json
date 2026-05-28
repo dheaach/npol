@@ -364,10 +364,10 @@
         "id": "page_width",
         "label": "Page max width",
         "min": 1000,
-        "max": 1600,
+        "max": 1440,
         "step": 10,
         "unit": "px",
-        "default": 1440
+        "default": 1360
       },
       {
         "type": "range",

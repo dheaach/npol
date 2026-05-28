@@ -81,7 +81,12 @@
 </section>
 
 <style>
-  {% render 'section-spacing-styles', root: '.resources-cards', pad_x: '.resources-cards__inner', pad_x_fallback: true %}
+  {% render 'section-spacing-styles',
+    root: '.resources-cards',
+    pad_y: '.resources-cards__inner',
+    pad_x: '.resources-cards__inner',
+    pad_x_fallback: true
+  %}
   {% render 'section-spacing-gap', section: section, selector: '.resources-cards__grid', gap_id: 'cards_grid_gap', stack_breakpoint: '0' %}
   #shopify-section-{{ section.id }} .resources-cards {
     width: 100%;
@@ -92,6 +97,8 @@
     max-width: 1440px;
     margin-left: auto;
     margin-right: auto;
+    padding-left: var(--section-padding-x, 40px);
+    padding-right: var(--section-padding-x, 40px);
     box-sizing: border-box;
   }
   {%- if section.settings.heading_before_color != blank -%}

@@ -25,7 +25,7 @@
     assign video_poster_image = section.settings.hosted_video.preview_image
   endif
 
-  assign video_player_title = section.settings.heading
+  assign video_player_title = section.settings.heading | newline_to_br | strip_html | replace: '<br />', ' ' | replace: '<br>', ' ' | strip
   if video_player_title == blank and section.settings.hosted_video != blank
     assign video_player_title = section.settings.hosted_video.alt
   endif
@@ -108,7 +108,7 @@
               loading: 'lazy'
             %}
             <span class="video-showcase__play-btn" aria-hidden="true">
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="32" fill="#FF0000"/><path d="M26 20l22 12-22 12V20z" fill="#fff"/></svg>
+              <svg width="111" height="111" viewBox="0 0 111 111" fill="none"><circle cx="55.5" cy="55.5" r="55.5" fill="#FF0000"/><path d="M47 37L75 55.5L47 74V37Z" fill="#fff"/></svg>
             </span>
           </button>
           <template>
@@ -239,21 +239,31 @@
       "content": "Heading"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "heading",
       "label": "Heading",
-      "info": "Single line. Or use split heading fields below."
+      "info": "Press Enter for a line break. Or use split heading fields below."
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
     },
     {
       "type": "color",
       "id": "heading_font_color",
-      "label": "Heading color (single line)",
-      "info": "Empty = theme heading color. Used when the single heading field is filled."
+      "label": "Heading color",
+      "info": "Empty = theme heading color. Used when the heading field above is filled."
     },
     {
       "type": "range",
       "id": "heading_font_size",
-      "label": "Font size (single line heading)",
+      "label": "Font size (heading)",
       "min": 0,
       "max": 96,
       "step": 2,
@@ -264,7 +274,7 @@
     {
       "type": "select",
       "id": "heading_weight",
-      "label": "Font weight (single line heading)",
+      "label": "Font weight (heading)",
       "options": [
         { "value": "inherit", "label": "Theme default" },
         { "value": "300", "label": "Light (300)" },
@@ -397,16 +407,6 @@
       "label": "Heading color (legacy fallback)",
       "default": "#0A1D3C",
       "info": "Used when per-segment heading colors above are empty."
-    },
-    {
-      "type": "select",
-      "id": "heading_tag",
-      "label": "Heading tag (SEO)",
-      "options": [
-        { "value": "h2", "label": "H2" },
-        { "value": "h3", "label": "H3" }
-      ],
-      "default": "h2"
     },
     {
       "type": "header",
@@ -598,7 +598,7 @@
       "id": "padding_bottom",
       "label": "Padding bottom",
       "min": 0,
-      "max": 120,
+      "max": 400,
       "step": 4,
       "unit": "px",
       "default": 0,
@@ -646,7 +646,7 @@
       "id": "padding_bottom_tablet",
       "label": "Padding bottom",
       "min": 0,
-      "max": 120,
+      "max": 400,
       "step": 4,
       "unit": "px",
       "default": 0,
@@ -694,7 +694,7 @@
       "id": "padding_bottom_mobile",
       "label": "Padding bottom",
       "min": 0,
-      "max": 120,
+      "max": 400,
       "step": 4,
       "unit": "px",
       "default": 0,

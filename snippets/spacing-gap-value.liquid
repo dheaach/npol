@@ -1,0 +1,12 @@
+{%- comment -%}
+  Output a gap length for CSS (e.g. 32px or 8%).
+  {% render 'spacing-gap-value', value: 32, unit: 'px' %}
+{%- endcomment -%}
+{%- liquid
+  assign gap_unit = unit | default: 'px'
+  if gap_unit == '%'
+    echo value | append: '%'
+  else
+    echo value | append: 'px'
+  endif
+-%}

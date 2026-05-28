@@ -16,6 +16,12 @@
   assign gap_mobile_key = gap_base_id | append: '_mobile'
   assign gap_tablet = section.settings[gap_tablet_key] | default: 0
   assign gap_mobile = section.settings[gap_mobile_key] | default: 0
+  if gap_tablet == 0
+    assign gap_tablet = gap_desktop
+  endif
+  if gap_mobile == 0
+    assign gap_mobile = gap_tablet
+  endif
   if gap_tablet == 0 and gap_fallback_tablet != blank
     assign gap_tablet = gap_fallback_tablet
   endif
@@ -59,7 +65,11 @@
 
 {%- assign gap_css = gap_css | strip -%}
 {%- if gap_css != blank -%}
-  {%- if standalone -%}<style>{%- endif -%}
+  {%- if standalone -%}
+    <style>
+  {%- endif -%}
   {{ gap_css }}
-  {%- if standalone -%}</style>{%- endif -%}
+  {%- if standalone -%}
+    </style>
+  {%- endif -%}
 {%- endif -%}

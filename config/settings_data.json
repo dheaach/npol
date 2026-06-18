@@ -1,7 +1,7 @@
 
  {
   "current": {
-    "color_primary": "#1BCDC4",
+    "color_primary": "#51ADA0",
     "color_secondary": "#0A1D3C",
     "color_yellow": "#FFC300",
     "color_light_blue": "#ADE8F6",
@@ -38,7 +38,7 @@
   },
   "presets": {
     "Default": {
-      "color_primary": "#1BCDC4",
+      "color_primary": "#51ADA0",
       "color_secondary": "#0A1D3C",
       "color_yellow": "#FFC300",
       "color_light_blue": "#ADE8F6",

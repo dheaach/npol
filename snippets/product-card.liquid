@@ -1,0 +1,57 @@
+{%- comment -%}
+  Product card for grids.
+  Usage: {% render 'product-card', product: product, show_vendor: true, show_badge: true %}
+{%- endcomment -%}
+
+{%- liquid
+  assign card_show_vendor = show_vendor | default: false
+  assign card_show_badge = show_badge | default: true
+  assign card_image_ratio = image_ratio | default: 'square'
+  case card_image_ratio
+    when 'portrait'
+      assign card_aspect = '4 / 5'
+    when 'landscape'
+      assign card_aspect = '4 / 3'
+    else
+      assign card_aspect = '1 / 1'
+  endcase
+-%}
+
+<article class="product-card">
+  <a href="{{ product.url }}" class="product-card__link">
+    <div class="product-card__media" style="--product-card-aspect: {{ card_aspect }};">
+      {%- if product.featured_image -%}
+        {% render 'responsive-image',
+          image: product.featured_image,
+          alt: product.featured_image.alt | default: product.title,
+          class: 'product-card__image',
+          width: 600
+        %}
+      {%- else -%}
+        <div class="product-card__placeholder" aria-hidden="true"></div>
+      {%- endif -%}
+
+      {%- if card_show_badge and product.compare_at_price > product.price -%}
+        <span class="product-card__badge">{{ 'products.product.on_sale' | t | default: 'Sale' }}</span>
+      {%- endif -%}
+    </div>
+
+    <div class="product-card__body">
+      {%- if card_show_vendor and product.vendor != blank -%}
+        <p class="product-card__vendor section-text">{{ product.vendor }}</p>
+      {%- endif -%}
+
+      <h3 class="product-card__title section-heading section-heading--h5">{{ product.title }}</h3>
+
+      <p class="product-card__price section-text">
+        {%- if product.price_varies -%}
+          <span class="product-card__price-from">{{ 'products.product.from' | t | default: 'From' }}</span>
+        {%- endif -%}
+        <span class="product-card__price-current">{{ product.price | money }}</span>
+        {%- if product.compare_at_price > product.price -%}
+          <s class="product-card__price-compare">{{ product.compare_at_price | money }}</s>
+        {%- endif -%}
+      </p>
+    </div>
+  </a>
+</article>

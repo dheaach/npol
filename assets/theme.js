@@ -15,12 +15,14 @@
   var menuToggle = document.querySelector('[data-menu-toggle]');
   var nav = document.querySelector('[data-site-nav]');
   var navWrapper = nav ? nav.closest('.site-header__nav-wrapper') : null;
+  var headerBottom = document.querySelector('[data-header-bottom]');
   var mobileNavQuery = window.matchMedia('(max-width: 1023px)');
 
   function closeMainNav() {
     if (!nav) return;
     nav.classList.remove('is-open');
     if (navWrapper) navWrapper.classList.remove('is-open');
+    if (headerBottom) headerBottom.classList.remove('is-open');
     if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
     nav.querySelectorAll('.site-header__nav-item--has-children.is-open').forEach(function (item) {
       item.classList.remove('is-open');
@@ -34,12 +36,14 @@
       e.stopPropagation();
       var isOpen = nav.classList.toggle('is-open');
       if (navWrapper) navWrapper.classList.toggle('is-open', isOpen);
+      if (headerBottom) headerBottom.classList.toggle('is-open', isOpen);
       menuToggle.setAttribute('aria-expanded', isOpen);
     });
 
     document.addEventListener('click', function (e) {
       if (menuToggle.contains(e.target)) return;
       if (navWrapper && navWrapper.contains(e.target)) return;
+      if (headerBottom && headerBottom.contains(e.target)) return;
       closeMainNav();
     });
 
@@ -119,10 +123,18 @@
     function updateSlider() {
       if (!track || !slides.length) return;
       var sliderWidth = slider.clientWidth;
+      var slideWidth = slides[0].offsetWidth;
+      var edgePadding = Math.max(0, sliderWidth / 2 - slideWidth / 2);
+      track.style.paddingLeft = edgePadding + 'px';
+      track.style.paddingRight = edgePadding + 'px';
+
       var slide = slides[current];
+      var firstSlide = slides[0];
+      var lastSlide = slides[slides.length - 1];
       var offset = slide.offsetLeft + slide.offsetWidth / 2 - sliderWidth / 2;
-      var maxOffset = Math.max(0, track.scrollWidth - sliderWidth);
-      offset = Math.max(0, Math.min(offset, maxOffset));
+      var minOffset = firstSlide.offsetLeft + firstSlide.offsetWidth / 2 - sliderWidth / 2;
+      var maxOffset = lastSlide.offsetLeft + lastSlide.offsetWidth / 2 - sliderWidth / 2;
+      offset = Math.max(minOffset, Math.min(offset, maxOffset));
       track.style.transform = 'translateX(-' + offset + 'px)';
       updateDots();
     }
@@ -162,5 +174,97 @@
       updateSlider();
       window.addEventListener('resize', updateSlider);
     }
+  });
+
+  /* --- Product showcase filter & sort (delegated — survives section re-render) --- */
+  function productShowcaseReplaceSection(shopifySection, sectionId, html) {
+    var parsed = new DOMParser().parseFromString(html, 'text/html');
+    var newSection = parsed.getElementById('shopify-section-' + sectionId);
+    shopifySection.innerHTML = newSection ? newSection.innerHTML : html;
+  }
+
+  function productShowcaseSyncForm(form, params) {
+    if (!form) return;
+    params.forEach(function (value, key) {
+      var field = form.elements[key];
+      if (field && field.tagName === 'SELECT') {
+        field.value = value;
+      }
+    });
+  }
+
+  function productShowcaseFetch(form, paramOverride) {
+    var sectionIdInput = form.querySelector('input[name="section_id"]');
+    var sectionId = sectionIdInput ? sectionIdInput.value : '';
+    var shopifySection = sectionId ? document.getElementById('shopify-section-' + sectionId) : null;
+    var collectionUrl = form.dataset.collectionUrl || form.getAttribute('action') || window.location.pathname;
+    var collectionPath = collectionUrl.split('?')[0];
+
+    var params;
+    if (paramOverride) {
+      params = new URLSearchParams(paramOverride);
+      params.delete('page');
+    } else {
+      var formData = new FormData(form);
+      formData.delete('section_id');
+      formData.delete('page');
+      params = new URLSearchParams();
+      formData.forEach(function (value, key) {
+        if (value !== '') {
+          params.append(key, value);
+        }
+      });
+    }
+
+    var displayUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+
+    if (!sectionId || !shopifySection) {
+      window.location.href = collectionPath + (params.toString() ? '?' + params.toString() : '');
+      return;
+    }
+
+    var fetchParams = new URLSearchParams(params);
+    fetchParams.set('sections', sectionId);
+
+    fetch(collectionPath + '?' + fetchParams.toString())
+      .then(function (response) {
+        if (!response.ok) throw new Error('Section fetch failed');
+        return response.json();
+      })
+      .then(function (data) {
+        if (data[sectionId]) {
+          productShowcaseReplaceSection(shopifySection, sectionId, data[sectionId]);
+          productShowcaseSyncForm(
+            shopifySection.querySelector('[data-product-showcase-form]'),
+            params
+          );
+          window.history.replaceState({}, '', displayUrl + '#product-showcase-' + sectionId);
+          return;
+        }
+        window.location.href = collectionPath + (params.toString() ? '?' + params.toString() : '');
+      })
+      .catch(function () {
+        window.location.href = collectionPath + (params.toString() ? '?' + params.toString() : '');
+      });
+  }
+
+  document.addEventListener('change', function (event) {
+    var select = event.target;
+    if (!select.matches || !select.matches('[data-product-showcase-form] select')) return;
+
+    var form = select.closest('[data-product-showcase-form]');
+    if (!form) return;
+
+    productShowcaseFetch(form);
+  });
+
+  document.querySelectorAll('[data-product-showcase-form]').forEach(function (form) {
+    var urlParams = new URLSearchParams(window.location.search);
+    var hasFilterOrSort = urlParams.has('sort_by') || Array.from(urlParams.keys()).some(function (key) {
+      return key.indexOf('filter.') === 0;
+    });
+    if (!hasFilterOrSort) return;
+
+    productShowcaseFetch(form, urlParams);
   });
 })();

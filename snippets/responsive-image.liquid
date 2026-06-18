@@ -9,6 +9,7 @@
     assign img_loading = loading | default: 'lazy'
     assign img_class = class | default: 'responsive-image'
     assign img_width = width | default: 1200
+    assign img_sizes = sizes | default: '(max-width: 767px) 100vw, (max-width: 1023px) 80vw, ' | append: img_width | append: 'px'
   -%}
 
   <img
@@ -21,7 +22,7 @@
       {{ image | image_url: width: 1200 }} 1200w,
       {{ image | image_url: width: 1600 }} 1600w
     "
-    sizes="(max-width: 767px) 100vw, (max-width: 1023px) 80vw, {{ img_width }}px"
+    sizes="{{ img_sizes }}"
     alt="{{ img_alt | escape }}"
     class="{{ img_class }}"
     loading="{{ img_loading }}"

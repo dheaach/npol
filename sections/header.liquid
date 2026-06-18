@@ -1,13 +1,76 @@
 <header class="site-header" role="banner">
+  {%- liquid
+    assign logo_width = section.settings.logo_width | default: 0
+    assign logo_height = section.settings.logo_height | default: 40
+    assign logo_width_tablet = section.settings.logo_width_tablet | default: 0
+    assign logo_height_tablet = section.settings.logo_height_tablet | default: 0
+    assign logo_width_mobile = section.settings.logo_width_mobile | default: 0
+    assign logo_height_mobile = section.settings.logo_height_mobile | default: 0
+
+    assign tablet_logo_width = logo_width_tablet
+    if tablet_logo_width == 0
+      assign tablet_logo_width = logo_width
+    endif
+    assign tablet_logo_height = logo_height_tablet
+    if tablet_logo_height == 0
+      assign tablet_logo_height = logo_height
+    endif
+
+    assign mobile_logo_width = logo_width_mobile
+    if mobile_logo_width == 0
+      if logo_width_tablet > 0
+        assign mobile_logo_width = logo_width_tablet
+      else
+        assign mobile_logo_width = logo_width
+      endif
+    endif
+    assign mobile_logo_height = logo_height_mobile
+    if mobile_logo_height == 0
+      if logo_height_tablet > 0
+        assign mobile_logo_height = logo_height_tablet
+      else
+        assign mobile_logo_height = logo_height
+      endif
+    endif
+
+    assign logo_render_width = logo_width
+    if logo_render_width == 0
+      assign logo_render_width = 500
+    endif
+    if tablet_logo_width > logo_render_width
+      assign logo_render_width = tablet_logo_width
+    endif
+    if mobile_logo_width > logo_render_width
+      assign logo_render_width = mobile_logo_width
+    endif
+
+    assign logo_sizes = '(max-width: 767px) '
+    if mobile_logo_width > 0
+      assign logo_sizes = logo_sizes | append: mobile_logo_width | append: 'px, (max-width: 1023px) '
+    else
+      assign logo_sizes = logo_sizes | append: '50vw, (max-width: 1023px) '
+    endif
+    if tablet_logo_width > 0
+      assign logo_sizes = logo_sizes | append: tablet_logo_width | append: 'px, '
+    else
+      assign logo_sizes = logo_sizes | append: '40vw, '
+    endif
+    if logo_width > 0
+      assign logo_sizes = logo_sizes | append: logo_width | append: 'px'
+    else
+      assign logo_sizes = logo_sizes | append: logo_render_width | append: 'px'
+    endif
+  -%}
   <div class="page-width">
-    <div class="site-header__inner">
+    <div class="site-header__row site-header__row--top">
       <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ shop.name | escape }} — Home">
         {%- if section.settings.logo != blank -%}
           {% render 'responsive-image',
             image: section.settings.logo,
             alt: section.settings.logo_alt | default: shop.name,
             class: 'site-header__logo-image',
-            width: 500,
+            width: logo_render_width,
+            sizes: logo_sizes,
             loading: 'eager'
           %}
         {%- else -%}
@@ -15,44 +78,139 @@
         {%- endif -%}
       </a>
 
-      <div class="site-header__actions">
+      {%- if section.settings.show_search -%}
+        <form action="{{ routes.search_url }}" method="get" role="search" class="site-header__search">
+          <label class="visually-hidden" for="header-search-{{ section.id }}">
+            {{ section.settings.search_label | default: 'Search' }}
+          </label>
+          <span class="site-header__search-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </span>
+          <input
+            type="search"
+            name="q"
+            id="header-search-{{ section.id }}"
+            class="site-header__search-input"
+            placeholder="{{ section.settings.search_placeholder }}"
+            value="{{ search.terms | escape }}"
+          >
+        </form>
+      {%- endif -%}
+
+      {%- if section.settings.top_menu != blank or section.settings.menu != blank -%}
+        <div class="site-header__top-actions">
+          {%- if section.settings.top_menu != blank -%}
+            <nav class="site-header__top-nav" aria-label="{{ section.settings.top_menu_title | default: 'Utility navigation' | escape }}">
+              <ul class="site-header__top-nav-list">
+                {%- for link in section.settings.top_menu.links -%}
+                  <li class="site-header__top-nav-item">
+                    <a
+                      href="{{ link.url }}"
+                      class="site-header__top-nav-link"
+                      {% if link.active %}aria-current="page"{% endif %}
+                    >
+                      {{ link.title }}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </nav>
+          {%- endif -%}
+
+          {%- if section.settings.menu != blank -%}
+            <button
+              type="button"
+              class="site-header__menu-toggle"
+              data-menu-toggle
+              aria-label="Toggle menu"
+              aria-expanded="false"
+              aria-controls="site-nav"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="site-header__row site-header__row--bottom" data-header-bottom>
+      <div class="site-header__bottom-spacer" aria-hidden="true"></div>
+
+      {%- if section.settings.menu != blank -%}
+        <nav class="site-header__nav-wrapper" data-nav-wrapper aria-label="{{ section.settings.menu_title | default: 'Main navigation' | escape }}">
+          <ul class="site-header__nav" data-site-nav id="site-nav">
+            {%- for link in section.settings.menu.links -%}
+              {%- render 'header-menu-item', link: link, section_id: section.id -%}
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      <div class="site-header__bottom-end">
         {%- if section.settings.button_label != blank -%}
           <a href="{{ section.settings.button_url | default: '#' }}" class="btn btn--yellow site-header__cta">
             {{ section.settings.button_label }}
           </a>
         {%- endif -%}
-
-        {%- if section.settings.menu != blank -%}
-          <button
-            type="button"
-            class="site-header__menu-toggle"
-            data-menu-toggle
-            aria-label="Toggle menu"
-            aria-expanded="false"
-            aria-controls="site-nav"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-        {%- endif -%}
       </div>
     </div>
-
-    {%- if section.settings.menu != blank -%}
-      <nav class="site-header__nav-wrapper" data-nav-wrapper aria-label="{{ section.settings.menu_title | default: 'Main navigation' | escape }}">
-        <ul class="site-header__nav" data-site-nav id="site-nav">
-          {%- for link in section.settings.menu.links -%}
-            {%- render 'header-menu-item', link: link, section_id: section.id -%}
-          {%- endfor -%}
-        </ul>
-      </nav>
-    {%- endif -%}
   </div>
 </header>
 
 <style>
   {% render 'section-spacing-styles', root: '.site-header', pad_x: '.page-width' %}
+
+  #shopify-section-{{ section.id }} .site-header__logo-image,
+  #shopify-section-{{ section.id }} .site-header__logo img {
+    max-width: 100%;
+    object-fit: contain;
+    {%- if logo_width > 0 -%}
+      width: {{ logo_width }}px;
+    {%- else -%}
+      width: auto;
+    {%- endif -%}
+    {%- if logo_height > 0 -%}
+      height: {{ logo_height }}px;
+    {%- else -%}
+      height: auto;
+    {%- endif -%}
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .site-header__logo-image,
+    #shopify-section-{{ section.id }} .site-header__logo img {
+      {%- if tablet_logo_width > 0 -%}
+        width: {{ tablet_logo_width }}px;
+      {%- else -%}
+        width: auto;
+      {%- endif -%}
+      {%- if tablet_logo_height > 0 -%}
+        height: {{ tablet_logo_height }}px;
+      {%- else -%}
+        height: auto;
+      {%- endif -%}
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .site-header__logo-image,
+    #shopify-section-{{ section.id }} .site-header__logo img {
+      {%- if mobile_logo_width > 0 -%}
+        width: {{ mobile_logo_width }}px;
+      {%- else -%}
+        width: auto;
+      {%- endif -%}
+      {%- if mobile_logo_height > 0 -%}
+        height: {{ mobile_logo_height }}px;
+      {%- else -%}
+        height: auto;
+      {%- endif -%}
+    }
+  }
 </style>
 
 {% schema %}
@@ -82,6 +240,122 @@
     },
     {
       "type": "header",
+      "content": "Logo size — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = auto (keeps aspect ratio)."
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "label": "Logo height",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40,
+      "info": "0 = auto (keeps aspect ratio)."
+    },
+    {
+      "type": "header",
+      "content": "Logo size — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "logo_width_tablet",
+      "label": "Logo width",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop width."
+    },
+    {
+      "type": "range",
+      "id": "logo_height_tablet",
+      "label": "Logo height",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop height."
+    },
+    {
+      "type": "header",
+      "content": "Logo size — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "logo_width_mobile",
+      "label": "Logo width",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop width."
+    },
+    {
+      "type": "range",
+      "id": "logo_height_mobile",
+      "label": "Logo height",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop height."
+    },
+    {
+      "type": "header",
+      "content": "Search"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder",
+      "default": "Search for product or service"
+    },
+    {
+      "type": "text",
+      "id": "search_label",
+      "label": "Search field label (accessibility)",
+      "default": "Search"
+    },
+    {
+      "type": "header",
+      "content": "Top links (About, Store)"
+    },
+    {
+      "type": "link_list",
+      "id": "top_menu",
+      "label": "Top menu",
+      "info": "Links shown in the first row (e.g. About, Store). Create a menu in Online Store → Navigation."
+    },
+    {
+      "type": "text",
+      "id": "top_menu_title",
+      "label": "Top menu aria label",
+      "default": "Utility navigation"
+    },
+    {
+      "type": "header",
       "content": "Navigation"
     },
     {
@@ -89,7 +363,7 @@
       "id": "menu",
       "label": "Menu",
       "default": "main-menu",
-      "info": "Select a menu from Online Store → Navigation"
+      "info": "Main navigation shown in the second row. Select a menu from Online Store → Navigation."
     },
     {
       "type": "text",
@@ -105,7 +379,7 @@
       "type": "text",
       "id": "button_label",
       "label": "Button label",
-      "default": "Get Started"
+      "default": "Talk With Us"
     },
     {
       "type": "url",

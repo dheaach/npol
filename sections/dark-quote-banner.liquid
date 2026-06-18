@@ -19,16 +19,20 @@
   style="background-color: {{ section.settings.background_color | default: '#0A1D3C' }};"
   aria-labelledby="quote-heading-{{ section.id }}"
 >
+  {%- liquid
+    assign bg_flip_desktop = section.settings.background_flip | default: 'none'
+    assign bg_flip_mobile = section.settings.background_flip_mobile | default: 'none'
+  -%}
   {%- if banner_bg_mobile_url != blank -%}
     <div
-      class="dark-quote-banner__bg dark-quote-banner__bg--mobile"
+      class="dark-quote-banner__bg dark-quote-banner__bg--mobile{% if bg_flip_mobile != 'none' %} dark-quote-banner__bg--flip-{{ bg_flip_mobile }}{% endif %}"
       style="background-image: url({{ banner_bg_mobile_url }});"
       aria-hidden="true"
     ></div>
   {%- endif -%}
   {%- if banner_bg_url != blank -%}
     <div
-      class="dark-quote-banner__bg{% if banner_bg_mobile_url != blank %} dark-quote-banner__bg--desktop{% endif %}"
+      class="dark-quote-banner__bg{% if banner_bg_mobile_url != blank %} dark-quote-banner__bg--desktop{% endif %}{% if bg_flip_desktop != 'none' %} dark-quote-banner__bg--flip-{{ bg_flip_desktop }}{% endif %}"
       style="background-image: url({{ banner_bg_url }});"
       aria-hidden="true"
     ></div>
@@ -87,7 +91,7 @@
     }
   {%- endif -%}
   #shopify-section-{{ section.id }} .text-highlight {
-    color: {{ section.settings.highlight_color | default: '#1BCDC4' }} !important;
+    color: {{ section.settings.highlight_color | default: '#51ADA0' }} !important;
   }
   {%- liquid
     assign legacy_bg_mode = section.settings.background_size | default: 'fit_width'
@@ -111,6 +115,15 @@
   #shopify-section-{{ section.id }} .dark-quote-banner__bg {
     background-size: {{ bg_size_mobile | strip }};
     background-position: {{ bg_position }};
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner__bg--flip-horizontal {
+    transform: scaleX(-1);
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner__bg--flip-vertical {
+    transform: scaleY(-1);
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner__bg--flip-both {
+    transform: scale(-1, -1);
   }
   @media screen and (min-width: 768px) {
     #shopify-section-{{ section.id }} .dark-quote-banner__bg {
@@ -365,7 +378,7 @@
       "type": "color",
       "id": "highlight_color",
       "label": "Highlight color",
-      "default": "#1BCDC4"
+      "default": "#51ADA0"
     },
     {
       "type": "header",
@@ -519,6 +532,31 @@
         { "value": "center bottom", "label": "Bottom" }
       ],
       "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_flip",
+      "label": "Background flip — tablet and up (768px+)",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "horizontal", "label": "Horizontal (mirror)" },
+        { "value": "vertical", "label": "Vertical" },
+        { "value": "both", "label": "Both axes" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "background_flip_mobile",
+      "label": "Background flip — mobile (767px and below)",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "horizontal", "label": "Horizontal (mirror)" },
+        { "value": "vertical", "label": "Vertical" },
+        { "value": "both", "label": "Both axes" }
+      ],
+      "default": "none",
+      "info": "Applies only when a separate mobile background image is set."
     },
     {
       "type": "header",

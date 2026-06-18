@@ -1,0 +1,1173 @@
+{%- liquid
+  assign poppins_regular = settings.font_heading
+  assign poppins_bold = settings.font_button
+-%}
+<style>
+  {{ poppins_regular | font_face: font_display: 'swap' }}
+  {{ poppins_bold | font_face: font_display: 'swap' }}
+  #shopify-section-{{ section.id }} .core-components,
+  #shopify-section-{{ section.id }} .core-components .section-heading,
+  #shopify-section-{{ section.id }} .core-components .section-text,
+  #shopify-section-{{ section.id }} .core-components .core-components__subtext,
+  #shopify-section-{{ section.id }} .core-components .core-components__subtext p,
+  #shopify-section-{{ section.id }} .core-components .core-components__subtext a,
+  #shopify-section-{{ section.id }} .core-components .core-components__subtext li,
+  #shopify-section-{{ section.id }} .core-components .core-components__title,
+  #shopify-section-{{ section.id }} .core-components .core-components__text,
+  #shopify-section-{{ section.id }} .core-components .core-components__text p,
+  #shopify-section-{{ section.id }} .core-components .core-components__text a,
+  #shopify-section-{{ section.id }} .core-components .core-components__link,
+  #shopify-section-{{ section.id }} .core-components p,
+  #shopify-section-{{ section.id }} .core-components a,
+  #shopify-section-{{ section.id }} .core-components li,
+  #shopify-section-{{ section.id }} .core-components h1,
+  #shopify-section-{{ section.id }} .core-components h2,
+  #shopify-section-{{ section.id }} .core-components h3 {
+    font-family: {{ poppins_regular.family }}, {{ poppins_regular.fallback_families }};
+    font-style: {{ poppins_regular.style }};
+  }
+</style>
+
+{%- liquid
+  assign bg_color = section.settings.background_color
+  assign accent = section.settings.accent_color | default: '#51ADA0'
+  assign row_col1_default = section.settings.row_column_1_width | default: 35
+  assign row_gap = section.settings.rows_gap | default: 56
+  assign row_gap_tablet = section.settings.rows_gap_tablet | default: 0
+  if row_gap_tablet == 0
+    assign row_gap_tablet = row_gap
+  endif
+  assign row_gap_mobile = section.settings.rows_gap_mobile | default: 0
+  if row_gap_mobile == 0
+    assign row_gap_mobile = row_gap_tablet
+  endif
+-%}
+
+<section
+  class="core-components section-spacing"
+  aria-labelledby="core-components-heading-{{ section.id }}"
+>
+  <div class="page-width">
+    <header class="core-components__header text-center">
+      <div id="core-components-heading-{{ section.id }}">
+        {%- liquid
+          assign cc_heading_before_color = section.settings.heading_before_color
+          if cc_heading_before_color == blank
+            assign cc_heading_before_color = section.settings.heading_color
+          endif
+          assign cc_heading_after_color = section.settings.heading_after_color
+          if cc_heading_after_color == blank
+            assign cc_heading_after_color = section.settings.heading_color
+          endif
+        -%}
+        {% render 'highlighted-heading',
+          heading_before: section.settings.heading_before,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_before_font_size: section.settings.heading_before_font_size,
+          heading_before_color: cc_heading_before_color,
+          heading_highlight: section.settings.heading_highlight,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_after: section.settings.heading_after,
+          heading_after_weight: section.settings.heading_after_weight,
+          heading_after_font_size: section.settings.heading_after_font_size,
+          heading_after_color: cc_heading_after_color,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_size,
+          highlight_color: section.settings.highlight_color
+        %}
+      </div>
+
+      {%- if section.settings.subtext != blank -%}
+        <div class="core-components__subtext section-text rte">{{ section.settings.subtext }}</div>
+      {%- endif -%}
+    </header>
+
+    <div
+      class="core-components__rows"
+      style="
+        --rows-gap: {{ row_gap }}px;
+        --rows-gap-tablet: {{ row_gap_tablet }}px;
+        --rows-gap-mobile: {{ row_gap_mobile }}px;
+      "
+    >
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign block_col1 = block.settings.block_column_1_width | default: 0
+          if block_col1 == 0
+            assign block_col1 = row_col1_default
+          endif
+          assign block_col2 = 100 | minus: block_col1
+          assign block_accent = block.settings.title_font_color
+          if block_accent == blank
+            assign block_accent = accent
+          endif
+          assign img_max = block.settings.image_max_width | default: 320
+          assign img_loading = block.settings.image_loading | default: 'lazy'
+        -%}
+        <article
+          id="core-component-{{ block.id }}"
+          class="core-components__row"
+          {{ block.shopify_attributes }}
+          style="
+            --row-col-1: {{ block_col1 }}fr;
+            --row-col-2: {{ block_col2 }}fr;
+            --image-max-width: {{ img_max }}px;
+          "
+        >
+          <div class="core-components__media">
+            {% render 'responsive-image',
+              image: block.settings.image,
+              alt: block.settings.image_alt,
+              class: 'core-components__image',
+              loading: img_loading,
+              width: img_max
+            %}
+          </div>
+
+          <div class="core-components__content">
+            {%- if block.settings.title != blank -%}
+              <h3 class="core-components__title section-heading section-heading--h3">
+                <span class="core-components__arrow" aria-hidden="true" style="color: {{ block_accent }};">→</span>
+                <span class="core-components__title-text">{{ block.settings.title }}</span>
+              </h3>
+            {%- endif -%}
+
+            {%- if block.settings.text != blank -%}
+              <div class="core-components__text section-text rte">{{ block.settings.text }}</div>
+            {%- endif -%}
+
+            {%- if block.settings.link_label != blank -%}
+              <a
+                class="core-components__link"
+                {% if block.settings.link_url != blank %}
+                  href="{{ block.settings.link_url }}"
+                {% else %}
+                  role="link"
+                  aria-disabled="true"
+                {% endif %}
+              >
+                {{ block.settings.link_label }}
+              </a>
+            {%- endif -%}
+          </div>
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.core-components', pad_x: '.page-width' %}
+  {% render 'section-spacing-gap', section: section, selector: '.core-components__row', stack_breakpoint: '1023' %}
+
+  {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ bg_color }};
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .core-components__header {
+    margin-bottom: 100px;
+  }
+
+  {%- liquid
+    assign cc_heading_base_color = section.settings.heading_before_color
+    if cc_heading_base_color == blank
+      assign cc_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if cc_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #core-components-heading-{{ section.id }} .section-heading {
+      color: {{ cc_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #core-components-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: accent }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #core-components-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.subtext_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .core-components__subtext,
+    #shopify-section-{{ section.id }} .core-components__subtext p {
+      font-size: {{ section.settings.subtext_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_weight != blank and section.settings.subtext_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .core-components__subtext,
+    #shopify-section-{{ section.id }} .core-components__subtext p {
+      font-weight: {{ section.settings.subtext_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_color != blank -%}
+    #shopify-section-{{ section.id }} .core-components__subtext,
+    #shopify-section-{{ section.id }} .core-components__subtext p,
+    #shopify-section-{{ section.id }} .core-components__subtext a {
+      color: {{ section.settings.subtext_font_color }} !important;
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .core-components__subtext {
+    max-width: 52rem;
+    margin-inline: auto;
+    margin-top: 1.25rem;
+  }
+
+  #shopify-section-{{ section.id }} .core-components__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rows-gap-mobile, var(--rows-gap-tablet, var(--rows-gap, 56px)));
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .core-components__rows {
+      gap: var(--rows-gap-tablet, var(--rows-gap, 48px));
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .core-components__rows {
+      gap: var(--rows-gap, 56px);
+    }
+  }
+
+  #shopify-section-{{ section.id }} .core-components__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    width: 100%;
+  }
+
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .core-components__row {
+      grid-template-columns: minmax(0, var(--row-col-1, 35fr)) minmax(0, var(--row-col-2, 65fr));
+    }
+  }
+
+  #shopify-section-{{ section.id }} .core-components__media {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  #shopify-section-{{ section.id }} .core-components__image,
+  #shopify-section-{{ section.id }} .core-components__media .responsive-image--placeholder {
+    max-width: var(--image-max-width, 320px);
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  #shopify-section-{{ section.id }} .core-components__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  #shopify-section-{{ section.id }} .core-components__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0;
+    color: {{ accent }};
+  }
+
+  #shopify-section-{{ section.id }} .core-components__arrow {
+    flex-shrink: 0;
+    font-size: 1.15em;
+    line-height: 1;
+  }
+
+  #shopify-section-{{ section.id }} .core-components__link {
+    display: inline-block;
+    margin-top: 0.25rem;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    color: inherit;
+    width: fit-content;
+  }
+
+  #shopify-section-{{ section.id }} .core-components__link[aria-disabled='true'] {
+    pointer-events: none;
+    opacity: 1;
+  }
+
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign block_title_color = block.settings.title_font_color
+      if block_title_color == blank
+        assign block_title_color = accent
+      endif
+    -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__title,
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__title-text {
+      color: {{ block_title_color }};
+    }
+  {%- if block.settings.title_font_size > 0 -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__title {
+      font-size: {{ block.settings.title_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if block.settings.title_font_weight != blank and block.settings.title_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__title {
+      font-weight: {{ block.settings.title_font_weight }};
+    }
+  {%- endif -%}
+  {%- if block.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text,
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text p {
+      font-size: {{ block.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text,
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text p {
+      font-weight: {{ block.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if block.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text,
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text p,
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__text a {
+      color: {{ block.settings.text_font_color }} !important;
+    }
+  {%- endif -%}
+  {%- if block.settings.link_font_size > 0 -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__link {
+      font-size: {{ block.settings.link_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if block.settings.link_font_weight != blank and block.settings.link_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__link {
+      font-weight: {{ block.settings.link_font_weight }};
+    }
+  {%- endif -%}
+  {%- if block.settings.link_font_color != blank -%}
+    #shopify-section-{{ section.id }} #core-component-{{ block.id }} .core-components__link {
+      color: {{ block.settings.link_font_color }} !important;
+    }
+  {%- endif -%}
+  {%- endfor -%}
+</style>
+
+{% schema %}
+{
+  "name": "Core Components",
+  "tag": "section",
+  "class": "section-core-components",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Explore the"
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Highlighted text",
+      "default": "Core Components"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)",
+      "default": "of the System"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color (fallback)",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size class",
+      "options": [
+        { "value": "h1", "label": "H1 scale" },
+        { "value": "h2", "label": "H2 scale" },
+        { "value": "h3", "label": "H3 scale" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "richtext",
+      "id": "subtext",
+      "label": "Description",
+      "default": "<p>Each part of the system is designed to support the progressive development of students' mathematical thinking across curriculum, assessment, instruction, and professional learning.</p>"
+    },
+    {
+      "type": "color",
+      "id": "subtext_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "subtext_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "subtext_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color (row titles & arrows)",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "header",
+      "content": "Row layout"
+    },
+    {
+      "type": "range",
+      "id": "row_column_1_width",
+      "label": "Default image column width",
+      "min": 25,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 35,
+      "info": "Default for all rows. Override per component block. Text column uses the remaining width."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 16,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 48,
+      "info": "1024px and up (side by side)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px when stacked. 0 = use desktop gap."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below when stacked. 0 = use tablet, then desktop gap."
+    },
+    {
+      "type": "range",
+      "id": "rows_gap",
+      "label": "Gap between rows (desktop)",
+      "min": 24,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "rows_gap_tablet",
+      "label": "Gap between rows (tablet)",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop gap."
+    },
+    {
+      "type": "range",
+      "id": "rows_gap_mobile",
+      "label": "Gap between rows (mobile)",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, then desktop gap."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "component",
+      "name": "Component row",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "range",
+          "id": "block_column_1_width",
+          "label": "Image column width",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "unit": "%",
+          "default": 0,
+          "info": "0 = use section default. Text column uses the remaining width."
+        },
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo or graphic"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text (SEO)"
+        },
+        {
+          "type": "range",
+          "id": "image_max_width",
+          "label": "Image max width",
+          "min": 120,
+          "max": 480,
+          "step": 20,
+          "unit": "px",
+          "default": 320
+        },
+        {
+          "type": "select",
+          "id": "image_loading",
+          "label": "Image loading",
+          "options": [
+            { "value": "lazy", "label": "Lazy" },
+            { "value": "eager", "label": "Eager" }
+          ],
+          "default": "lazy"
+        },
+        {
+          "type": "header",
+          "content": "Title"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Row title",
+          "default": "Core Instructional System"
+        },
+        {
+          "type": "color",
+          "id": "title_font_color",
+          "label": "Title color",
+          "info": "Empty = section accent color."
+        },
+        {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Title font size",
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme H3 scale."
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Title font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "header",
+          "content": "Description"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Describe this component of the system.</p>"
+        },
+        {
+          "type": "color",
+          "id": "text_font_color",
+          "label": "Description color"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Description font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Description font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Link"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "default": "Explore"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL"
+        },
+        {
+          "type": "color",
+          "id": "link_font_color",
+          "label": "Link color"
+        },
+        {
+          "type": "range",
+          "id": "link_font_size",
+          "label": "Link font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "link_font_weight",
+          "label": "Link font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Core Components",
+      "blocks": [
+        {
+          "type": "component",
+          "settings": {
+            "title": "Core Instructional System",
+            "text": "<p>Next Gen CFLM is a comprehensive, research-based curriculum and instructional system designed to develop students' mathematical thinking through sequences of investigations.</p>",
+            "link_label": "Explore Next Gen CFLM"
+          }
+        },
+        {
+          "type": "component",
+          "settings": {
+            "title": "In-the-Moment Instructional Support",
+            "text": "<p>Studio Adelaide provides real-time instructional support that helps teachers make decisions in the moment to advance student thinking.</p>",
+            "link_label": "Learn About Studio Adelaide"
+          }
+        },
+        {
+          "type": "component",
+          "settings": {
+            "title": "Implementation/Professional Learning Support Platform",
+            "text": "<p>Professional Learning Services support sustained implementation through coaching, workshops, and collaborative learning experiences.</p>",
+            "link_label": "Visit New Perspectives Online"
+          }
+        },
+        {
+          "type": "component",
+          "settings": {
+            "title": "Developmental Assessment/Documentation System",
+            "text": "<p>New Perspectives on Assessment provides tools and frameworks for documenting and understanding students' mathematical development over time.</p>",
+            "link_label": "Explore Assessment"
+          }
+        },
+        {
+          "type": "component",
+          "settings": {
+            "title": "Implementation/Professional Learning Support Platform",
+            "text": "<p>New Perspectives Online delivers flexible professional learning resources that support teachers and leaders at every stage of implementation.</p>",
+            "link_label": "Explore Professional Learning"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

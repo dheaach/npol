@@ -1,7 +1,7 @@
 {% render 'section-font-vars', section: section %}
 {% render 'section-column-widths', section: section, grid_class: 'cta-teal__inner' %}
 
-<section class="cta-teal section-spacing" style="background-color: {{ section.settings.background_color | default: '#1BCDC4' }};" aria-labelledby="cta-teal-heading-{{ section.id }}">
+<section class="cta-teal section-spacing" style="background-color: {{ section.settings.background_color | default: '#51ADA0' }};" aria-labelledby="cta-teal-heading-{{ section.id }}">
   <div class="page-width">
     <div
       class="cta-teal__inner{% if section.settings.mobile_stack_order == 'decoration-first' %} cta-teal__inner--mobile-decoration-first{% endif %}"
@@ -599,7 +599,7 @@
       "type": "color",
       "id": "background_color",
       "label": "Background color",
-      "default": "#1BCDC4"
+      "default": "#51ADA0"
     },
     {
       "type": "color",

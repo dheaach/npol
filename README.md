@@ -49,7 +49,7 @@ Every section supports Theme Editor settings:
 
 **Theme settings → Colors / Typography**
 
-- Primary `#1BCDC4`, Secondary `#0A1D3C`, Yellow `#FFC300`, Light Blue `#ADE8F6`
+- Primary `#51ADA0`, Secondary `#0A1D3C`, Yellow `#FFC300`, Light Blue `#ADE8F6`
 - H1–H6: Poppins (60/36/24px default)
 - Body: Montserrat 16px
 - Button: Poppins 20px medium

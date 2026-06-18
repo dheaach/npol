@@ -1,0 +1,1243 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign bar_pad_y = section.settings.bar_padding_y | default: 32
+  assign bar_pad_x = section.settings.bar_padding_x | default: 40
+  assign icon_w = section.settings.icon_width | default: 80
+  assign title_col = section.settings.title_column_width | default: 28
+  assign header_gap = section.settings.header_spacing | default: 48
+  assign cta_gap = section.settings.cta_spacing_top | default: 48
+  assign bar_text_color = section.settings.bar_text_color | default: '#FFFFFF'
+-%}
+
+<section
+  class="intervention-approach section-spacing"
+  style="background-color: {{ section.settings.background_color | default: '#F0F1F3' }};"
+  aria-labelledby="intervention-heading-{{ section.id }}"
+>
+  {%- if section.settings.wave_top_left != blank -%}
+    <div class="intervention-approach__wave intervention-approach__wave--top-left" aria-hidden="true">
+      {% render 'responsive-image',
+        image: section.settings.wave_top_left,
+        alt: section.settings.wave_top_left_alt,
+        class: 'intervention-approach__wave-image',
+        width: 400
+      %}
+    </div>
+  {%- endif -%}
+  {%- if section.settings.wave_bottom_right != blank -%}
+    <div class="intervention-approach__wave intervention-approach__wave--bottom-right" aria-hidden="true">
+      {% render 'responsive-image',
+        image: section.settings.wave_bottom_right,
+        alt: section.settings.wave_bottom_right_alt,
+        class: 'intervention-approach__wave-image',
+        width: 400
+      %}
+    </div>
+  {%- endif -%}
+
+  <div class="page-width">
+    <div class="intervention-approach__inner">
+      <header class="intervention-approach__header text-center">
+        <div id="intervention-heading-{{ section.id }}">
+          {%- liquid
+            assign ia_heading_font_color = section.settings.heading_font_color
+            if ia_heading_font_color == blank
+              assign ia_heading_font_color = section.settings.heading_color
+            endif
+            assign ia_heading_before_color = section.settings.heading_before_color
+            if ia_heading_before_color == blank
+              assign ia_heading_before_color = section.settings.heading_color
+            endif
+          -%}
+          {% render 'highlighted-heading',
+            heading: section.settings.heading,
+            heading_font_size: section.settings.heading_font_size,
+            heading_weight: section.settings.heading_weight,
+            heading_font_color: ia_heading_font_color,
+            heading_before: section.settings.heading_before,
+            heading_before_weight: section.settings.heading_before_weight,
+            heading_before_font_size: section.settings.heading_before_font_size,
+            heading_before_color: ia_heading_before_color,
+            heading_highlight: section.settings.heading_highlight,
+            heading_highlight_weight: section.settings.heading_highlight_weight,
+            heading_highlight_font_size: section.settings.heading_highlight_font_size,
+            heading_after: section.settings.heading_after,
+            heading_after_weight: section.settings.heading_after_weight,
+            heading_after_font_size: section.settings.heading_after_font_size,
+            heading_after_color: section.settings.heading_after_color,
+            heading_tag: section.settings.heading_tag,
+            heading_size: section.settings.heading_tag,
+            highlight_color: section.settings.highlight_color
+          %}
+        </div>
+        {%- if section.settings.subtext != blank -%}
+          <p class="section-text intervention-approach__subtext">{{ section.settings.subtext }}</p>
+        {%- endif -%}
+      </header>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="intervention-approach__bars">
+          {%- for block in section.blocks -%}
+            <article
+              class="intervention-approach__bar"
+              id="intervention-bar-{{ block.id }}"
+              style="background-color: {{ block.settings.bar_color | default: '#51ADA0' }};"
+              {{ block.shopify_attributes }}
+            >
+              <div class="intervention-approach__bar-inner">
+                <div class="intervention-approach__icon">
+                  {%- if block.settings.icon != blank -%}
+                    {% render 'responsive-image',
+                      image: block.settings.icon,
+                      alt: block.settings.icon_alt,
+                      class: 'intervention-approach__icon-image',
+                      width: icon_w | times: 2
+                    %}
+                  {%- else -%}
+                    <div class="intervention-approach__icon-placeholder" role="img" aria-label="{{ block.settings.icon_alt | default: 'Feature icon' | escape }}">
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="section-heading section-heading--h3 intervention-approach__bar-title">{{ block.settings.title }}</h3>
+                {%- endif -%}
+                {%- if block.settings.text != blank -%}
+                  <div class="section-text rte intervention-approach__bar-text">{{ block.settings.text }}</div>
+                {%- endif -%}
+              </div>
+            </article>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.button_label != blank -%}
+        <div class="intervention-approach__cta">
+          {% render 'button',
+            label: section.settings.button_label,
+            url: section.settings.button_url,
+            style: section.settings.button_style | default: 'yellow'
+          %}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.intervention-approach', pad_x: '.page-width' %}
+  {% render 'section-spacing-gap', section: section, selector: '.intervention-approach__bars', gap_id: 'bars_gap', stack_breakpoint: '0' %}
+  {% render 'section-spacing-gap', section: section, selector: '.intervention-approach__bar-inner', gap_id: 'bar_inner_gap', stack_breakpoint: '0' %}
+
+  #shopify-section-{{ section.id }} .intervention-approach {
+    position: relative;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: {{ section.settings.content_max_width | default: 1200 }}px;
+    margin-inline: auto;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__header {
+    margin-bottom: {{ header_gap }}px;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__subtext {
+    max-width: 900px;
+    margin-inline: auto;
+    margin-top: 1rem;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__wave {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    line-height: 0;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__wave--top-left {
+    top: 0;
+    left: 0;
+    max-width: min(35vw, 280px);
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__wave--bottom-right {
+    right: 0;
+    bottom: 0;
+    max-width: min(35vw, 280px);
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__wave-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__bars {
+    display: flex;
+    flex-direction: column;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__bar {
+    color: {{ bar_text_color }};
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__bar-inner {
+    display: grid;
+    grid-template-columns: {{ icon_w }}px minmax(140px, {{ title_col }}%) minmax(0, 1fr);
+    align-items: center;
+    padding: {{ bar_pad_y }}px {{ bar_pad_x }}px;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__icon-image,
+  #shopify-section-{{ section.id }} .intervention-approach__icon-placeholder {
+    width: {{ icon_w }}px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__icon-placeholder {
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__icon-placeholder .placeholder-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0.5;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__bar-title {
+    margin: 0;
+    color: inherit;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__bar-text,
+  #shopify-section-{{ section.id }} .intervention-approach__bar-text p {
+    color: inherit;
+    margin: 0;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach__cta {
+    margin-top: {{ cta_gap }}px;
+    text-align: center;
+  }
+
+  {%- liquid
+    assign ia_heading_base_color = section.settings.heading_before_color
+    if ia_heading_base_color == blank
+      assign ia_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if ia_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #intervention-heading-{{ section.id }} .section-heading {
+      color: {{ ia_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #intervention-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#51ADA0' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #intervention-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .intervention-approach__subtext {
+      font-size: {{ section.settings.subtext_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_weight != blank and section.settings.subtext_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .intervention-approach__subtext {
+      font-weight: {{ section.settings.subtext_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.subtext_font_color != blank -%}
+    #shopify-section-{{ section.id }} .intervention-approach__subtext {
+      color: {{ section.settings.subtext_font_color }};
+    }
+  {%- endif -%}
+
+  {%- for block in section.blocks -%}
+    {%- if block.settings.title_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-title {
+        font-size: {{ block.settings.title_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_weight != blank and block.settings.title_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-title {
+        font-weight: {{ block.settings.title_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_color != blank -%}
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-title {
+        color: {{ block.settings.title_font_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text,
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text p {
+        font-size: {{ block.settings.text_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text,
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text p {
+        font-weight: {{ block.settings.text_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_color != blank -%}
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text,
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text p,
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text li,
+      #shopify-section-{{ section.id }} #intervention-bar-{{ block.id }} .intervention-approach__bar-text a {
+        color: {{ block.settings.text_font_color }} !important;
+      }
+    {%- endif -%}
+  {%- endfor -%}
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .intervention-approach__bar-inner {
+      grid-template-columns: 1fr;
+      text-align: left;
+    }
+    #shopify-section-{{ section.id }} .intervention-approach__icon-image,
+    #shopify-section-{{ section.id }} .intervention-approach__icon-placeholder {
+      margin-bottom: 4px;
+    }
+  }
+  {%- if section.settings.bar_padding_y_tablet > 0 or section.settings.bar_padding_x_tablet > 0 -%}
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .intervention-approach__bar-inner {
+      {%- if section.settings.bar_padding_y_tablet > 0 -%}
+      padding-top: {{ section.settings.bar_padding_y_tablet }}px;
+      padding-bottom: {{ section.settings.bar_padding_y_tablet }}px;
+      {%- endif -%}
+      {%- if section.settings.bar_padding_x_tablet > 0 -%}
+      padding-left: {{ section.settings.bar_padding_x_tablet }}px;
+      padding-right: {{ section.settings.bar_padding_x_tablet }}px;
+      {%- endif -%}
+    }
+  }
+  {%- endif -%}
+  {%- if section.settings.bar_padding_y_mobile > 0 or section.settings.bar_padding_x_mobile > 0 -%}
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .intervention-approach__bar-inner {
+      {%- if section.settings.bar_padding_y_mobile > 0 -%}
+      padding-top: {{ section.settings.bar_padding_y_mobile }}px;
+      padding-bottom: {{ section.settings.bar_padding_y_mobile }}px;
+      {%- endif -%}
+      {%- if section.settings.bar_padding_x_mobile > 0 -%}
+      padding-left: {{ section.settings.bar_padding_x_mobile }}px;
+      padding-right: {{ section.settings.bar_padding_x_mobile }}px;
+      {%- endif -%}
+    }
+  }
+  {%- endif -%}
+</style>
+
+{% schema %}
+{
+  "name": "Intervention Approach",
+  "tag": "section",
+  "class": "section-intervention-approach",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F0F1F3"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "image_picker",
+      "id": "wave_top_left",
+      "label": "Decorative wave (top left)"
+    },
+    {
+      "type": "text",
+      "id": "wave_top_left_alt",
+      "label": "Wave top left alt text",
+      "default": "Decorative wave"
+    },
+    {
+      "type": "image_picker",
+      "id": "wave_bottom_right",
+      "label": "Decorative wave (bottom right)"
+    },
+    {
+      "type": "text",
+      "id": "wave_bottom_right_alt",
+      "label": "Wave bottom right alt text",
+      "default": "Decorative wave"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)",
+      "default": "A Different Approach to Intervention"
+    },
+    {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color",
+      "info": "Empty = theme heading color. Used when the single Heading field is filled."
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Font size (single line heading)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "info": "Optional split heading. Leave blank to use single line heading above."
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)"
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Intro text",
+      "default": "Intervention works best when it is connected to how students develop mathematical ideas over time. This approach focuses on understanding student thinking and supporting development from where students are, not simply reteaching isolated skills or procedures."
+    },
+    {
+      "type": "color",
+      "id": "subtext_font_color",
+      "label": "Intro text color"
+    },
+    {
+      "type": "range",
+      "id": "subtext_font_size",
+      "label": "Intro text font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "subtext_font_weight",
+      "label": "Intro text font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Feature bars layout"
+    },
+    {
+      "type": "color",
+      "id": "bar_text_color",
+      "label": "Default bar text color",
+      "default": "#FFFFFF",
+      "info": "Used when block text colors are empty."
+    },
+    {
+      "type": "range",
+      "id": "icon_width",
+      "label": "Icon width",
+      "min": 48,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "title_column_width",
+      "label": "Title column width",
+      "min": 20,
+      "max": 45,
+      "step": 1,
+      "unit": "%",
+      "default": 28,
+      "info": "Share of the bar row for the title column (desktop)."
+    },
+    {
+      "type": "range",
+      "id": "bar_padding_y",
+      "label": "Bar padding vertical (desktop)",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "bar_padding_x",
+      "label": "Bar padding horizontal (desktop)",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "bar_padding_y_tablet",
+      "label": "Bar padding vertical (tablet)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "bar_padding_x_tablet",
+      "label": "Bar padding horizontal (tablet)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "bar_padding_y_mobile",
+      "label": "Bar padding vertical (mobile)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "range",
+      "id": "bar_padding_x_mobile",
+      "label": "Bar padding horizontal (mobile)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Space below header",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "bars_gap",
+      "label": "Gap between bars (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "bars_gap_tablet",
+      "label": "Gap between bars (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "bars_gap_mobile",
+      "label": "Gap between bars (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "range",
+      "id": "bar_inner_gap",
+      "label": "Gap inside bar — icon, title, text (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "bar_inner_gap_tablet",
+      "label": "Gap inside bar (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "bar_inner_gap_mobile",
+      "label": "Gap inside bar (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 24,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View Intervention Resources"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        { "value": "yellow", "label": "Yellow" },
+        { "value": "primary", "label": "Primary" },
+        { "value": "secondary", "label": "Secondary" }
+      ],
+      "default": "yellow"
+    },
+    {
+      "type": "range",
+      "id": "cta_spacing_top",
+      "label": "Space above button",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bar",
+      "name": "Feature bar",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon image"
+        },
+        {
+          "type": "text",
+          "id": "icon_alt",
+          "label": "Icon alt text"
+        },
+        {
+          "type": "color",
+          "id": "bar_color",
+          "label": "Bar background color",
+          "default": "#51ADA0"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Start with Student Thinking"
+        },
+        {
+          "type": "color",
+          "id": "title_font_color",
+          "label": "Title color"
+        },
+        {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Title font size",
+          "min": 0,
+          "max": 96,
+          "step": 2,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = heading scale only."
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Title font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Teachers assess what big ideas, strategies, and models are emerging from students. Instruction begins with students' current understandings and supports the next steps in their mathematical development.</p>"
+        },
+        {
+          "type": "color",
+          "id": "text_font_color",
+          "label": "Description color"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Description font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Description font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Intervention Approach",
+      "blocks": [
+        {
+          "type": "bar",
+          "settings": {
+            "bar_color": "#51ADA0",
+            "title": "Start with Student Thinking",
+            "text": "<p>Teachers assess what big ideas, strategies, and models are emerging from students. Instruction begins with students' current understandings and supports the next steps in their mathematical development.</p>"
+          }
+        },
+        {
+          "type": "bar",
+          "settings": {
+            "bar_color": "#2B5F8E",
+            "title": "Support Development Through Responsive Teaching",
+            "text": "<p>Problem strings, minilessons, games, contextual tasks and powerful conferrals help strengthen important mathematical relationships while giving teachers insight into student thinking.</p>"
+          }
+        },
+        {
+          "type": "bar",
+          "settings": {
+            "bar_color": "#0A1D3C",
+            "title": "Provide Targeted Support That Builds Development",
+            "text": "<p>Assessment and instruction work together to help teachers identify emerging understandings, plan next steps, and provide targeted support through conferring, small groups, and classroom routines.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

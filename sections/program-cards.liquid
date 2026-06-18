@@ -160,7 +160,7 @@
       color: {{ program_heading_color }};
     }
     #shopify-section-{{ section.id }} #program-heading-{{ section.id }} .section-heading .text-highlight {
-      color: {{ section.settings.highlight_color | default: '#1BCDC4' }};
+      color: {{ section.settings.highlight_color | default: '#51ADA0' }};
     }
   {%- elsif section.settings.highlight_color != blank -%}
     #shopify-section-{{ section.id }} #program-heading-{{ section.id }} .section-heading .text-highlight {
@@ -409,7 +409,7 @@
       "type": "color",
       "id": "highlight_color",
       "label": "Highlight color",
-      "default": "#1BCDC4"
+      "default": "#51ADA0"
     },
     {
       "type": "header",
@@ -1103,7 +1103,7 @@
           "type": "color",
           "id": "card_bg_color",
           "label": "Card background",
-          "default": "#1BCDC4"
+          "default": "#51ADA0"
         },
         {
           "type": "color",
@@ -1364,8 +1364,8 @@
   "presets": [{
     "name": "Program Feature Cards",
     "blocks": [
-      { "type": "card", "settings": { "tag_label": "Approach", "tag_color": "#FFC300", "card_bg_color": "#1BCDC4", "text_color": "#0A1D3C" } },
-      { "type": "card", "settings": { "tag_label": "Curriculum", "tag_color": "#1BCDC4", "card_bg_color": "#0A1D3C", "text_color": "#FFFFFF" } },
+      { "type": "card", "settings": { "tag_label": "Approach", "tag_color": "#FFC300", "card_bg_color": "#51ADA0", "text_color": "#0A1D3C" } },
+      { "type": "card", "settings": { "tag_label": "Curriculum", "tag_color": "#51ADA0", "card_bg_color": "#0A1D3C", "text_color": "#FFFFFF" } },
       { "type": "card", "settings": { "tag_label": "Results", "tag_color": "#FFB6C1", "card_bg_color": "#ADE8F6", "text_color": "#0A1D3C" } }
     ]
   }]

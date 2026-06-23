@@ -1,0 +1,1523 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign configured_collection = section.settings.collection
+  if configured_collection == blank
+    assign configured_collection = collections.all
+  endif
+
+  assign showcase_collection = configured_collection
+  if collection != blank and collection.handle == configured_collection.handle
+    assign showcase_collection = collection
+  endif
+
+  assign products_per_page = section.settings.products_per_page | default: 12
+  assign sort_by = showcase_collection.sort_by | default: showcase_collection.default_sort_by
+  assign cols_desktop = section.settings.products_per_row | default: 4
+  assign cols_tablet = section.settings.products_per_row_tablet | default: 2
+  assign cols_mobile = section.settings.products_per_row_mobile | default: 1
+
+  assign col_gap_d = section.settings.column_gap | default: 0
+  if col_gap_d == 0
+    assign col_gap_d = 32
+  endif
+  assign col_gap_t = section.settings.column_gap_tablet | default: 0
+  if col_gap_t == 0
+    assign col_gap_t = col_gap_d
+  endif
+  assign col_gap_m = section.settings.column_gap_mobile | default: 0
+  if col_gap_m == 0
+    assign col_gap_m = col_gap_t
+  endif
+
+  assign row_gap_d = section.settings.row_gap | default: 0
+  if row_gap_d == 0
+    assign row_gap_d = 32
+  endif
+  assign row_gap_t = section.settings.row_gap_tablet | default: 0
+  if row_gap_t == 0
+    assign row_gap_t = row_gap_d
+  endif
+  assign row_gap_m = section.settings.row_gap_mobile | default: 0
+  if row_gap_m == 0
+    assign row_gap_m = row_gap_t
+  endif
+
+  assign collection_product_tags = showcase_collection.all_tags
+
+  assign grade_tags_joined = ''
+  assign type_tags_joined = ''
+  assign topic_tags_joined = ''
+
+  assign catalog_grade_tags = 'kindergarten::grade_kindergarten|1st grade::grade_1st_grade|2nd grade::grade_2nd_grade|3rd grade::grade_3rd_grade|4th grade::grade_4th_grade|5th grade::grade_5th_grade' | split: '|'
+  assign catalog_type_tags = 'games::type_games|Huge Sale::type_huge_sale|Read Aloud::type_read_aloud|intervention::type_intervention|minilessons::type_minilessons|additional resources::type_additional_resources|number strings::type_number_strings|PD::type_pd|Online Workshops::type_online_workshops|grade level set::type_grade_level_set|assessment::type_assessment' | split: '|'
+  assign catalog_topic_tags = 'addition::topic_addition|subtraction::topic_subtraction|multiplication::topic_multiplication|division::topic_division|place value::topic_place_value|geometry::topic_geometry|fractions::topic_fractions|data::topic_data|measurement::topic_measurement|algebra::topic_algebra|decimals::topic_decimals|time::topic_time|angles::topic_angles|area::topic_area|money::topic_money|volume::topic_volume|perimeter::topic_perimeter|proportional reasoning::topic_proportional_reasoning' | split: '|'
+
+  for entry in catalog_grade_tags
+    assign entry_parts = entry | split: '::'
+    assign tag_name = entry_parts[0]
+    assign setting_id = entry_parts[1]
+    if section.settings[setting_id] and collection_product_tags contains tag_name
+      assign tag_lookup = '||' | append: tag_name | append: '||'
+      assign grade_lookup = '||' | append: grade_tags_joined | append: '||'
+      unless grade_lookup contains tag_lookup
+        assign tag_entry = tag_name | append: '||' | append: tag_name
+        if grade_tags_joined == blank
+          assign grade_tags_joined = tag_entry
+        else
+          assign grade_tags_joined = grade_tags_joined | append: '::' | append: tag_entry
+        endif
+      endunless
+    endif
+  endfor
+
+  assign grade_custom_tags = section.settings.grade_tags_custom | newline_to_br | split: '<br />'
+  for tag in grade_custom_tags
+    assign tag_clean = tag | strip
+    if tag_clean != blank and collection_product_tags contains tag_clean
+      assign tag_lookup = '||' | append: tag_clean | append: '||'
+      assign grade_lookup = '||' | append: grade_tags_joined | append: '||'
+      unless grade_lookup contains tag_lookup
+        assign tag_entry = tag_clean | append: '||' | append: tag_clean
+        if grade_tags_joined == blank
+          assign grade_tags_joined = tag_entry
+        else
+          assign grade_tags_joined = grade_tags_joined | append: '::' | append: tag_entry
+        endif
+      endunless
+    endif
+  endfor
+
+  for entry in catalog_type_tags
+    assign entry_parts = entry | split: '::'
+    assign tag_name = entry_parts[0]
+    assign setting_id = entry_parts[1]
+    if section.settings[setting_id] and collection_product_tags contains tag_name
+      assign tag_lookup = '||' | append: tag_name | append: '||'
+      assign type_lookup = '||' | append: type_tags_joined | append: '||'
+      unless type_lookup contains tag_lookup
+        assign tag_entry = tag_name | append: '||' | append: tag_name
+        if type_tags_joined == blank
+          assign type_tags_joined = tag_entry
+        else
+          assign type_tags_joined = type_tags_joined | append: '::' | append: tag_entry
+        endif
+      endunless
+    endif
+  endfor
+
+  assign type_custom_tags = section.settings.type_tags_custom | newline_to_br | split: '<br />'
+  for tag in type_custom_tags
+    assign tag_clean = tag | strip
+    if tag_clean != blank and collection_product_tags contains tag_clean
+      assign tag_lookup = '||' | append: tag_clean | append: '||'
+      assign type_lookup = '||' | append: type_tags_joined | append: '||'
+      unless type_lookup contains tag_lookup
+        assign tag_entry = tag_clean | append: '||' | append: tag_clean
+        if type_tags_joined == blank
+          assign type_tags_joined = tag_entry
+        else
+          assign type_tags_joined = type_tags_joined | append: '::' | append: tag_entry
+        endif
+      endunless
+    endif
+  endfor
+
+  for entry in catalog_topic_tags
+    assign entry_parts = entry | split: '::'
+    assign tag_name = entry_parts[0]
+    assign setting_id = entry_parts[1]
+    if section.settings[setting_id] and collection_product_tags contains tag_name
+      assign tag_lookup = '||' | append: tag_name | append: '||'
+      assign topic_lookup = '||' | append: topic_tags_joined | append: '||'
+      unless topic_lookup contains tag_lookup
+        assign tag_entry = tag_name | append: '||' | append: tag_name
+        if topic_tags_joined == blank
+          assign topic_tags_joined = tag_entry
+        else
+          assign topic_tags_joined = topic_tags_joined | append: '::' | append: tag_entry
+        endif
+      endunless
+    endif
+  endfor
+
+  assign topic_custom_tags = section.settings.topic_tags_custom | newline_to_br | split: '<br />'
+  for tag in topic_custom_tags
+    assign tag_clean = tag | strip
+    if tag_clean != blank and collection_product_tags contains tag_clean
+      assign tag_lookup = '||' | append: tag_clean | append: '||'
+      assign topic_lookup = '||' | append: topic_tags_joined | append: '||'
+      unless topic_lookup contains tag_lookup
+        assign tag_entry = tag_clean | append: '||' | append: tag_clean
+        if topic_tags_joined == blank
+          assign topic_tags_joined = tag_entry
+        else
+          assign topic_tags_joined = topic_tags_joined | append: '::' | append: tag_entry
+        endif
+      endunless
+    endif
+  endfor
+
+  if grade_tags_joined == blank
+    assign grade_tag_entries = '' | split: '::'
+  else
+    assign grade_tag_entries = grade_tags_joined | split: '::'
+  endif
+  if type_tags_joined == blank
+    assign type_tag_entries = '' | split: '::'
+  else
+    assign type_tag_entries = type_tags_joined | split: '::'
+  endif
+  if topic_tags_joined == blank
+    assign topic_tag_entries = '' | split: '::'
+  else
+    assign topic_tag_entries = topic_tags_joined | split: '::'
+  endif
+
+  assign active_tags_joined = ''
+  for filter in showcase_collection.filters
+    if filter.param_name == 'filter.p.tag'
+      for value in filter.values
+        if value.active
+          if active_tags_joined == ''
+            assign active_tags_joined = value.value
+          else
+            assign active_tags_joined = active_tags_joined | append: '||' | append: value.value
+          endif
+        endif
+      endfor
+    endif
+  endfor
+  if active_tags_joined == ''
+    assign active_tags = '' | split: '||'
+  else
+    assign active_tags = active_tags_joined | split: '||'
+  endif
+
+  assign has_active_filters = false
+  if active_tags.size > 0
+    assign has_active_filters = true
+  endif
+-%}
+
+<section
+  id="product-catalog-{{ section.id }}"
+  class="product-catalog section-spacing"
+  {% if section.settings.heading != blank or section.settings.heading_before != blank or section.settings.heading_highlight != blank %}
+    aria-labelledby="product-catalog-heading-{{ section.id }}"
+  {% endif %}
+  data-product-catalog
+>
+  <div class="page-width product-catalog__inner">
+    {%- if section.settings.heading != blank or section.settings.heading_before != blank or section.settings.heading_highlight != blank -%}
+      <div class="product-catalog__header" id="product-catalog-heading-{{ section.id }}">
+        {% render 'highlighted-heading',
+          heading: section.settings.heading,
+          heading_font_size: section.settings.heading_font_size,
+          heading_weight: section.settings.heading_weight,
+          heading_font_color: section.settings.heading_font_color,
+          heading_before: section.settings.heading_before,
+          heading_before_font_size: section.settings.heading_before_font_size,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_before_color: section.settings.heading_before_color,
+          heading_highlight: section.settings.heading_highlight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+        {%- if section.settings.description != blank -%}
+          <div class="section-text rte product-catalog__description">{{ section.settings.description }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- paginate showcase_collection.products by products_per_page -%}
+      {%- liquid
+        assign show_toolbar_box = true
+        if section.settings.enable_sort == false and section.settings.show_product_count == false
+          assign show_toolbar_box = true
+        endif
+      -%}
+
+      {%- if show_toolbar_box -%}
+        <div class="product-catalog__toolbar-box">
+          <form
+            method="get"
+            action="{{ showcase_collection.url }}"
+            class="product-catalog__toolbar"
+            data-product-catalog-form
+            data-collection-url="{{ showcase_collection.url }}"
+            aria-label="{{ section.settings.toolbar_label | default: 'Product catalog filters' | escape }}"
+          >
+            <input type="hidden" name="section_id" value="{{ section.id }}">
+
+            <div class="product-catalog__toolbar-controls">
+              <div class="product-catalog__filter-groups">
+                {%- if grade_tag_entries.size > 0 -%}
+                <div class="product-catalog__field">
+                  <label class="product-catalog__label" for="catalog-grade-{{ section.id }}">
+                    {{ section.settings.grade_label | default: 'Grade' }}
+                  </label>
+                  <select
+                    id="catalog-grade-{{ section.id }}"
+                    class="product-catalog__select"
+                    name="catalog_grade"
+                    data-catalog-filter
+                  >
+                    <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- for entry in grade_tag_entries -%}
+                      {%- assign entry_parts = entry | split: '||' -%}
+                      {%- assign tag_value = entry_parts[0] -%}
+                      {%- assign tag_label = entry_parts[1] | default: tag_value -%}
+                      <option
+                        value="{{ tag_value | escape }}"
+                        {% if active_tags contains tag_value %}selected{% endif %}
+                      >
+                        {{ tag_label }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                </div>
+                {%- endif -%}
+
+                {%- if type_tag_entries.size > 0 -%}
+                <div class="product-catalog__field">
+                  <label class="product-catalog__label" for="catalog-type-{{ section.id }}">
+                    {{ section.settings.type_label | default: 'Type' }}
+                  </label>
+                  <select
+                    id="catalog-type-{{ section.id }}"
+                    class="product-catalog__select"
+                    name="catalog_type"
+                    data-catalog-filter
+                  >
+                    <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- for entry in type_tag_entries -%}
+                      {%- assign entry_parts = entry | split: '||' -%}
+                      {%- assign tag_value = entry_parts[0] -%}
+                      {%- assign tag_label = entry_parts[1] | default: tag_value -%}
+                      <option
+                        value="{{ tag_value | escape }}"
+                        {% if active_tags contains tag_value %}selected{% endif %}
+                      >
+                        {{ tag_label }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                </div>
+                {%- endif -%}
+
+                {%- if topic_tag_entries.size > 0 -%}
+                <div class="product-catalog__field">
+                  <label class="product-catalog__label" for="catalog-topic-{{ section.id }}">
+                    {{ section.settings.topic_label | default: 'Topics' }}
+                  </label>
+                  <select
+                    id="catalog-topic-{{ section.id }}"
+                    class="product-catalog__select"
+                    name="catalog_topic"
+                    data-catalog-filter
+                  >
+                    <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- for entry in topic_tag_entries -%}
+                      {%- assign entry_parts = entry | split: '||' -%}
+                      {%- assign tag_value = entry_parts[0] -%}
+                      {%- assign tag_label = entry_parts[1] | default: tag_value -%}
+                      <option
+                        value="{{ tag_value | escape }}"
+                        {% if active_tags contains tag_value %}selected{% endif %}
+                      >
+                        {{ tag_label }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                </div>
+                {%- endif -%}
+              </div>
+
+              {%- if section.settings.enable_sort -%}
+                <div class="product-catalog__field product-catalog__field--sort">
+                  <label class="product-catalog__label" for="catalog-sort-{{ section.id }}">
+                    {{ section.settings.sort_label | default: 'Sort by' }}
+                  </label>
+                  <select
+                    id="catalog-sort-{{ section.id }}"
+                    class="product-catalog__select"
+                    name="sort_by"
+                  >
+                    {%- for option in showcase_collection.sort_options -%}
+                      <option
+                        value="{{ option.value }}"
+                        {% if option.value == sort_by %}selected{% endif %}
+                      >
+                        {{ option.name }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                </div>
+              {%- endif -%}
+            </div>
+
+            {%- if paginate.current_page == 1 and section.settings.show_product_count -%}
+              <p class="product-catalog__count section-text">
+                {{ paginate.items }} {{ section.settings.product_count_suffix | default: 'products' }}
+              </p>
+            {%- endif -%}
+          </form>
+        </div>
+      {%- endif -%}
+
+      {%- if showcase_collection.products.size > 0 -%}
+        <div
+          class="product-catalog__grid"
+          style="
+            --product-catalog-columns: {{ cols_desktop }};
+            --product-catalog-columns-tablet: {{ cols_tablet }};
+            --product-catalog-columns-mobile: {{ cols_mobile }};
+          "
+        >
+          {%- for product in showcase_collection.products -%}
+            {% render 'product-card',
+              product: product,
+              show_vendor: section.settings.show_vendor,
+              show_badge: section.settings.show_sale_badge,
+              image_ratio: section.settings.image_ratio
+            %}
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        <p class="product-catalog__empty section-text" role="status">
+          {%- if has_active_filters -%}
+            {{ section.settings.no_match_text | default: 'No products match your filters.' }}
+          {%- else -%}
+            {{ section.settings.empty_text | default: 'No products found.' }}
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="product-catalog__pagination" aria-label="{{ section.settings.pagination_label | default: 'Product pagination' | escape }}">
+          <ul class="product-catalog__pagination-list" role="list">
+            {%- if paginate.previous -%}
+              <li>
+                <a href="{{ paginate.previous.url }}#product-catalog-{{ section.id }}" class="product-catalog__pagination-link product-catalog__pagination-link--prev">
+                  {{ section.settings.pagination_prev_label | default: 'Previous' }}
+                </a>
+              </li>
+            {%- endif -%}
+
+            {%- for part in paginate.parts -%}
+              <li>
+                {%- if part.is_link -%}
+                  <a
+                    href="{{ part.url }}#product-catalog-{{ section.id }}"
+                    class="product-catalog__pagination-link"
+                  >
+                    {{ part.title }}
+                  </a>
+                {%- else -%}
+                  <span class="product-catalog__pagination-link is-current" aria-current="page">
+                    {{ part.title }}
+                  </span>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+
+            {%- if paginate.next -%}
+              <li>
+                <a href="{{ paginate.next.url }}#product-catalog-{{ section.id }}" class="product-catalog__pagination-link product-catalog__pagination-link--next">
+                  {{ section.settings.pagination_next_label | default: 'Next' }}
+                </a>
+              </li>
+            {%- endif -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.product-catalog', pad_x: '.page-width' %}
+
+  #shopify-section-{{ section.id }} .product-catalog__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--product-catalog-columns, 4), minmax(0, 1fr));
+    column-gap: {{ col_gap_d }}px;
+    row-gap: {{ row_gap_d }}px;
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .product-catalog__grid {
+      grid-template-columns: repeat(var(--product-catalog-columns-tablet, 2), minmax(0, 1fr));
+      column-gap: {{ col_gap_t }}px;
+      row-gap: {{ row_gap_t }}px;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .product-catalog__grid {
+      grid-template-columns: repeat(var(--product-catalog-columns-mobile, 1), minmax(0, 1fr));
+      column-gap: {{ col_gap_m }}px;
+      row-gap: {{ row_gap_m }}px;
+    }
+  }
+
+  {%- if section.settings.heading_font_color != blank -%}
+    #shopify-section-{{ section.id }} #product-catalog-heading-{{ section.id }} .section-heading {
+      color: {{ section.settings.heading_font_color }};
+    }
+  {%- elsif section.settings.heading_before_color != blank -%}
+    #shopify-section-{{ section.id }} #product-catalog-heading-{{ section.id }} .section-heading {
+      color: {{ section.settings.heading_before_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #product-catalog-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.description_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .product-catalog__description,
+    #shopify-section-{{ section.id }} .product-catalog__description p {
+      font-size: {{ section.settings.description_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_weight != blank and section.settings.description_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .product-catalog__description,
+    #shopify-section-{{ section.id }} .product-catalog__description p {
+      font-weight: {{ section.settings.description_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_color != blank -%}
+    #shopify-section-{{ section.id }} .product-catalog__description,
+    #shopify-section-{{ section.id }} .product-catalog__description p,
+    #shopify-section-{{ section.id }} .product-catalog__description a,
+    #shopify-section-{{ section.id }} .product-catalog__description li {
+      color: {{ section.settings.description_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.empty_text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .product-catalog__empty {
+      font-size: {{ section.settings.empty_text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.empty_text_font_weight != blank and section.settings.empty_text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .product-catalog__empty {
+      font-weight: {{ section.settings.empty_text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.empty_text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .product-catalog__empty {
+      color: {{ section.settings.empty_text_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.card_bg_color != blank -%}
+    #shopify-section-{{ section.id }} .product-card {
+      background-color: {{ section.settings.card_bg_color }};
+    }
+  {%- endif -%}
+</style>
+
+{% schema %}
+{
+  "name": "Product Catalog",
+  "tag": "section",
+  "class": "section-product-catalog",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)",
+      "info": "Single line. Or use split heading fields below."
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Font size (single line heading)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color (single line)",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)"
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "color",
+      "id": "description_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "description_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 4,
+      "max": 48,
+      "step": 4,
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "Show product count",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "product_count_suffix",
+      "label": "Product count suffix",
+      "default": "products"
+    },
+    {
+      "type": "header",
+      "content": "Tag filters"
+    },
+    {
+      "type": "paragraph",
+      "content": "Select which product tags appear in each filter. Only tags on products in the selected collection are shown on the storefront. Selections across Grade, Type, and Topics combine with AND logic."
+    },
+    {
+      "type": "text",
+      "id": "grade_label",
+      "label": "Grade filter label",
+      "default": "Grade"
+    },
+    {
+      "type": "header",
+      "content": "Grade tags — select to include"
+    },
+    {
+      "type": "checkbox",
+      "id": "grade_kindergarten",
+      "label": "kindergarten",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "grade_1st_grade",
+      "label": "1st grade",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "grade_2nd_grade",
+      "label": "2nd grade",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "grade_3rd_grade",
+      "label": "3rd grade",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "grade_4th_grade",
+      "label": "4th grade",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "grade_5th_grade",
+      "label": "5th grade",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "grade_tags_custom",
+      "label": "Additional grade tags",
+      "info": "One product tag per line. Use for tags on your products that are not listed above."
+    },
+    {
+      "type": "text",
+      "id": "type_label",
+      "label": "Type filter label",
+      "default": "Type"
+    },
+    {
+      "type": "header",
+      "content": "Type tags — select to include"
+    },
+    {
+      "type": "checkbox",
+      "id": "type_games",
+      "label": "games",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_huge_sale",
+      "label": "Huge Sale",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_read_aloud",
+      "label": "Read Aloud",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_intervention",
+      "label": "intervention",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_minilessons",
+      "label": "minilessons",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_additional_resources",
+      "label": "additional resources",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_number_strings",
+      "label": "number strings",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_pd",
+      "label": "PD",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_online_workshops",
+      "label": "Online Workshops",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_grade_level_set",
+      "label": "grade level set",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "type_assessment",
+      "label": "assessment",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "type_tags_custom",
+      "label": "Additional type tags",
+      "info": "One product tag per line. Use for tags on your products that are not listed above."
+    },
+    {
+      "type": "text",
+      "id": "topic_label",
+      "label": "Topics filter label",
+      "default": "Topics"
+    },
+    {
+      "type": "header",
+      "content": "Topic tags — select to include"
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_addition",
+      "label": "addition",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_subtraction",
+      "label": "subtraction",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_multiplication",
+      "label": "multiplication",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_division",
+      "label": "division",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_place_value",
+      "label": "place value",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_geometry",
+      "label": "geometry",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_fractions",
+      "label": "fractions",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_data",
+      "label": "data",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_measurement",
+      "label": "measurement",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_algebra",
+      "label": "algebra",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_decimals",
+      "label": "decimals",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_time",
+      "label": "time",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_angles",
+      "label": "angles",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_area",
+      "label": "area",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_money",
+      "label": "money",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_volume",
+      "label": "volume",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_perimeter",
+      "label": "perimeter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_proportional_reasoning",
+      "label": "proportional reasoning",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "topic_tags_custom",
+      "label": "Additional topic tags",
+      "info": "One product tag per line. Use for tags on your products that are not listed above."
+    },
+    {
+      "type": "text",
+      "id": "filter_all_label",
+      "label": "Filter — all option",
+      "default": "All"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sort",
+      "label": "Show sort dropdown",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "sort_label",
+      "label": "Sort label",
+      "default": "Sort by"
+    },
+    {
+      "type": "text",
+      "id": "toolbar_label",
+      "label": "Toolbar accessibility label",
+      "default": "Product catalog filters"
+    },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_badge",
+      "label": "Show sale badge",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (4:5)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty state text",
+      "default": "No products found.",
+      "info": "Shown when the collection has no products."
+    },
+    {
+      "type": "text",
+      "id": "no_match_text",
+      "label": "No match text",
+      "default": "No products match your filters.",
+      "info": "Shown when filters are active but no products match."
+    },
+    {
+      "type": "color",
+      "id": "empty_text_font_color",
+      "label": "Empty state color"
+    },
+    {
+      "type": "range",
+      "id": "empty_text_font_size",
+      "label": "Empty state font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "empty_text_font_weight",
+      "label": "Empty state font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "text",
+      "id": "pagination_label",
+      "label": "Pagination accessibility label",
+      "default": "Product pagination"
+    },
+    {
+      "type": "text",
+      "id": "pagination_prev_label",
+      "label": "Previous button label",
+      "default": "Previous"
+    },
+    {
+      "type": "text",
+      "id": "pagination_next_label",
+      "label": "Next button label",
+      "default": "Next"
+    },
+    {
+      "type": "header",
+      "content": "Grid layout"
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "label": "Products per row (desktop)",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 4,
+      "info": "1024px and above."
+    },
+    {
+      "type": "range",
+      "id": "products_per_row_tablet",
+      "label": "Products per row (tablet)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "info": "768px–1023px."
+    },
+    {
+      "type": "range",
+      "id": "products_per_row_mobile",
+      "label": "Products per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1,
+      "info": "767px and below."
+    },
+    {
+      "type": "header",
+      "content": "Grid spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "0 = 32px default."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Column gap (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Column gap (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Row gap (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "0 = 32px default."
+    },
+    {
+      "type": "range",
+      "id": "row_gap_tablet",
+      "label": "Row gap (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "row_gap_mobile",
+      "label": "Row gap (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Catalog",
+      "settings": {
+        "heading_before": "Browse ",
+        "heading_highlight": "Resources",
+        "description": "<p>Filter by grade, type, and topic to find the right materials for your classroom.</p>",
+        "products_per_page": 12,
+        "products_per_row": 4,
+        "products_per_row_tablet": 2,
+        "products_per_row_mobile": 1
+      }
+    }
+  ]
+}
+{% endschema %}

@@ -8,34 +8,74 @@
   assign header_gap = section.settings.header_spacing | default: 48
   assign cta_gap = section.settings.cta_spacing_top | default: 48
   assign bar_text_color = section.settings.bar_text_color | default: '#FFFFFF'
+
+  assign has_bg_desktop = false
+  assign bg_url = blank
+  if section.settings.background_image != blank
+    assign has_bg_desktop = true
+    assign bg_url = section.settings.background_image | image_url: width: 3840
+  endif
+
+  assign has_bg_tablet = false
+  assign bg_tablet_url = blank
+  if section.settings.background_image_tablet != blank
+    assign has_bg_tablet = true
+    assign bg_tablet_url = section.settings.background_image_tablet | image_url: width: 2400
+  endif
+
+  assign has_bg_mobile = false
+  assign bg_mobile_url = blank
+  if section.settings.background_image_mobile != blank
+    assign has_bg_mobile = true
+    assign bg_mobile_url = section.settings.background_image_mobile | image_url: width: 1200
+  endif
+
+  assign has_bg_4k = false
+  assign bg_4k_url = blank
+  if section.settings.background_image_4k != blank
+    assign has_bg_4k = true
+    assign bg_4k_url = section.settings.background_image_4k | image_url: width: 5120
+  endif
+
+  assign bg_layered = false
+  if has_bg_mobile or has_bg_tablet or has_bg_4k
+    assign bg_layered = true
+  endif
 -%}
+
+{%- if has_bg_mobile -%}
+  <div
+    class="intervention-approach__bg intervention-approach__bg--mobile"
+    style="background-image: url({{ bg_mobile_url }});"
+    aria-hidden="true"
+  ></div>
+{%- endif -%}
+{%- if has_bg_tablet -%}
+  <div
+    class="intervention-approach__bg intervention-approach__bg--tablet"
+    style="background-image: url({{ bg_tablet_url }});"
+    aria-hidden="true"
+  ></div>
+{%- endif -%}
+{%- if has_bg_desktop -%}
+  <div
+    class="intervention-approach__bg{% if bg_layered %} intervention-approach__bg--desktop{% endif %}"
+    style="background-image: url({{ bg_url }});"
+    aria-hidden="true"
+  ></div>
+{%- endif -%}
+{%- if has_bg_4k -%}
+  <div
+    class="intervention-approach__bg intervention-approach__bg--4k"
+    style="background-image: url({{ bg_4k_url }});"
+    aria-hidden="true"
+  ></div>
+{%- endif -%}
 
 <section
   class="intervention-approach section-spacing"
-  style="background-color: {{ section.settings.background_color | default: '#F0F1F3' }};"
   aria-labelledby="intervention-heading-{{ section.id }}"
 >
-  {%- if section.settings.wave_top_left != blank -%}
-    <div class="intervention-approach__wave intervention-approach__wave--top-left" aria-hidden="true">
-      {% render 'responsive-image',
-        image: section.settings.wave_top_left,
-        alt: section.settings.wave_top_left_alt,
-        class: 'intervention-approach__wave-image',
-        width: 400
-      %}
-    </div>
-  {%- endif -%}
-  {%- if section.settings.wave_bottom_right != blank -%}
-    <div class="intervention-approach__wave intervention-approach__wave--bottom-right" aria-hidden="true">
-      {% render 'responsive-image',
-        image: section.settings.wave_bottom_right,
-        alt: section.settings.wave_bottom_right_alt,
-        class: 'intervention-approach__wave-image',
-        width: 400
-      %}
-    </div>
-  {%- endif -%}
-
   <div class="page-width">
     <div class="intervention-approach__inner">
       <header class="intervention-approach__header text-center">
@@ -130,10 +170,98 @@
   {% render 'section-spacing-gap', section: section, selector: '.intervention-approach__bars', gap_id: 'bars_gap', stack_breakpoint: '0' %}
   {% render 'section-spacing-gap', section: section, selector: '.intervention-approach__bar-inner', gap_id: 'bar_inner_gap', stack_breakpoint: '0' %}
 
-  #shopify-section-{{ section.id }} .intervention-approach {
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.background_color | default: '#F0F1F3' }};
     position: relative;
     overflow: hidden;
   }
+  #shopify-section-{{ section.id }} .intervention-approach__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-repeat: no-repeat;
+  }
+  #shopify-section-{{ section.id }} .intervention-approach {
+    position: relative;
+    z-index: 1;
+  }
+  {%- liquid
+    assign bg_pos_base = section.settings.background_position | default: 'center center'
+    assign bg_pos_4k = section.settings.background_position_4k | default: bg_pos_base
+    assign bg_mode_mobile = section.settings.background_size_mobile | default: section.settings.background_size | default: 'fit_width'
+    assign bg_mode_tablet = section.settings.background_size_tablet | default: section.settings.background_size | default: 'fit_width'
+    assign bg_mode_desktop = section.settings.background_size | default: 'fit_width'
+    assign bg_mode_4k = section.settings.background_size_4k | default: section.settings.background_size | default: 'fit_width'
+  -%}
+  {%- capture bg_size_mobile -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_mobile %}{%- endcapture -%}
+  {%- capture bg_size_tablet -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_tablet %}{%- endcapture -%}
+  {%- capture bg_size_desktop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_desktop %}{%- endcapture -%}
+  {%- capture bg_size_4k -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_4k %}{%- endcapture -%}
+  #shopify-section-{{ section.id }} .intervention-approach__bg {
+    background-size: {{ bg_size_mobile | strip }};
+    background-position: {{ bg_pos_base }};
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .intervention-approach__bg {
+      background-size: {{ bg_size_tablet | strip }};
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .intervention-approach__bg {
+      background-size: {{ bg_size_desktop | strip }};
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }} .intervention-approach__bg {
+      background-size: {{ bg_size_4k | strip }};
+      background-position: {{ bg_pos_4k }};
+    }
+  }
+  {%- if has_bg_mobile -%}
+    @media screen and (min-width: 768px) {
+      #shopify-section-{{ section.id }} .intervention-approach__bg--mobile {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- if has_bg_mobile -%}
+    {%- if has_bg_desktop or has_bg_tablet or has_bg_4k -%}
+    @media screen and (max-width: 767px) {
+      #shopify-section-{{ section.id }} .intervention-approach__bg--desktop,
+      #shopify-section-{{ section.id }} .intervention-approach__bg--tablet,
+      #shopify-section-{{ section.id }} .intervention-approach__bg--4k {
+        display: none;
+      }
+    }
+    {%- endif -%}
+  {%- endif -%}
+  {%- if has_bg_tablet and has_bg_desktop -%}
+    @media screen and (min-width: 768px) and (max-width: 1023px) {
+      #shopify-section-{{ section.id }} .intervention-approach__bg--desktop {
+        display: none;
+      }
+    }
+    @media screen and (min-width: 1024px) {
+      #shopify-section-{{ section.id }} .intervention-approach__bg--tablet {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- if has_bg_4k -%}
+    @media screen and (max-width: 2559px) {
+      #shopify-section-{{ section.id }} .intervention-approach__bg--4k {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- if has_bg_4k and has_bg_desktop -%}
+    @media screen and (min-width: 2560px) {
+      #shopify-section-{{ section.id }} .intervention-approach__bg--desktop {
+        display: none;
+      }
+    }
+  {%- endif -%}
   #shopify-section-{{ section.id }} .intervention-approach__inner {
     position: relative;
     z-index: 1;
@@ -148,27 +276,6 @@
     max-width: 900px;
     margin-inline: auto;
     margin-top: 1rem;
-  }
-  #shopify-section-{{ section.id }} .intervention-approach__wave {
-    position: absolute;
-    z-index: 0;
-    pointer-events: none;
-    line-height: 0;
-  }
-  #shopify-section-{{ section.id }} .intervention-approach__wave--top-left {
-    top: 0;
-    left: 0;
-    max-width: min(35vw, 280px);
-  }
-  #shopify-section-{{ section.id }} .intervention-approach__wave--bottom-right {
-    right: 0;
-    bottom: 0;
-    max-width: min(35vw, 280px);
-  }
-  #shopify-section-{{ section.id }} .intervention-approach__wave-image {
-    width: 100%;
-    height: auto;
-    display: block;
   }
   #shopify-section-{{ section.id }} .intervention-approach__bars {
     display: flex;
@@ -341,8 +448,121 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background color",
-      "default": "#F0F1F3"
+      "label": "Background fallback color",
+      "default": "#F0F1F3",
+      "info": "Shown behind the image or when no image is uploaded."
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image — desktop (1024px–2559px)",
+      "info": "Upload the full section background artwork. Recommended width 2560px or larger."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_4k",
+      "label": "Background image — 4K (2560px and up)",
+      "info": "Optional. High-resolution artwork for large displays. If empty, the desktop image is used on 4K screens."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_tablet",
+      "label": "Background image — tablet (768px–1023px)",
+      "info": "Optional. If empty, the desktop image is used on tablet when set."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image — mobile (767px and below)",
+      "info": "Optional. If empty, the tablet or desktop image is used on phones."
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top center" },
+        { "value": "left top", "label": "Top left" },
+        { "value": "right top", "label": "Top right" },
+        { "value": "left center", "label": "Center left" },
+        { "value": "right center", "label": "Center right" },
+        { "value": "center bottom", "label": "Bottom center" },
+        { "value": "left bottom", "label": "Bottom left" },
+        { "value": "right bottom", "label": "Bottom right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_size",
+      "label": "Background fit — desktop (1024px–2559px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_tablet",
+      "label": "Background fit — tablet (768px–1023px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_mobile",
+      "label": "Background fit — mobile (767px and below)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_4k",
+      "label": "Background fit — 4K (2560px and up)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_position_4k",
+      "label": "Background position — 4K (2560px and up)",
+      "options": [
+        { "value": "", "label": "Use default" },
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top center" },
+        { "value": "left top", "label": "Top left" },
+        { "value": "right top", "label": "Top right" },
+        { "value": "left center", "label": "Center left" },
+        { "value": "right center", "label": "Center right" },
+        { "value": "center bottom", "label": "Bottom center" },
+        { "value": "left bottom", "label": "Bottom left" },
+        { "value": "right bottom", "label": "Bottom right" }
+      ],
+      "default": "",
+      "info": "Optional. Leave on “Use default” to use the background position above."
     },
     {
       "type": "range",
@@ -353,28 +573,6 @@
       "step": 20,
       "unit": "px",
       "default": 1200
-    },
-    {
-      "type": "image_picker",
-      "id": "wave_top_left",
-      "label": "Decorative wave (top left)"
-    },
-    {
-      "type": "text",
-      "id": "wave_top_left_alt",
-      "label": "Wave top left alt text",
-      "default": "Decorative wave"
-    },
-    {
-      "type": "image_picker",
-      "id": "wave_bottom_right",
-      "label": "Decorative wave (bottom right)"
-    },
-    {
-      "type": "text",
-      "id": "wave_bottom_right_alt",
-      "label": "Wave bottom right alt text",
-      "default": "Decorative wave"
     },
     {
       "type": "header",

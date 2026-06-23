@@ -69,6 +69,11 @@
 
 <style>
   {% render 'section-spacing-styles', root: '.intro-content', pad_x: '.page-width' %}
+  {%- if section.settings.background_color != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
   {%- liquid
     assign intro_heading_base_color = section.settings.heading_before_color
     if intro_heading_base_color == blank
@@ -175,6 +180,16 @@
   "tag": "section",
   "class": "section-intro-content",
   "settings": [
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "info": "Empty = no background color."
+    },
     {
       "type": "header",
       "content": "Heading"

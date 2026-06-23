@@ -267,4 +267,101 @@
 
     productShowcaseFetch(form, urlParams);
   });
+
+  /* --- Product catalog multi-tag filters (AND across Grade / Type / Topics) --- */
+  function productCatalogSyncForm(form, params) {
+    if (!form) return;
+    var tagValues = params.getAll('filter.p.tag');
+    form.querySelectorAll('[data-catalog-filter]').forEach(function (select) {
+      var matched = false;
+      for (var i = 0; i < select.options.length; i++) {
+        var option = select.options[i];
+        if (option.value && tagValues.indexOf(option.value) !== -1) {
+          select.value = option.value;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) select.value = '';
+    });
+    var sortSelect = form.querySelector('[name="sort_by"]');
+    if (sortSelect && params.has('sort_by')) {
+      sortSelect.value = params.get('sort_by');
+    }
+  }
+
+  function productCatalogBuildParams(form) {
+    var params = new URLSearchParams();
+    form.querySelectorAll('[data-catalog-filter]').forEach(function (select) {
+      if (select.value) params.append('filter.p.tag', select.value);
+    });
+    var sortSelect = form.querySelector('[name="sort_by"]');
+    if (sortSelect && sortSelect.value) params.set('sort_by', sortSelect.value);
+    return params;
+  }
+
+  function productCatalogFetch(form, paramOverride) {
+    var sectionIdInput = form.querySelector('input[name="section_id"]');
+    var sectionId = sectionIdInput ? sectionIdInput.value : '';
+    var shopifySection = sectionId ? document.getElementById('shopify-section-' + sectionId) : null;
+    var collectionUrl = form.dataset.collectionUrl || form.getAttribute('action') || window.location.pathname;
+    var collectionPath = collectionUrl.split('?')[0];
+
+    var params;
+    if (paramOverride) {
+      params = new URLSearchParams(paramOverride);
+      params.delete('page');
+    } else {
+      params = productCatalogBuildParams(form);
+    }
+
+    var displayUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+
+    if (!sectionId || !shopifySection) {
+      window.location.href = collectionPath + (params.toString() ? '?' + params.toString() : '');
+      return;
+    }
+
+    var fetchParams = new URLSearchParams(params);
+    fetchParams.set('sections', sectionId);
+
+    fetch(collectionPath + '?' + fetchParams.toString())
+      .then(function (response) {
+        if (!response.ok) throw new Error('Section fetch failed');
+        return response.json();
+      })
+      .then(function (data) {
+        if (data[sectionId]) {
+          productShowcaseReplaceSection(shopifySection, sectionId, data[sectionId]);
+          productCatalogSyncForm(
+            shopifySection.querySelector('[data-product-catalog-form]'),
+            params
+          );
+          window.history.replaceState({}, '', displayUrl + '#product-catalog-' + sectionId);
+          return;
+        }
+        window.location.href = collectionPath + (params.toString() ? '?' + params.toString() : '');
+      })
+      .catch(function () {
+        window.location.href = collectionPath + (params.toString() ? '?' + params.toString() : '');
+      });
+  }
+
+  document.addEventListener('change', function (event) {
+    var select = event.target;
+    if (!select.matches || !select.matches('[data-product-catalog-form] select')) return;
+
+    var form = select.closest('[data-product-catalog-form]');
+    if (!form) return;
+
+    productCatalogFetch(form);
+  });
+
+  document.querySelectorAll('[data-product-catalog-form]').forEach(function (form) {
+    var urlParams = new URLSearchParams(window.location.search);
+    var hasFilterOrSort = urlParams.has('sort_by') || urlParams.getAll('filter.p.tag').length > 0;
+    if (!hasFilterOrSort) return;
+
+    productCatalogFetch(form, urlParams);
+  });
 })();

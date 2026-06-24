@@ -1,11 +1,30 @@
 {% render 'section-font-vars', section: section %}
 {% render 'section-column-widths', section: section, grid_class: 'program-cards__header' %}
 
-<section class="program-cards section-spacing" aria-labelledby="program-heading-{{ section.id }}">
+{%- liquid
+  assign program_cards_bg_url = blank
+  if section.settings.background_image != blank
+    assign program_cards_bg_url = section.settings.background_image | image_url: width: 2400
+  endif
+-%}
 
+{%- if program_cards_bg_url != blank -%}
+  <div class="program-cards__bg" aria-hidden="true">
+    <img
+      class="program-cards__bg-image"
+      src="{{ program_cards_bg_url }}"
+      alt=""
+      width="{{ section.settings.background_image.width }}"
+      height="{{ section.settings.background_image.height }}"
+      loading="lazy"
+    >
+  </div>
+{%- endif -%}
+
+<section class="program-cards section-spacing" aria-labelledby="program-heading-{{ section.id }}">
   <div class="page-width">
     <div class="program-cards__header">
-      <div class="program-cards__header-left" id="program-heading-{{ section.id }}">
+      <div class="program-cards__header-left text-{{ section.settings.heading_text_alignment | default: 'left' }}" id="program-heading-{{ section.id }}">
         {%- liquid
           assign program_heading_font_color = section.settings.heading_font_color
           if program_heading_font_color == blank
@@ -38,12 +57,33 @@
       {%- endif -%}
     </div>
 
+    {%- liquid
+      assign pc_gap_d = section.settings.cards_grid_gap | default: 0
+      if pc_gap_d == 0
+        assign pc_gap_d = 24
+      endif
+      assign pc_gap_t = section.settings.cards_grid_gap_tablet | default: 0
+      if pc_gap_t == 0
+        assign pc_gap_t = pc_gap_d
+      endif
+      assign pc_gap_m = section.settings.cards_grid_gap_mobile | default: 0
+      if pc_gap_m == 0
+        assign pc_gap_m = pc_gap_t
+      endif
+      assign pc_grid_justify = section.settings.grid_alignment | default: 'center'
+      if pc_grid_justify == 'stretch' or pc_grid_justify == 'start'
+        assign pc_grid_justify = 'flex-start'
+      endif
+    -%}
     <div
       class="program-cards__grid"
       style="
         --program-cards-columns: {{ section.settings.cards_per_row | default: 3 }};
         --program-cards-columns-tablet: {{ section.settings.cards_per_row_tablet | default: 2 }};
-        --program-cards-justify: {{ section.settings.grid_alignment | default: 'stretch' }};
+        --program-cards-gap: {{ pc_gap_d }}px;
+        --program-cards-gap-tablet: {{ pc_gap_t }}px;
+        --program-cards-gap-mobile: {{ pc_gap_m }}px;
+        --program-cards-justify: {{ pc_grid_justify }};
       "
     >
       {%- for block in section.blocks -%}
@@ -144,6 +184,36 @@
 </section>
 
 <style>
+  #shopify-section-{{ section.id }} {
+    position: relative;
+    overflow: hidden;
+  }
+  {%- if section.settings.background_color != blank and section.settings.background_color != 'rgba(0,0,0,0)' -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .program-cards__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #shopify-section-{{ section.id }} .program-cards__bg-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  {%- if program_cards_bg_url != blank -%}
+    #shopify-section-{{ section.id }} .program-cards__bg-image {
+      object-fit: {{ section.settings.background_object_fit | default: 'cover' }};
+      object-position: {{ section.settings.background_position | default: 'center center' }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .program-cards {
+    position: relative;
+    z-index: 1;
+  }
   {% render 'section-spacing-styles', root: '.program-cards', pad_x: '.page-width' %}
   {% render 'section-spacing-gap', section: section, selector: '.program-cards__grid', gap_id: 'cards_grid_gap', stack_breakpoint: '0' %}
   {%- liquid
@@ -208,8 +278,15 @@
     width: 100%;
   }
   #shopify-section-{{ section.id }} .program-cards__grid {
-    grid-template-columns: repeat(var(--program-cards-columns, 3), minmax(0, 1fr));
-    justify-content: var(--program-cards-justify, stretch);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: var(--program-cards-justify, center);
+  }
+  #shopify-section-{{ section.id }} .program-card {
+    flex: 0 0 calc((100% - (var(--program-cards-columns, 3) - 1) * var(--program-cards-gap, 24px)) / var(--program-cards-columns, 3));
+    max-width: calc((100% - (var(--program-cards-columns, 3) - 1) * var(--program-cards-gap, 24px)) / var(--program-cards-columns, 3));
+    min-width: 0;
+    box-sizing: border-box;
   }
   #shopify-section-{{ section.id }} .program-card__icon {
     width: var(--icon-size, 48px);
@@ -315,53 +392,16 @@
       }
     {%- endif -%}
   {%- endfor -%}
-  {%- comment -%}
-    justify-content on the grid only shifts column tracks when they do not fill the row.
-    repeat(N, 1fr) always grows to 100% width, so a lone card on the last row stays in column 1.
-    When alignment is center, span the orphan and justify-self: center at one column width.
-  {%- endcomment -%}
-  {%- if section.settings.grid_alignment == 'center' -%}
-    {%- liquid
-      assign cols_d = section.settings.cards_per_row | default: 3
-      assign cols_t = section.settings.cards_per_row_tablet | default: 2
-      assign gap_d = section.settings.cards_grid_gap | default: 0
-      if gap_d == 0
-        assign gap_d = 24
-      endif
-      assign gap_t = section.settings.cards_grid_gap_tablet | default: 0
-      if gap_t == 0
-        assign gap_t = gap_d
-      endif
-    -%}
-    {%- if cols_d > 1 -%}
-      {%- assign gap_sum_d = cols_d | minus: 1 | times: gap_d -%}
-      @media screen and (min-width: 1024px) {
-        #shopify-section-{{ section.id }} .program-cards__grid .program-card:last-child:nth-child({{ cols_d }}n+1) {
-          grid-column: 1 / -1;
-          justify-self: center;
-          width: calc((100% - {{ gap_sum_d }}px) / {{ cols_d }});
-        }
-      }
-    {%- endif -%}
-    {%- if cols_t > 1 -%}
-      {%- assign gap_sum_t = cols_t | minus: 1 | times: gap_t -%}
-      @media screen and (min-width: 768px) and (max-width: 1023px) {
-        #shopify-section-{{ section.id }} .program-cards__grid .program-card:last-child:nth-child({{ cols_t }}n+1) {
-          grid-column: 1 / -1;
-          justify-self: center;
-          width: calc((100% - {{ gap_sum_t }}px) / {{ cols_t }});
-        }
-      }
-    {%- endif -%}
-  {%- endif -%}
-  @media screen and (max-width: 1023px) {
-    #shopify-section-{{ section.id }} .program-cards__grid {
-      grid-template-columns: repeat(var(--program-cards-columns-tablet, 2), minmax(0, 1fr));
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .program-card {
+      flex-basis: calc((100% - (var(--program-cards-columns-tablet, 2) - 1) * var(--program-cards-gap-tablet, 24px)) / var(--program-cards-columns-tablet, 2));
+      max-width: calc((100% - (var(--program-cards-columns-tablet, 2) - 1) * var(--program-cards-gap-tablet, 24px)) / var(--program-cards-columns-tablet, 2));
     }
   }
   @media screen and (max-width: 767px) {
-    #shopify-section-{{ section.id }} .program-cards__grid {
-      grid-template-columns: 1fr;
+    #shopify-section-{{ section.id }} .program-card {
+      flex: 0 0 100%;
+      max-width: 100%;
     }
   }
 </style>
@@ -571,11 +611,22 @@
       "id": "column_1_width",
       "label": "Heading column width",
       "min": 25,
-      "max": 75,
+      "max": 100,
       "step": 5,
       "unit": "%",
       "default": 50,
-      "info": "Description column uses the remaining width. Stacks on tablet and below."
+      "info": "Description column uses the remaining width. At 100%, description stacks below on desktop. Stacks on tablet and below."
+    },
+    {
+      "type": "select",
+      "id": "heading_text_alignment",
+      "label": "Heading text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
     },
     {
       "type": "range",
@@ -672,7 +723,7 @@
       "type": "select",
       "id": "grid_alignment",
       "label": "Grid alignment",
-      "info": "With 1fr columns, Start/End/Center mainly affect incomplete last rows (e.g. one card centered when tablet is 2 columns and you have 3 cards). Stretch fills the row.",
+      "info": "Center aligns incomplete last rows (e.g. 2 cards centered under a row of 3). Stretch/Start keeps orphans on the left.",
       "options": [
         { "value": "stretch", "label": "Stretch" },
         { "value": "start", "label": "Start" },
@@ -682,7 +733,7 @@
         { "value": "space-around", "label": "Space around" },
         { "value": "space-evenly", "label": "Space evenly" }
       ],
-      "default": "stretch"
+      "default": "center"
     },
     {
       "type": "text",
@@ -719,6 +770,46 @@
         { "value": "800", "label": "Extra-bold (800)" }
       ],
       "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "info": "Shows behind the image and when no background image is set. Empty = no background color."
+    },
+    {
+      "type": "select",
+      "id": "background_object_fit",
+      "label": "Background object fit",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "fill", "label": "Fill (stretch)" },
+        { "value": "none", "label": "None (natural size)" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top" },
+        { "value": "center bottom", "label": "Bottom" },
+        { "value": "left center", "label": "Left" },
+        { "value": "right center", "label": "Right" }
+      ],
+      "default": "center center"
     },
     {
       "type": "header",

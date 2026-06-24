@@ -9,9 +9,6 @@
 
 <section
   class="text-content section-spacing"
-  {% if section.settings.background_color != blank and section.settings.background_color != 'rgba(0,0,0,0)' %}
-    style="background-color: {{ section.settings.background_color }};"
-  {% endif %}
   aria-labelledby="text-content-heading-{{ section.id }}"
 >
   <div class="page-width">
@@ -55,6 +52,11 @@
 
 <style>
   {% render 'section-spacing-styles', root: '.text-content', pad_x: '.page-width' %}
+  {%- if section.settings.background_color != blank and section.settings.background_color != 'rgba(0,0,0,0)' -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
   #shopify-section-{{ section.id }} .text-content__inner {
     display: flex;
     flex-direction: column;

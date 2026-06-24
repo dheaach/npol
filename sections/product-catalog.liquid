@@ -1,18 +1,86 @@
 {% render 'section-font-vars', section: section %}
 
 {%- liquid
-  assign configured_collection = section.settings.collection
-  if configured_collection == blank
-    assign configured_collection = collections.all
-  endif
-
-  assign showcase_collection = configured_collection
-  if collection != blank and collection.handle == configured_collection.handle
-    assign showcase_collection = collection
-  endif
-
   assign products_per_page = section.settings.products_per_page | default: 12
-  assign sort_by = showcase_collection.sort_by | default: showcase_collection.default_sort_by
+  assign active_grade_handle = ''
+  assign grade_collections_joined = ''
+
+  assign grade_catalog = 'all::grade_collection_all::grade_option_label_all|1::grade_collection_1::grade_option_label_1|2::grade_collection_2::grade_option_label_2|3::grade_collection_3::grade_option_label_3|4::grade_collection_4::grade_option_label_4|5::grade_collection_5::grade_option_label_5' | split: '|'
+  assign grade_only_catalog = '1::grade_collection_1|2::grade_collection_2|3::grade_collection_3|4::grade_collection_4|5::grade_collection_5' | split: '|'
+
+  for entry in grade_catalog
+    assign entry_parts = entry | split: '::'
+    assign grade_key = entry_parts[0]
+    assign grade_coll = section.settings[entry_parts[1]]
+    if grade_key == 'all'
+      if grade_coll != blank
+        assign grade_display = section.settings[entry_parts[2]]
+        if grade_display == blank
+          assign grade_display = 'All'
+        endif
+        assign grade_entry = grade_coll.handle | append: '||' | append: grade_display | append: '||' | append: grade_coll.url
+        if grade_collections_joined == blank
+          assign grade_collections_joined = grade_entry
+        else
+          assign grade_collections_joined = grade_collections_joined | append: '::' | append: grade_entry
+        endif
+      else
+        assign grade_display = section.settings.grade_option_label_all | default: 'All'
+        assign grade_entry = 'all||' | append: grade_display | append: '||'
+        if grade_collections_joined == blank
+          assign grade_collections_joined = grade_entry
+        else
+          assign grade_collections_joined = grade_collections_joined | append: '::' | append: grade_entry
+        endif
+      endif
+    elsif grade_coll != blank
+      assign grade_display = section.settings[entry_parts[2]]
+      if grade_display == blank
+        assign grade_display = grade_coll.title
+      endif
+      assign grade_entry = grade_coll.handle | append: '||' | append: grade_display | append: '||' | append: grade_coll.url
+      if grade_collections_joined == blank
+        assign grade_collections_joined = grade_entry
+      else
+        assign grade_collections_joined = grade_collections_joined | append: '::' | append: grade_entry
+      endif
+    endif
+  endfor
+
+  if grade_collections_joined == blank
+    assign grade_collection_entries = '' | split: '::'
+  else
+    assign grade_collection_entries = grade_collections_joined | split: '::'
+  endif
+
+  comment
+    all = dedicated all-grades collection, or merged products from grades 1–5.
+    Single grade = global collection on collection URLs.
+  endcomment
+  assign showcase_collection = nil
+  assign active_grade_handle = ''
+  assign catalog_merged_mode = false
+  assign all_grades_collection = section.settings.grade_collection_all
+
+  if collection != blank
+    assign showcase_collection = collection
+    if all_grades_collection != blank and collection.handle == all_grades_collection.handle
+      assign active_grade_handle = 'all'
+    else
+      assign active_grade_handle = collection.handle
+    endif
+  elsif all_grades_collection != blank
+    assign showcase_collection = all_grades_collection
+    assign active_grade_handle = 'all'
+  else
+    assign catalog_merged_mode = true
+    assign active_grade_handle = 'all'
+  endif
+
+  assign sort_by = ''
+  if showcase_collection != blank
+    assign sort_by = showcase_collection.sort_by | default: showcase_collection.default_sort_by
+  endif
   assign cols_desktop = section.settings.products_per_row | default: 4
   assign cols_tablet = section.settings.products_per_row_tablet | default: 2
   assign cols_mobile = section.settings.products_per_row_mobile | default: 1
@@ -43,83 +111,76 @@
     assign row_gap_m = row_gap_t
   endif
 
-  assign collection_product_tags = showcase_collection.all_tags
+  assign catalog_tags_lookup = ''
+  if catalog_merged_mode
+    for entry in grade_only_catalog
+      assign entry_parts = entry | split: '::'
+      assign merge_coll = section.settings[entry_parts[1]]
+      if merge_coll != blank
+        for tag in merge_coll.all_tags
+          assign tag_lookup = '||' | append: tag | append: '||'
+          unless catalog_tags_lookup contains tag_lookup
+            assign catalog_tags_lookup = catalog_tags_lookup | append: tag_lookup
+          endunless
+        endfor
+      endif
+    endfor
+  elsif showcase_collection != blank
+    for tag in showcase_collection.all_tags
+      assign catalog_tags_lookup = catalog_tags_lookup | append: '||' | append: tag | append: '||'
+    endfor
+  endif
 
-  assign grade_tags_joined = ''
+  assign active_grade_option_value = ''
+  if catalog_merged_mode
+    assign active_grade_option_value = 'all'
+  elsif showcase_collection != blank
+    assign active_grade_option_value = showcase_collection.handle
+  endif
+
+  assign catalog_type_tags = 'additional resources::type_additional_resources|games::type_games|intervention::type_intervention|minilessons::type_minilessons|number strings::type_number_strings|Huge Sale::type_on_sale' | split: '|'
+  assign catalog_topic_tags = 'addition::topic_addition|subtraction::topic_subtraction|multiplication::topic_multiplication|division::topic_division|fractions::topic_fractions|decimals::topic_decimals|place value::topic_place_value|geometry::topic_geometry|measurement::topic_measurement|time::topic_time' | split: '|'
   assign type_tags_joined = ''
   assign topic_tags_joined = ''
-
-  assign catalog_grade_tags = 'kindergarten::grade_kindergarten|1st grade::grade_1st_grade|2nd grade::grade_2nd_grade|3rd grade::grade_3rd_grade|4th grade::grade_4th_grade|5th grade::grade_5th_grade' | split: '|'
-  assign catalog_type_tags = 'games::type_games|Huge Sale::type_huge_sale|Read Aloud::type_read_aloud|intervention::type_intervention|minilessons::type_minilessons|additional resources::type_additional_resources|number strings::type_number_strings|PD::type_pd|Online Workshops::type_online_workshops|grade level set::type_grade_level_set|assessment::type_assessment' | split: '|'
-  assign catalog_topic_tags = 'addition::topic_addition|subtraction::topic_subtraction|multiplication::topic_multiplication|division::topic_division|place value::topic_place_value|geometry::topic_geometry|fractions::topic_fractions|data::topic_data|measurement::topic_measurement|algebra::topic_algebra|decimals::topic_decimals|time::topic_time|angles::topic_angles|area::topic_area|money::topic_money|volume::topic_volume|perimeter::topic_perimeter|proportional reasoning::topic_proportional_reasoning' | split: '|'
-
-  for entry in catalog_grade_tags
-    assign entry_parts = entry | split: '::'
-    assign tag_name = entry_parts[0]
-    assign setting_id = entry_parts[1]
-    if section.settings[setting_id] and collection_product_tags contains tag_name
-      assign tag_lookup = '||' | append: tag_name | append: '||'
-      assign grade_lookup = '||' | append: grade_tags_joined | append: '||'
-      unless grade_lookup contains tag_lookup
-        assign tag_entry = tag_name | append: '||' | append: tag_name
-        if grade_tags_joined == blank
-          assign grade_tags_joined = tag_entry
-        else
-          assign grade_tags_joined = grade_tags_joined | append: '::' | append: tag_entry
-        endif
-      endunless
-    endif
-  endfor
-
-  assign grade_custom_tags = section.settings.grade_tags_custom | newline_to_br | split: '<br />'
-  for tag in grade_custom_tags
-    assign tag_clean = tag | strip
-    if tag_clean != blank and collection_product_tags contains tag_clean
-      assign tag_lookup = '||' | append: tag_clean | append: '||'
-      assign grade_lookup = '||' | append: grade_tags_joined | append: '||'
-      unless grade_lookup contains tag_lookup
-        assign tag_entry = tag_clean | append: '||' | append: tag_clean
-        if grade_tags_joined == blank
-          assign grade_tags_joined = tag_entry
-        else
-          assign grade_tags_joined = grade_tags_joined | append: '::' | append: tag_entry
-        endif
-      endunless
-    endif
-  endfor
 
   for entry in catalog_type_tags
     assign entry_parts = entry | split: '::'
     assign tag_name = entry_parts[0]
     assign setting_id = entry_parts[1]
-    if section.settings[setting_id] and collection_product_tags contains tag_name
+    if section.settings[setting_id]
       assign tag_lookup = '||' | append: tag_name | append: '||'
-      assign type_lookup = '||' | append: type_tags_joined | append: '||'
-      unless type_lookup contains tag_lookup
-        assign tag_entry = tag_name | append: '||' | append: tag_name
-        if type_tags_joined == blank
-          assign type_tags_joined = tag_entry
-        else
-          assign type_tags_joined = type_tags_joined | append: '::' | append: tag_entry
-        endif
-      endunless
+      if catalog_tags_lookup contains tag_lookup
+        assign type_lookup = '||' | append: type_tags_joined | append: '||'
+        unless type_lookup contains tag_lookup
+          assign tag_handle = tag_name | handleize
+          assign tag_entry = tag_name | append: '||' | append: tag_name | append: '||' | append: tag_handle
+          if type_tags_joined == blank
+            assign type_tags_joined = tag_entry
+          else
+            assign type_tags_joined = type_tags_joined | append: '::' | append: tag_entry
+          endif
+        endunless
+      endif
     endif
   endfor
 
   assign type_custom_tags = section.settings.type_tags_custom | newline_to_br | split: '<br />'
   for tag in type_custom_tags
     assign tag_clean = tag | strip
-    if tag_clean != blank and collection_product_tags contains tag_clean
+    if tag_clean != blank
       assign tag_lookup = '||' | append: tag_clean | append: '||'
-      assign type_lookup = '||' | append: type_tags_joined | append: '||'
-      unless type_lookup contains tag_lookup
-        assign tag_entry = tag_clean | append: '||' | append: tag_clean
-        if type_tags_joined == blank
-          assign type_tags_joined = tag_entry
-        else
-          assign type_tags_joined = type_tags_joined | append: '::' | append: tag_entry
-        endif
-      endunless
+      if catalog_tags_lookup contains tag_lookup
+        assign type_lookup = '||' | append: type_tags_joined | append: '||'
+        unless type_lookup contains tag_lookup
+          assign tag_handle = tag_clean | handleize
+          assign tag_entry = tag_clean | append: '||' | append: tag_clean | append: '||' | append: tag_handle
+          if type_tags_joined == blank
+            assign type_tags_joined = tag_entry
+          else
+            assign type_tags_joined = type_tags_joined | append: '::' | append: tag_entry
+          endif
+        endunless
+      endif
     endif
   endfor
 
@@ -127,42 +188,43 @@
     assign entry_parts = entry | split: '::'
     assign tag_name = entry_parts[0]
     assign setting_id = entry_parts[1]
-    if section.settings[setting_id] and collection_product_tags contains tag_name
+    if section.settings[setting_id]
       assign tag_lookup = '||' | append: tag_name | append: '||'
-      assign topic_lookup = '||' | append: topic_tags_joined | append: '||'
-      unless topic_lookup contains tag_lookup
-        assign tag_entry = tag_name | append: '||' | append: tag_name
-        if topic_tags_joined == blank
-          assign topic_tags_joined = tag_entry
-        else
-          assign topic_tags_joined = topic_tags_joined | append: '::' | append: tag_entry
-        endif
-      endunless
+      if catalog_tags_lookup contains tag_lookup
+        assign topic_lookup = '||' | append: topic_tags_joined | append: '||'
+        unless topic_lookup contains tag_lookup
+          assign tag_handle = tag_name | handleize
+          assign tag_entry = tag_name | append: '||' | append: tag_name | append: '||' | append: tag_handle
+          if topic_tags_joined == blank
+            assign topic_tags_joined = tag_entry
+          else
+            assign topic_tags_joined = topic_tags_joined | append: '::' | append: tag_entry
+          endif
+        endunless
+      endif
     endif
   endfor
 
   assign topic_custom_tags = section.settings.topic_tags_custom | newline_to_br | split: '<br />'
   for tag in topic_custom_tags
     assign tag_clean = tag | strip
-    if tag_clean != blank and collection_product_tags contains tag_clean
+    if tag_clean != blank
       assign tag_lookup = '||' | append: tag_clean | append: '||'
-      assign topic_lookup = '||' | append: topic_tags_joined | append: '||'
-      unless topic_lookup contains tag_lookup
-        assign tag_entry = tag_clean | append: '||' | append: tag_clean
-        if topic_tags_joined == blank
-          assign topic_tags_joined = tag_entry
-        else
-          assign topic_tags_joined = topic_tags_joined | append: '::' | append: tag_entry
-        endif
-      endunless
+      if catalog_tags_lookup contains tag_lookup
+        assign topic_lookup = '||' | append: topic_tags_joined | append: '||'
+        unless topic_lookup contains tag_lookup
+          assign tag_handle = tag_clean | handleize
+          assign tag_entry = tag_clean | append: '||' | append: tag_clean | append: '||' | append: tag_handle
+          if topic_tags_joined == blank
+            assign topic_tags_joined = tag_entry
+          else
+            assign topic_tags_joined = topic_tags_joined | append: '::' | append: tag_entry
+          endif
+        endunless
+      endif
     endif
   endfor
 
-  if grade_tags_joined == blank
-    assign grade_tag_entries = '' | split: '::'
-  else
-    assign grade_tag_entries = grade_tags_joined | split: '::'
-  endif
   if type_tags_joined == blank
     assign type_tag_entries = '' | split: '::'
   else
@@ -174,29 +236,14 @@
     assign topic_tag_entries = topic_tags_joined | split: '::'
   endif
 
-  assign active_tags_joined = ''
-  for filter in showcase_collection.filters
-    if filter.param_name == 'filter.p.tag'
-      for value in filter.values
-        if value.active
-          if active_tags_joined == ''
-            assign active_tags_joined = value.value
-          else
-            assign active_tags_joined = active_tags_joined | append: '||' | append: value.value
-          endif
-        endif
-      endfor
-    endif
-  endfor
-  if active_tags_joined == ''
-    assign active_tags = '' | split: '||'
-  else
-    assign active_tags = active_tags_joined | split: '||'
+  assign has_active_filters = false
+  if current_tags.size > 0
+    assign has_active_filters = true
   endif
 
-  assign has_active_filters = false
-  if active_tags.size > 0
-    assign has_active_filters = true
+  assign form_collection_url = ''
+  if showcase_collection != blank
+    assign form_collection_url = showcase_collection.url
   endif
 -%}
 
@@ -233,7 +280,7 @@
       </div>
     {%- endif -%}
 
-    {%- paginate showcase_collection.products by products_per_page -%}
+    {%- if grade_collection_entries.size > 0 -%}
       {%- liquid
         assign show_toolbar_box = true
         if section.settings.enable_sort == false and section.settings.show_product_count == false
@@ -245,17 +292,16 @@
         <div class="product-catalog__toolbar-box">
           <form
             method="get"
-            action="{{ showcase_collection.url }}"
+            action="{{ form_collection_url | default: request.path }}"
             class="product-catalog__toolbar"
             data-product-catalog-form
-            data-collection-url="{{ showcase_collection.url }}"
+            data-collection-url="{{ form_collection_url }}"
             aria-label="{{ section.settings.toolbar_label | default: 'Product catalog filters' | escape }}"
           >
             <input type="hidden" name="section_id" value="{{ section.id }}">
 
             <div class="product-catalog__toolbar-controls">
               <div class="product-catalog__filter-groups">
-                {%- if grade_tag_entries.size > 0 -%}
                 <div class="product-catalog__field">
                   <label class="product-catalog__label" for="catalog-grade-{{ section.id }}">
                     {{ section.settings.grade_label | default: 'Grade' }}
@@ -264,24 +310,25 @@
                     id="catalog-grade-{{ section.id }}"
                     class="product-catalog__select"
                     name="catalog_grade"
-                    data-catalog-filter
+                    data-catalog-grade
                   >
-                    <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
-                    {%- for entry in grade_tag_entries -%}
+                    {%- for entry in grade_collection_entries -%}
                       {%- assign entry_parts = entry | split: '||' -%}
-                      {%- assign tag_value = entry_parts[0] -%}
-                      {%- assign tag_label = entry_parts[1] | default: tag_value -%}
+                      {%- assign grade_handle = entry_parts[0] -%}
+                      {%- assign grade_option_label = entry_parts[1] | default: grade_handle -%}
+                      {%- assign grade_collection_url = entry_parts[2] -%}
                       <option
-                        value="{{ tag_value | escape }}"
-                        {% if active_tags contains tag_value %}selected{% endif %}
+                        value="{{ grade_handle | escape }}"
+                        data-collection-url="{{ grade_collection_url }}"
+                        {% if active_grade_option_value == grade_handle %}selected{% endif %}
                       >
-                        {{ tag_label }}
+                        {{ grade_option_label }}
                       </option>
                     {%- endfor -%}
                   </select>
                 </div>
-                {%- endif -%}
 
+                {%- if showcase_collection != blank or catalog_merged_mode -%}
                 {%- if type_tag_entries.size > 0 -%}
                 <div class="product-catalog__field">
                   <label class="product-catalog__label" for="catalog-type-{{ section.id }}">
@@ -296,11 +343,12 @@
                     <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
                     {%- for entry in type_tag_entries -%}
                       {%- assign entry_parts = entry | split: '||' -%}
-                      {%- assign tag_value = entry_parts[0] -%}
-                      {%- assign tag_label = entry_parts[1] | default: tag_value -%}
+                      {%- assign tag_name = entry_parts[0] -%}
+                      {%- assign tag_label = entry_parts[1] | default: tag_name -%}
+                      {%- assign tag_handle = entry_parts[2] | default: tag_name | handleize -%}
                       <option
-                        value="{{ tag_value | escape }}"
-                        {% if active_tags contains tag_value %}selected{% endif %}
+                        value="{{ tag_handle | escape }}"
+                        {% if current_tags contains tag_name %}selected{% endif %}
                       >
                         {{ tag_label }}
                       </option>
@@ -323,11 +371,12 @@
                     <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
                     {%- for entry in topic_tag_entries -%}
                       {%- assign entry_parts = entry | split: '||' -%}
-                      {%- assign tag_value = entry_parts[0] -%}
-                      {%- assign tag_label = entry_parts[1] | default: tag_value -%}
+                      {%- assign tag_name = entry_parts[0] -%}
+                      {%- assign tag_label = entry_parts[1] | default: tag_name -%}
+                      {%- assign tag_handle = entry_parts[2] | default: tag_name | handleize -%}
                       <option
-                        value="{{ tag_value | escape }}"
-                        {% if active_tags contains tag_value %}selected{% endif %}
+                        value="{{ tag_handle | escape }}"
+                        {% if current_tags contains tag_name %}selected{% endif %}
                       >
                         {{ tag_label }}
                       </option>
@@ -335,9 +384,10 @@
                   </select>
                 </div>
                 {%- endif -%}
+                {%- endif -%}
               </div>
 
-              {%- if section.settings.enable_sort -%}
+              {%- if showcase_collection != blank and section.settings.enable_sort -%}
                 <div class="product-catalog__field product-catalog__field--sort">
                   <label class="product-catalog__label" for="catalog-sort-{{ section.id }}">
                     {{ section.settings.sort_label | default: 'Sort by' }}
@@ -359,83 +409,253 @@
                 </div>
               {%- endif -%}
             </div>
-
-            {%- if paginate.current_page == 1 and section.settings.show_product_count -%}
-              <p class="product-catalog__count section-text">
-                {{ paginate.items }} {{ section.settings.product_count_suffix | default: 'products' }}
-              </p>
-            {%- endif -%}
           </form>
         </div>
       {%- endif -%}
 
-      {%- if showcase_collection.products.size > 0 -%}
-        <div
-          class="product-catalog__grid"
-          style="
-            --product-catalog-columns: {{ cols_desktop }};
-            --product-catalog-columns-tablet: {{ cols_tablet }};
-            --product-catalog-columns-mobile: {{ cols_mobile }};
-          "
-        >
-          {%- for product in showcase_collection.products -%}
-            {% render 'product-card',
-              product: product,
-              show_vendor: section.settings.show_vendor,
-              show_badge: section.settings.show_sale_badge,
-              image_ratio: section.settings.image_ratio
-            %}
-          {%- endfor -%}
-        </div>
+      {%- if catalog_merged_mode -%}
+        {%- liquid
+          assign catalog_merged_ids = ''
+          assign catalog_merged_count = 0
+          assign catalog_page_reader = nil
+
+          for entry in grade_only_catalog
+            assign entry_parts = entry | split: '::'
+            assign merge_coll = section.settings[entry_parts[1]]
+            if merge_coll != blank
+              if catalog_page_reader == nil
+                assign catalog_page_reader = merge_coll
+              endif
+              for product in merge_coll.products limit: 250
+                assign product_id_key = product.id | append: '||'
+                unless catalog_merged_ids contains product_id_key
+                  assign catalog_merged_ids = catalog_merged_ids | append: product_id_key
+                  assign catalog_show_product = true
+                  if current_tags.size > 0
+                    for active_tag in current_tags
+                      unless product.tags contains active_tag
+                        assign catalog_show_product = false
+                      endunless
+                    endfor
+                  endif
+                  if catalog_show_product
+                    assign catalog_merged_count = catalog_merged_count | plus: 1
+                  endif
+                endunless
+              endfor
+            endif
+          endfor
+
+          assign catalog_total_pages = catalog_merged_count | divided_by: products_per_page
+          assign catalog_merge_remainder = catalog_merged_count | modulo: products_per_page
+          if catalog_merge_remainder > 0
+            assign catalog_total_pages = catalog_total_pages | plus: 1
+          endif
+          assign catalog_pagination_base = request.path
+        -%}
+
+        {%- if catalog_page_reader != blank -%}
+          {%- paginate catalog_page_reader.products by 1 -%}
+            {%- liquid
+              assign catalog_current_page = paginate.current_page
+              assign catalog_page_offset = catalog_current_page | minus: 1 | times: products_per_page
+            -%}
+
+            {%- if catalog_current_page == 1 and section.settings.show_product_count -%}
+              <p class="product-catalog__count section-text">
+                {{ catalog_merged_count }} {{ section.settings.product_count_suffix | default: 'products' }}
+              </p>
+            {%- endif -%}
+
+            {%- if catalog_merged_count > 0 -%}
+              <div
+                class="product-catalog__grid"
+                style="
+                  --product-catalog-columns: {{ cols_desktop }};
+                  --product-catalog-columns-tablet: {{ cols_tablet }};
+                  --product-catalog-columns-mobile: {{ cols_mobile }};
+                "
+              >
+                {%- liquid
+                  assign catalog_merged_ids = ''
+                  assign catalog_items_skipped = 0
+                  assign catalog_items_shown = 0
+                -%}
+                {%- for entry in grade_only_catalog -%}
+                  {%- assign entry_parts = entry | split: '::' -%}
+                  {%- assign merge_coll = section.settings[entry_parts[1]] -%}
+                  {%- if merge_coll != blank -%}
+                    {%- for product in merge_coll.products limit: 250 -%}
+                      {%- assign product_id_key = product.id | append: '||' -%}
+                      {%- unless catalog_merged_ids contains product_id_key -%}
+                        {%- assign catalog_merged_ids = catalog_merged_ids | append: product_id_key -%}
+                        {%- liquid
+                          assign catalog_show_product = true
+                          if current_tags.size > 0
+                            for active_tag in current_tags
+                              unless product.tags contains active_tag
+                                assign catalog_show_product = false
+                              endunless
+                            endfor
+                          endif
+                        -%}
+                        {%- if catalog_show_product -%}
+                          {%- if catalog_items_skipped < catalog_page_offset -%}
+                            {%- assign catalog_items_skipped = catalog_items_skipped | plus: 1 -%}
+                          {%- elsif catalog_items_shown < products_per_page -%}
+                            {% render 'product-card',
+                              product: product,
+                              show_vendor: section.settings.show_vendor,
+                              show_badge: section.settings.show_sale_badge,
+                              image_ratio: section.settings.image_ratio
+                            %}
+                            {%- assign catalog_items_shown = catalog_items_shown | plus: 1 -%}
+                          {%- endif -%}
+                        {%- endif -%}
+                      {%- endunless -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            {%- else -%}
+              <p class="product-catalog__empty section-text" role="status">
+                {%- if has_active_filters -%}
+                  {{ section.settings.no_match_text | default: 'No products match your filters.' }}
+                {%- else -%}
+                  {{ section.settings.empty_text | default: 'No products found.' }}
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+
+            {%- if catalog_total_pages > 1 -%}
+              <nav class="product-catalog__pagination" aria-label="{{ section.settings.pagination_label | default: 'Product pagination' | escape }}">
+                <ul class="product-catalog__pagination-list" role="list">
+                  {%- if catalog_current_page > 1 -%}
+                    {%- assign catalog_prev_page = catalog_current_page | minus: 1 -%}
+                    <li>
+                      <a
+                        href="{{ catalog_pagination_base }}?page={{ catalog_prev_page }}{% if sort_by != blank %}&amp;sort_by={{ sort_by }}{% endif %}#product-catalog-{{ section.id }}"
+                        class="product-catalog__pagination-link product-catalog__pagination-link--prev"
+                      >
+                        {{ section.settings.pagination_prev_label | default: 'Previous' }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+
+                  {%- for page_num in (1..catalog_total_pages) -%}
+                    <li>
+                      {%- if page_num == catalog_current_page -%}
+                        <span class="product-catalog__pagination-link is-current" aria-current="page">
+                          {{ page_num }}
+                        </span>
+                      {%- else -%}
+                        <a
+                          href="{{ catalog_pagination_base }}?page={{ page_num }}{% if sort_by != blank %}&amp;sort_by={{ sort_by }}{% endif %}#product-catalog-{{ section.id }}"
+                          class="product-catalog__pagination-link"
+                        >
+                          {{ page_num }}
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+
+                  {%- if catalog_current_page < catalog_total_pages -%}
+                    {%- assign catalog_next_page = catalog_current_page | plus: 1 -%}
+                    <li>
+                      <a
+                        href="{{ catalog_pagination_base }}?page={{ catalog_next_page }}{% if sort_by != blank %}&amp;sort_by={{ sort_by }}{% endif %}#product-catalog-{{ section.id }}"
+                        class="product-catalog__pagination-link product-catalog__pagination-link--next"
+                      >
+                        {{ section.settings.pagination_next_label | default: 'Next' }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                </ul>
+              </nav>
+            {%- endif -%}
+          {%- endpaginate -%}
+        {%- endif -%}
+      {%- elsif showcase_collection != blank -%}
+        {%- paginate showcase_collection.products by products_per_page -%}
+          {%- if paginate.current_page == 1 and section.settings.show_product_count -%}
+            <p class="product-catalog__count section-text">
+              {{ paginate.items }} {{ section.settings.product_count_suffix | default: 'products' }}
+            </p>
+          {%- endif -%}
+
+          {%- if showcase_collection.products.size > 0 -%}
+            <div
+              class="product-catalog__grid"
+              style="
+                --product-catalog-columns: {{ cols_desktop }};
+                --product-catalog-columns-tablet: {{ cols_tablet }};
+                --product-catalog-columns-mobile: {{ cols_mobile }};
+              "
+            >
+              {%- for product in showcase_collection.products -%}
+                {% render 'product-card',
+                  product: product,
+                  show_vendor: section.settings.show_vendor,
+                  show_badge: section.settings.show_sale_badge,
+                  image_ratio: section.settings.image_ratio
+                %}
+              {%- endfor -%}
+            </div>
+          {%- else -%}
+            <p class="product-catalog__empty section-text" role="status">
+              {%- if has_active_filters -%}
+                {{ section.settings.no_match_text | default: 'No products match your filters.' }}
+              {%- else -%}
+                {{ section.settings.empty_text | default: 'No products found.' }}
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+
+          {%- if paginate.pages > 1 -%}
+            <nav class="product-catalog__pagination" aria-label="{{ section.settings.pagination_label | default: 'Product pagination' | escape }}">
+              <ul class="product-catalog__pagination-list" role="list">
+                {%- if paginate.previous -%}
+                  <li>
+                    <a href="{{ paginate.previous.url }}#product-catalog-{{ section.id }}" class="product-catalog__pagination-link product-catalog__pagination-link--prev">
+                      {{ section.settings.pagination_prev_label | default: 'Previous' }}
+                    </a>
+                  </li>
+                {%- endif -%}
+
+                {%- for part in paginate.parts -%}
+                  <li>
+                    {%- if part.is_link -%}
+                      <a
+                        href="{{ part.url }}#product-catalog-{{ section.id }}"
+                        class="product-catalog__pagination-link"
+                      >
+                        {{ part.title }}
+                      </a>
+                    {%- else -%}
+                      <span class="product-catalog__pagination-link is-current" aria-current="page">
+                        {{ part.title }}
+                      </span>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+
+                {%- if paginate.next -%}
+                  <li>
+                    <a href="{{ paginate.next.url }}#product-catalog-{{ section.id }}" class="product-catalog__pagination-link product-catalog__pagination-link--next">
+                      {{ section.settings.pagination_next_label | default: 'Next' }}
+                    </a>
+                  </li>
+                {%- endif -%}
+              </ul>
+            </nav>
+          {%- endif -%}
+        {%- endpaginate -%}
       {%- else -%}
         <p class="product-catalog__empty section-text" role="status">
-          {%- if has_active_filters -%}
-            {{ section.settings.no_match_text | default: 'No products match your filters.' }}
-          {%- else -%}
-            {{ section.settings.empty_text | default: 'No products found.' }}
-          {%- endif -%}
+          {{ section.settings.empty_text | default: 'Assign grade collections in the theme editor to show products.' }}
         </p>
       {%- endif -%}
-
-      {%- if paginate.pages > 1 -%}
-        <nav class="product-catalog__pagination" aria-label="{{ section.settings.pagination_label | default: 'Product pagination' | escape }}">
-          <ul class="product-catalog__pagination-list" role="list">
-            {%- if paginate.previous -%}
-              <li>
-                <a href="{{ paginate.previous.url }}#product-catalog-{{ section.id }}" class="product-catalog__pagination-link product-catalog__pagination-link--prev">
-                  {{ section.settings.pagination_prev_label | default: 'Previous' }}
-                </a>
-              </li>
-            {%- endif -%}
-
-            {%- for part in paginate.parts -%}
-              <li>
-                {%- if part.is_link -%}
-                  <a
-                    href="{{ part.url }}#product-catalog-{{ section.id }}"
-                    class="product-catalog__pagination-link"
-                  >
-                    {{ part.title }}
-                  </a>
-                {%- else -%}
-                  <span class="product-catalog__pagination-link is-current" aria-current="page">
-                    {{ part.title }}
-                  </span>
-                {%- endif -%}
-              </li>
-            {%- endfor -%}
-
-            {%- if paginate.next -%}
-              <li>
-                <a href="{{ paginate.next.url }}#product-catalog-{{ section.id }}" class="product-catalog__pagination-link product-catalog__pagination-link--next">
-                  {{ section.settings.pagination_next_label | default: 'Next' }}
-                </a>
-              </li>
-            {%- endif -%}
-          </ul>
-        </nav>
-      {%- endif -%}
-    {%- endpaginate -%}
+    {%- endif -%}
   </div>
 </section>
 
@@ -694,12 +914,7 @@
     },
     {
       "type": "header",
-      "content": "Collection"
-    },
-    {
-      "type": "collection",
-      "id": "collection",
-      "label": "Collection"
+      "content": "Catalog"
     },
     {
       "type": "range",
@@ -724,11 +939,11 @@
     },
     {
       "type": "header",
-      "content": "Tag filters"
+      "content": "Filters"
     },
     {
       "type": "paragraph",
-      "content": "Select which product tags appear in each filter. Only tags on products in the selected collection are shown on the storefront. Selections across Grade, Type, and Topics combine with AND logic."
+      "content": "All shows products from grades 1–5. Assign an optional combined collection for All, or products merge automatically from the grade collections below. Single-grade URLs: /collections/{handle}/{tag}?sort_by=."
     },
     {
       "type": "text",
@@ -738,49 +953,79 @@
     },
     {
       "type": "header",
-      "content": "Grade tags — select to include"
+      "content": "Grade collections"
     },
     {
-      "type": "checkbox",
-      "id": "grade_kindergarten",
-      "label": "kindergarten",
-      "default": true
+      "type": "collection",
+      "id": "grade_collection_all",
+      "label": "All grades (optional)",
+      "info": "Optional. Combined collection for All grades 1–5. If empty, products merge from the collections below."
     },
     {
-      "type": "checkbox",
-      "id": "grade_1st_grade",
-      "label": "1st grade",
-      "default": true
+      "type": "text",
+      "id": "grade_option_label_all",
+      "label": "All grades dropdown label",
+      "default": "All"
     },
     {
-      "type": "checkbox",
-      "id": "grade_2nd_grade",
-      "label": "2nd grade",
-      "default": true
+      "type": "collection",
+      "id": "grade_collection_1",
+      "label": "1st grade collection",
+      "info": "1st Grade Curriculum"
     },
     {
-      "type": "checkbox",
-      "id": "grade_3rd_grade",
-      "label": "3rd grade",
-      "default": true
+      "type": "text",
+      "id": "grade_option_label_1",
+      "label": "1st grade dropdown label",
+      "default": "1st Grade Curriculum"
     },
     {
-      "type": "checkbox",
-      "id": "grade_4th_grade",
-      "label": "4th grade",
-      "default": true
+      "type": "collection",
+      "id": "grade_collection_2",
+      "label": "2nd grade collection",
+      "info": "2nd Grade Curriculum"
     },
     {
-      "type": "checkbox",
-      "id": "grade_5th_grade",
-      "label": "5th grade",
-      "default": true
+      "type": "text",
+      "id": "grade_option_label_2",
+      "label": "2nd grade dropdown label",
+      "default": "2nd Grade Curriculum"
     },
     {
-      "type": "textarea",
-      "id": "grade_tags_custom",
-      "label": "Additional grade tags",
-      "info": "One product tag per line. Use for tags on your products that are not listed above."
+      "type": "collection",
+      "id": "grade_collection_3",
+      "label": "3rd grade collection",
+      "info": "3rd Grade Curriculum"
+    },
+    {
+      "type": "text",
+      "id": "grade_option_label_3",
+      "label": "3rd grade dropdown label",
+      "default": "3rd Grade Curriculum"
+    },
+    {
+      "type": "collection",
+      "id": "grade_collection_4",
+      "label": "4th grade collection",
+      "info": "4th Grade Curriculum"
+    },
+    {
+      "type": "text",
+      "id": "grade_option_label_4",
+      "label": "4th grade dropdown label",
+      "default": "4th Grade Curriculum"
+    },
+    {
+      "type": "collection",
+      "id": "grade_collection_5",
+      "label": "5th grade collection",
+      "info": "5th Grade Curriculum"
+    },
+    {
+      "type": "text",
+      "id": "grade_option_label_5",
+      "label": "5th grade dropdown label",
+      "default": "5th Grade Curriculum"
     },
     {
       "type": "text",
@@ -794,20 +1039,14 @@
     },
     {
       "type": "checkbox",
+      "id": "type_additional_resources",
+      "label": "additional resources",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "type_games",
       "label": "games",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "type_huge_sale",
-      "label": "Huge Sale",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "type_read_aloud",
-      "label": "Read Aloud",
       "default": true
     },
     {
@@ -824,38 +1063,14 @@
     },
     {
       "type": "checkbox",
-      "id": "type_additional_resources",
-      "label": "additional resources",
-      "default": true
-    },
-    {
-      "type": "checkbox",
       "id": "type_number_strings",
       "label": "number strings",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "type_pd",
-      "label": "PD",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "type_online_workshops",
-      "label": "Online Workshops",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "type_grade_level_set",
-      "label": "grade level set",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "type_assessment",
-      "label": "assessment",
+      "id": "type_on_sale",
+      "label": "Huge Sale",
       "default": true
     },
     {
@@ -882,8 +1097,20 @@
     },
     {
       "type": "checkbox",
-      "id": "topic_subtraction",
-      "label": "subtraction",
+      "id": "topic_decimals",
+      "label": "decimals",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_division",
+      "label": "division",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "topic_fractions",
+      "label": "fractions",
       "default": true
     },
     {
@@ -894,8 +1121,8 @@
     },
     {
       "type": "checkbox",
-      "id": "topic_division",
-      "label": "division",
+      "id": "topic_subtraction",
+      "label": "subtraction",
       "default": true
     },
     {
@@ -912,74 +1139,14 @@
     },
     {
       "type": "checkbox",
-      "id": "topic_fractions",
-      "label": "fractions",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_data",
-      "label": "data",
-      "default": true
-    },
-    {
-      "type": "checkbox",
       "id": "topic_measurement",
       "label": "measurement",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "topic_algebra",
-      "label": "algebra",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_decimals",
-      "label": "decimals",
-      "default": true
-    },
-    {
-      "type": "checkbox",
       "id": "topic_time",
       "label": "time",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_angles",
-      "label": "angles",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_area",
-      "label": "area",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_money",
-      "label": "money",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_volume",
-      "label": "volume",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_perimeter",
-      "label": "perimeter",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "topic_proportional_reasoning",
-      "label": "proportional reasoning",
       "default": true
     },
     {
@@ -1511,7 +1678,7 @@
       "settings": {
         "heading_before": "Browse ",
         "heading_highlight": "Resources",
-        "description": "<p>Filter by grade, type, and topic to find the right materials for your classroom.</p>",
+        "description": "<p>Select a grade, then filter by type and topic to find the right materials for your classroom.</p>",
         "products_per_page": 12,
         "products_per_row": 4,
         "products_per_row_tablet": 2,

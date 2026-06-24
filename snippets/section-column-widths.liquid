@@ -1,7 +1,7 @@
 {%- comment -%}
   Per-section two-column grid widths (fr units) with responsive column gap.
   Usage: {% render 'section-column-widths', section: section, grid_class: 'hero-math__inner' %}
-  Expects section.settings.column_1_width (25–75, default 50).
+  Expects section.settings.column_1_width (25–100, default 50).
 {%- endcomment -%}
 
 {%- liquid
@@ -17,7 +17,11 @@
 <style>
   @media screen and (min-width: 1024px) {
     #shopify-section-{{ section.id }} .{{ grid_class }} {
+      {%- if col1 >= 100 or col2 <= 0 -%}
+      grid-template-columns: 1fr;
+      {%- else -%}
       grid-template-columns: minmax(0, {{ col1 }}fr) minmax(0, {{ col2 }}fr);
+      {%- endif -%}
     }
   }
 

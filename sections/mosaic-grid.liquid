@@ -56,7 +56,7 @@
       class="mosaic-grid__header"
       style="--header-col-1: {{ header_col1 }}; --header-col-2: {{ header_col2 }};"
     >
-      <div class="mosaic-grid__header-left" id="mosaic-heading-{{ section.id }}">
+      <div class="mosaic-grid__header-left text-{{ section.settings.heading_text_alignment | default: 'left' }}" id="mosaic-heading-{{ section.id }}">
         {%- liquid
           assign mosaic_heading_font_color = section.settings.heading_font_color
           if mosaic_heading_font_color == blank
@@ -93,7 +93,7 @@
         %}
       </div>
       {%- if section.settings.intro_text != blank -%}
-        <div class="mosaic-grid__header-right section-text rte">{{ section.settings.intro_text }}</div>
+        <div class="mosaic-grid__header-right section-text rte text-{{ section.settings.intro_text_alignment | default: 'left' }}">{{ section.settings.intro_text }}</div>
       {%- endif -%}
     </header>
   </div>
@@ -289,9 +289,15 @@
     }
   {%- endif -%}
   @media screen and (min-width: 1024px) {
+    {%- if header_col1 >= 100 or header_col2 <= 0 -%}
+    #shopify-section-{{ section.id }} .mosaic-grid__header {
+      grid-template-columns: 1fr;
+    }
+    {%- else -%}
     #shopify-section-{{ section.id }} .mosaic-grid__header {
       grid-template-columns: minmax(0, {{ header_col1 }}fr) minmax(0, {{ header_col2 }}fr);
     }
+    {%- endif -%}
   }
   @media screen and (max-width: 1023px) {
     #shopify-section-{{ section.id }} .mosaic-grid__header {
@@ -645,22 +651,44 @@
       "id": "column_1_width",
       "label": "Left column width (heading)",
       "min": 25,
-      "max": 75,
+      "max": 100,
       "step": 5,
       "unit": "%",
       "default": 55,
-      "info": "Relative width of the heading column. Right column uses the remaining space unless set below."
+      "info": "Relative width of the heading column. At 100%, intro text stacks below on desktop. Right column uses the remaining space unless set below."
+    },
+    {
+      "type": "select",
+      "id": "heading_text_alignment",
+      "label": "Heading text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
     },
     {
       "type": "range",
       "id": "column_2_width",
       "label": "Right column width (intro text)",
       "min": 0,
-      "max": 75,
+      "max": 100,
       "step": 5,
       "unit": "%",
       "default": 0,
       "info": "0 = auto (100% minus left column). Set both columns for a custom ratio."
+    },
+    {
+      "type": "select",
+      "id": "intro_text_alignment",
+      "label": "Intro text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
     },
     {
       "type": "range",

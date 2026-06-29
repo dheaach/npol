@@ -158,7 +158,8 @@ p, .section-text,
 
 #MainContent > .shopify-section.section-testimonials,
 #MainContent > .shopify-section.section-process-steps,
-#MainContent > .shopify-section.section-resources-cards {
+#MainContent > .shopify-section.section-resources-cards,
+#MainContent > .shopify-section.section-media-label-cards {
   padding-left: 0;
   padding-right: 0;
   overflow-x: clip;
@@ -170,6 +171,7 @@ p, .section-text,
 #MainContent > .shopify-section.section-testimonials .testimonials__inner,
 #MainContent > .shopify-section.section-process-steps .process-steps__inner,
 #MainContent > .shopify-section.section-resources-cards .resources-cards__inner,
+#MainContent > .shopify-section.section-media-label-cards .page-width,
 #MainContent > .shopify-section.section-video-showcase .page-width,
 #MainContent > .shopify-section.section-hero-banner .page-width,
 #MainContent > .shopify-section.section-cta-banner .page-width,

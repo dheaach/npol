@@ -76,6 +76,10 @@
             endif
             assign col_align = block.settings.text_align | default: 'center'
             assign img_position = block.settings.image_position | default: 'above'
+            assign img_side = false
+            if img_position == 'left' or img_position == 'right'
+              assign img_side = true
+            endif
             assign col_img_width = block.settings.image_width | default: 800
             if block.settings.image_src_width_tablet > 0 and block.settings.image_src_width_tablet < col_img_width
               assign col_img_width = block.settings.image_src_width_tablet
@@ -86,7 +90,7 @@
           -%}
           <div
             id="quote-column-{{ block.id }}"
-            class="dark-quote-banner-columns__column text-{{ col_align }}"
+            class="dark-quote-banner-columns__column text-{{ col_align }}{% if img_side %} dark-quote-banner-columns__column--image-side dark-quote-banner-columns__column--image-{{ img_position }}{% endif %}"
             {{ block.shopify_attributes }}
           >
             {%- if block.settings.image != blank and img_position == 'above' -%}
@@ -101,24 +105,74 @@
               </div>
             {%- endif -%}
 
-            <div class="dark-quote-banner-columns__heading{% if block.settings.heading != blank %} dark-quote-banner-columns__heading--single{% endif %}">
-              {% render 'highlighted-heading',
-                heading: block.settings.heading,
-                heading_weight: block.settings.heading_weight,
-                heading_before: block.settings.heading_before,
-                heading_highlight: block.settings.heading_highlight,
-                heading_after: block.settings.heading_after,
-                heading_before_weight: block.settings.heading_before_weight,
-                heading_highlight_weight: block.settings.heading_highlight_weight,
-                heading_after_weight: block.settings.heading_after_weight,
-                heading_tag: block.settings.heading_tag,
-                heading_size: block.settings.heading_tag,
-                highlight_color: col_highlight
-              %}
-            </div>
+            {%- if img_side -%}
+              <div class="dark-quote-banner-columns__row">
+                {%- if img_position == 'left' and block.settings.image != blank -%}
+                  <div class="dark-quote-banner-columns__media dark-quote-banner-columns__media--side dark-quote-banner-columns__media--align-{{ block.settings.image_align | default: 'center' }}">
+                    {% render 'responsive-image',
+                      image: block.settings.image,
+                      alt: block.settings.image_alt,
+                      class: 'dark-quote-banner-columns__image',
+                      loading: block.settings.image_loading,
+                      width: col_img_width
+                    %}
+                  </div>
+                {%- endif -%}
 
-            {%- if block.settings.subtext != blank -%}
-              <div class="dark-quote-banner-columns__subtext section-text rte">{{ block.settings.subtext }}</div>
+                <div class="dark-quote-banner-columns__body">
+                  <div class="dark-quote-banner-columns__heading{% if block.settings.heading != blank %} dark-quote-banner-columns__heading--single{% endif %}">
+                    {% render 'highlighted-heading',
+                      heading: block.settings.heading,
+                      heading_weight: block.settings.heading_weight,
+                      heading_before: block.settings.heading_before,
+                      heading_highlight: block.settings.heading_highlight,
+                      heading_after: block.settings.heading_after,
+                      heading_before_weight: block.settings.heading_before_weight,
+                      heading_highlight_weight: block.settings.heading_highlight_weight,
+                      heading_after_weight: block.settings.heading_after_weight,
+                      heading_tag: block.settings.heading_tag,
+                      heading_size: block.settings.heading_tag,
+                      highlight_color: col_highlight
+                    %}
+                  </div>
+
+                  {%- if block.settings.subtext != blank -%}
+                    <div class="dark-quote-banner-columns__subtext section-text rte">{{ block.settings.subtext }}</div>
+                  {%- endif -%}
+                </div>
+
+                {%- if img_position == 'right' and block.settings.image != blank -%}
+                  <div class="dark-quote-banner-columns__media dark-quote-banner-columns__media--side dark-quote-banner-columns__media--align-{{ block.settings.image_align | default: 'center' }}">
+                    {% render 'responsive-image',
+                      image: block.settings.image,
+                      alt: block.settings.image_alt,
+                      class: 'dark-quote-banner-columns__image',
+                      loading: block.settings.image_loading,
+                      width: col_img_width
+                    %}
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- else -%}
+              <div class="dark-quote-banner-columns__heading{% if block.settings.heading != blank %} dark-quote-banner-columns__heading--single{% endif %}">
+                {% render 'highlighted-heading',
+                  heading: block.settings.heading,
+                  heading_weight: block.settings.heading_weight,
+                  heading_before: block.settings.heading_before,
+                  heading_highlight: block.settings.heading_highlight,
+                  heading_after: block.settings.heading_after,
+                  heading_before_weight: block.settings.heading_before_weight,
+                  heading_highlight_weight: block.settings.heading_highlight_weight,
+                  heading_after_weight: block.settings.heading_after_weight,
+                  heading_tag: block.settings.heading_tag,
+                  heading_size: block.settings.heading_tag,
+                  highlight_color: col_highlight
+                %}
+              </div>
+
+              {%- if block.settings.subtext != blank -%}
+                <div class="dark-quote-banner-columns__subtext section-text rte">{{ block.settings.subtext }}</div>
+              {%- endif -%}
             {%- endif -%}
 
             {%- if block.settings.image != blank and img_position == 'below' -%}
@@ -366,6 +420,35 @@
   #shopify-section-{{ section.id }} .dark-quote-banner-columns__media--below {
     margin-bottom: 0;
     margin-top: 20px;
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner-columns__row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner-columns__column--image-right .dark-quote-banner-columns__row {
+    flex-direction: row-reverse;
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner-columns__body {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .dark-quote-banner-columns__media--side {
+    margin: 0;
+    flex-shrink: 0;
+    max-width: 45%;
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .dark-quote-banner-columns__column--image-side .dark-quote-banner-columns__row {
+      flex-direction: column;
+    }
+    #shopify-section-{{ section.id }} .dark-quote-banner-columns__media--side {
+      max-width: 100%;
+      width: 100%;
+    }
   }
   #shopify-section-{{ section.id }} .dark-quote-banner-columns__heading {
     width: 100%;
@@ -1311,7 +1394,9 @@
           "label": "Image position",
           "options": [
             { "value": "above", "label": "Above text" },
-            { "value": "below", "label": "Below text" }
+            { "value": "below", "label": "Below text" },
+            { "value": "left", "label": "Left of text" },
+            { "value": "right", "label": "Right of text" }
           ],
           "default": "above"
         },
@@ -1363,12 +1448,12 @@
           "type": "range",
           "id": "image_width",
           "label": "Image file width (src)",
-          "min": 400,
-          "max": 1600,
-          "step": 100,
+          "min": 10,
+          "max": 1010,
+          "step": 10,
           "unit": "px",
           "default": 800,
-          "info": "Max width requested from Shopify CDN (desktop)."
+          "info": "Max width requested from Shopify CDN (desktop). Max 1010px (theme editor step limit)."
         },
         {
           "type": "range",

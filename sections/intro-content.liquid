@@ -48,7 +48,17 @@
         {%- endif -%}
 
         {%- if section.settings.list_items != blank -%}
-          <ul class="intro-content__list">
+          {%- liquid
+            assign list_style = section.settings.list_style | default: 'bullet'
+            if list_style == 'number'
+              assign list_tag = 'ol'
+              assign list_class = 'intro-content__list intro-content__list--ordered'
+            else
+              assign list_tag = 'ul'
+              assign list_class = 'intro-content__list'
+            endif
+          -%}
+          <{{ list_tag }} class="{{ list_class }}">
             {%- assign items = section.settings.list_items | newline_to_br | split: '<br />' -%}
             {%- for item in items -%}
               {%- assign trimmed = item | strip -%}
@@ -56,11 +66,15 @@
                 <li>{{ trimmed }}</li>
               {%- endif -%}
             {%- endfor -%}
-          </ul>
+          </{{ list_tag }}>
         {%- endif -%}
 
         {%- if section.settings.text_after_list != blank -%}
           <div class="section-text rte intro-content__text-after">{{ section.settings.text_after_list }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.html_after_list != blank -%}
+          <div class="intro-content__html-after">{{ section.settings.html_after_list }}</div>
         {%- endif -%}
       </div>
     </div>
@@ -129,6 +143,19 @@
       color: {{ section.settings.list_font_color }};
     }
   {%- endif -%}
+  #shopify-section-{{ section.id }} .intro-content__list--ordered {
+    display: block;
+    list-style: decimal;
+    padding-left: 1.5em;
+  }
+  #shopify-section-{{ section.id }} .intro-content__list--ordered li {
+    display: list-item;
+    padding-left: 0.25em;
+  }
+  #shopify-section-{{ section.id }} .intro-content__list--ordered li::before {
+    content: none;
+    display: none;
+  }
   {%- if section.settings.text_after_list_font_size > 0 -%}
     #shopify-section-{{ section.id }} .intro-content__text-after,
     #shopify-section-{{ section.id }} .intro-content__text-after p {
@@ -368,9 +395,19 @@
       "default": "inherit"
     },
     {
+      "type": "select",
+      "id": "list_style",
+      "label": "List style",
+      "options": [
+        { "value": "bullet", "label": "Bullet list" },
+        { "value": "number", "label": "Numbered list" }
+      ],
+      "default": "bullet"
+    },
+    {
       "type": "textarea",
       "id": "list_items",
-      "label": "Bullet list items",
+      "label": "List items",
       "info": "One item per line",
       "default": "Research-based approach to math instruction\nStudent-centered learning design\nProven results in K-5 classrooms"
     },
@@ -411,6 +448,11 @@
       "type": "richtext",
       "id": "text_after_list",
       "label": "Description (below list)"
+    },
+    {
+      "type": "html",
+      "id": "html_after_list",
+      "label": "Custom HTML (below list)"
     },
     {
       "type": "color",

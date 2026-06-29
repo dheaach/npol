@@ -159,7 +159,8 @@ p, .section-text,
 #MainContent > .shopify-section.section-testimonials,
 #MainContent > .shopify-section.section-process-steps,
 #MainContent > .shopify-section.section-resources-cards,
-#MainContent > .shopify-section.section-media-label-cards {
+#MainContent > .shopify-section.section-media-label-cards,
+#MainContent > .shopify-section.section-content-block {
   padding-left: 0;
   padding-right: 0;
   overflow-x: clip;
@@ -2131,6 +2132,9 @@ p, .section-text,
   padding: 6px 16px;
   border-radius: 20px;
   width: fit-content;
+}
+.base-color {
+  color: #51ADA0;
 }
 
 /* --- Feature Grid --- */

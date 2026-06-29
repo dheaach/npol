@@ -3,7 +3,37 @@
 {%- liquid
   assign layout = section.settings.layout
   assign bg_color = section.settings.background_color
+  assign image_only = false
+  if layout == 'image-only'
+    assign image_only = true
+  endif
+  assign image_max_d = 0
+  case section.settings.image_display_size
+    when 'small'
+      assign image_max_d = 360
+    when 'medium'
+      assign image_max_d = 560
+    when 'large'
+      assign image_max_d = 800
+  endcase
+  if section.settings.image_max_width > 0
+    assign image_max_d = section.settings.image_max_width
+  endif
+  assign image_max_t = section.settings.image_max_width_tablet | default: 0
+  if image_max_t == 0
+    assign image_max_t = image_max_d
+  endif
+  assign image_max_m = section.settings.image_max_width_mobile | default: 0
+  if image_max_m == 0
+    assign image_max_m = image_max_t
+  endif
 -%}
+
+{%- unless layout == 'stacked' or layout == 'image-only' -%}
+{% render 'section-column-widths', section: section, grid_class: 'image-text__inner', gap_fallback_tablet: 32, gap_fallback_mobile: 32 %}
+{%- else -%}
+{% render 'section-spacing-gap', section: section, selector: '.image-text__inner', stack_breakpoint: '0', standalone: true, gap_fallback_tablet: 32, gap_fallback_mobile: 32 %}
+{%- endunless -%}
 
 <section
   class="image-text section-spacing"
@@ -12,7 +42,7 @@
   {% endif %}
 >
   <div class="page-width">
-    <div class="image-text__inner{% if layout == 'stacked' %} image-text__inner--stacked{% endif %}">
+    <div class="image-text__inner{% if image_only %} image-text__inner--image-only{% elsif layout == 'stacked' %} image-text__inner--stacked text-center{% endif %}{% if layout == 'side-by-side' and section.settings.image_position == 'right' %} image-text__inner--reverse{% endif %}">
       <div class="image-text__media">
         {% render 'responsive-image',
           image: section.settings.image,
@@ -22,28 +52,145 @@
         %}
       </div>
 
-      <div class="image-text__content">
-        {% render 'section-heading',
-          heading: section.settings.heading,
-          heading_tag: section.settings.heading_tag,
-          heading_size: section.settings.heading_tag
-        %}
-
-        {%- if section.settings.text != blank -%}
-          <div class="section-text rte">{{ section.settings.text }}</div>
-        {%- endif -%}
-
-        {%- if section.settings.button_label != blank -%}
-          {% render 'button',
-            label: section.settings.button_label,
-            url: section.settings.button_url,
-            style: section.settings.button_style
+      {%- unless image_only -%}
+        <div class="image-text__content">
+          {% render 'section-heading',
+            heading: section.settings.heading,
+            heading_tag: section.settings.heading_tag,
+            heading_size: section.settings.heading_tag
           %}
-        {%- endif -%}
-      </div>
+
+          {%- if section.settings.text != blank -%}
+            <div class="section-text rte image-text__text">{{ section.settings.text }}</div>
+          {%- endif -%}
+
+          {%- if section.settings.button_label != blank -%}
+            {% render 'button',
+              label: section.settings.button_label,
+              url: section.settings.button_url,
+              style: section.settings.button_style
+            %}
+          {%- endif -%}
+        </div>
+      {%- endunless -%}
     </div>
   </div>
 </section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.image-text', pad_x: '.page-width' %}
+  {%- if layout == 'stacked' -%}
+  #shopify-section-{{ section.id }} .image-text__inner--stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__media {
+    width: auto;
+    max-width: 100%;
+  }
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__media img,
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__image {
+    width: auto;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__content {
+    align-items: center;
+    width: 100%;
+    {%- if section.settings.content_max_width > 0 -%}
+    max-width: {{ section.settings.content_max_width }}px;
+    {%- endif -%}
+  }
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .section-heading,
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__text,
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__text p {
+    text-align: center;
+  }
+  {%- endif -%}
+  {%- if layout == 'side-by-side' and section.settings.image_position == 'right' -%}
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .image-text__inner--reverse .image-text__media { order: 2; }
+    #shopify-section-{{ section.id }} .image-text__inner--reverse .image-text__content { order: 1; }
+  }
+  {%- endif -%}
+  {%- if image_max_d > 0 -%}
+  #shopify-section-{{ section.id }} .image-text__media {
+    max-width: {{ image_max_d }}px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #shopify-section-{{ section.id }} .image-text__inner--stacked .image-text__media img,
+  #shopify-section-{{ section.id }} .image-text__inner--image-only .image-text__media img,
+  #shopify-section-{{ section.id }} .image-text__media img,
+  #shopify-section-{{ section.id }} .image-text__image {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  {%- endif -%}
+  {%- if image_max_t > 0 and image_max_t != image_max_d -%}
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .image-text__media {
+      max-width: {{ image_max_t }}px;
+    }
+  }
+  {%- endif -%}
+  {%- if image_max_m > 0 and image_max_m != image_max_t -%}
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .image-text__media {
+      max-width: {{ image_max_m }}px;
+    }
+  }
+  {%- endif -%}
+  {%- if section.settings.content_max_width > 0 and layout != 'stacked' -%}
+  #shopify-section-{{ section.id }} .image-text__content {
+    max-width: {{ section.settings.content_max_width }}px;
+  }
+  {%- endif -%}
+  {%- if section.settings.heading_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .image-text__content .section-heading {
+      font-size: {{ section.settings.heading_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.heading_font_weight != blank and section.settings.heading_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .image-text__content .section-heading {
+      font-weight: {{ section.settings.heading_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.heading_font_color != blank -%}
+    #shopify-section-{{ section.id }} .image-text__content .section-heading {
+      color: {{ section.settings.heading_font_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .image-text__text,
+    #shopify-section-{{ section.id }} .image-text__text p {
+      font-size: {{ section.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_weight != blank and section.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .image-text__text,
+    #shopify-section-{{ section.id }} .image-text__text p {
+      font-weight: {{ section.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .image-text__text,
+    #shopify-section-{{ section.id }} .image-text__text p,
+    #shopify-section-{{ section.id }} .image-text__text li,
+    #shopify-section-{{ section.id }} .image-text__text a {
+      color: {{ section.settings.text_font_color }} !important;
+    }
+  {%- endif -%}
+</style>
 
 {% schema %}
 {
@@ -73,9 +220,71 @@
       "default": "h2"
     },
     {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
       "type": "richtext",
       "id": "text",
       "label": "Description"
+    },
+    {
+      "type": "color",
+      "id": "text_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "text",
@@ -124,6 +333,51 @@
       "default": "lazy"
     },
     {
+      "type": "select",
+      "id": "image_display_size",
+      "label": "Image display size",
+      "options": [
+        { "value": "full", "label": "Full column width" },
+        { "value": "large", "label": "Large (800px max)" },
+        { "value": "medium", "label": "Medium (560px max)" },
+        { "value": "small", "label": "Small (360px max)" }
+      ],
+      "default": "full"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image max width override (desktop)",
+      "min": 0,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use display size preset above."
+    },
+    {
+      "type": "range",
+      "id": "image_max_width_tablet",
+      "label": "Image max width (tablet)",
+      "min": 0,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = inherit desktop."
+    },
+    {
+      "type": "range",
+      "id": "image_max_width_mobile",
+      "label": "Image max width (mobile)",
+      "min": 0,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = inherit tablet/desktop."
+    },
+    {
       "type": "header",
       "content": "Layout"
     },
@@ -133,14 +387,373 @@
       "label": "Layout",
       "options": [
         { "value": "side-by-side", "label": "Side by side" },
-        { "value": "stacked", "label": "Stacked (centered)" }
+        { "value": "stacked", "label": "Stacked (centered)" },
+        { "value": "image-only", "label": "Image only" }
       ],
       "default": "side-by-side"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left",
+      "info": "Side-by-side layout on desktop only."
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Image column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Text column uses the remainder. Side-by-side on desktop only."
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 0,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = no limit. Useful for stacked layout."
     },
     {
       "type": "color",
       "id": "background_color",
       "label": "Background color"
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default (48px). Applies when side-by-side."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px when stacked. 0 = theme default (32px)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below when stacked. 0 = theme default (32px)."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
     },
     {
       "type": "header",
@@ -174,6 +787,12 @@
   "presets": [
     {
       "name": "Image + Text"
+    },
+    {
+      "name": "Image only",
+      "settings": {
+        "layout": "image-only"
+      }
     }
   ]
 }

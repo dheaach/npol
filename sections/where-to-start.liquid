@@ -1,0 +1,1018 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign grid_gap = section.settings.column_gap | default: 0
+  assign grid_gap_tablet = section.settings.column_gap_tablet | default: 0
+  if grid_gap_tablet == 0
+    assign grid_gap_tablet = grid_gap
+  endif
+  assign grid_gap_mobile = section.settings.column_gap_mobile | default: 0
+  if grid_gap_mobile == 0
+    assign grid_gap_mobile = grid_gap_tablet
+  endif
+  assign cols_desktop = section.settings.cards_per_row | default: 2
+  assign cols_tablet = section.settings.cards_per_row_tablet | default: 2
+  assign cols_mobile = section.settings.cards_per_row_mobile | default: 1
+  assign hub_size = section.settings.center_hub_size | default: 48
+  assign hub_offset_x = section.settings.center_hub_offset_x | default: 0
+  assign hub_offset_y = section.settings.center_hub_offset_y | default: 0
+  assign show_hub = section.settings.show_center_hub
+  assign card_text_color = section.settings.card_text_color | default: '#FFFFFF'
+  assign content_max = section.settings.content_max_width | default: 1200
+  assign grid_margin_top = section.settings.cards_margin_top | default: 48
+-%}
+
+<section
+  class="where-to-start section-spacing"
+  style="background-color: {{ section.settings.background_color | default: '#F0F1F3' }};"
+  aria-labelledby="where-to-start-heading-{{ section.id }}"
+>
+  <div class="page-width">
+    <div class="where-to-start__inner" style="max-width: {{ content_max }}px;">
+      <header class="where-to-start__header text-center">
+        <div id="where-to-start-heading-{{ section.id }}">
+          {% render 'highlighted-heading',
+            heading: section.settings.heading,
+            heading_weight: section.settings.heading_weight,
+            heading_before: section.settings.heading_before,
+            heading_highlight: section.settings.heading_highlight,
+            heading_after: section.settings.heading_after,
+            heading_before_weight: section.settings.heading_before_weight,
+            heading_highlight_weight: section.settings.heading_highlight_weight,
+            heading_after_weight: section.settings.heading_after_weight,
+            heading_tag: section.settings.heading_tag,
+            heading_size: section.settings.heading_tag,
+            highlight_color: section.settings.highlight_color
+          %}
+        </div>
+        {%- if section.settings.caption != blank -%}
+          <p class="where-to-start__caption section-text">{{ section.settings.caption }}</p>
+        {%- endif -%}
+      </header>
+
+      {%- if section.blocks.size > 0 -%}
+        <div
+          class="where-to-start__grid-wrap"
+          style="margin-top: {{ grid_margin_top }}px;"
+        >
+          <div
+            class="where-to-start__grid"
+            style="
+              --where-to-start-columns: {{ cols_desktop }};
+              --where-to-start-columns-tablet: {{ cols_tablet }};
+              --where-to-start-columns-mobile: {{ cols_mobile }};
+              --where-to-start-gap: {{ grid_gap }}px;
+              --where-to-start-gap-tablet: {{ grid_gap_tablet }}px;
+              --where-to-start-gap-mobile: {{ grid_gap_mobile }}px;
+              --where-to-start-hub: {{ hub_size }}px;
+            "
+          >
+            {%- if show_hub and section.blocks.size >= 4 and grid_gap > 0 -%}
+              <span class="where-to-start__hub" aria-hidden="true"></span>
+            {%- endif -%}
+
+            {%- for block in section.blocks -%}
+              <article
+                id="where-to-start-card-{{ block.id }}"
+                class="where-to-start__card"
+                style="background-color: {{ block.settings.card_background_color | default: '#51ADA0' }};"
+                {{ block.shopify_attributes }}
+              >
+                {%- if block.settings.title != blank -%}
+                  <h3 class="where-to-start__card-title section-heading section-heading--h3">{{ block.settings.title }}</h3>
+                {%- endif -%}
+
+                {%- if block.settings.text != blank -%}
+                  <div class="where-to-start__card-text section-text rte">{{ block.settings.text }}</div>
+                {%- endif -%}
+
+                {%- if block.settings.button_label != blank -%}
+                  <div class="where-to-start__card-cta">
+                    {% render 'button',
+                      label: block.settings.button_label,
+                      url: block.settings.button_url,
+                      style: block.settings.button_style | default: 'yellow'
+                    %}
+                  </div>
+                {%- endif -%}
+              </article>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.where-to-start', pad_x: '.page-width' %}
+
+  #shopify-section-{{ section.id }} .where-to-start__inner {
+    margin-inline: auto;
+  }
+  #shopify-section-{{ section.id }} #where-to-start-heading-{{ section.id }} .section-heading {
+    color: {{ section.settings.heading_color | default: '#0A1D3C' }};
+  }
+  #shopify-section-{{ section.id }} .text-highlight {
+    color: {{ section.settings.highlight_color | default: '#51ADA0' }} !important;
+  }
+  #shopify-section-{{ section.id }} .where-to-start__caption {
+    margin: 16px auto 0;
+    max-width: {{ section.settings.caption_max_width | default: 720 }}px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: {{ section.settings.caption_font_color | default: '#0A1D3C' }};
+  }
+  {%- if section.settings.caption_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .where-to-start__caption {
+      font-size: {{ section.settings.caption_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.caption_font_weight != blank and section.settings.caption_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .where-to-start__caption {
+      font-weight: {{ section.settings.caption_font_weight }};
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .where-to-start__grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--where-to-start-columns-mobile, 1), minmax(0, 1fr));
+    gap: var(--where-to-start-gap-mobile, 0px);
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .where-to-start__grid {
+      grid-template-columns: repeat(var(--where-to-start-columns-tablet, 2), minmax(0, 1fr));
+      gap: var(--where-to-start-gap-tablet, 0px);
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .where-to-start__grid {
+      grid-template-columns: repeat(var(--where-to-start-columns, 2), minmax(0, 1fr));
+      gap: var(--where-to-start-gap, 0px);
+    }
+  }
+  #shopify-section-{{ section.id }} .where-to-start__hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: var(--where-to-start-hub, 48px);
+    height: var(--where-to-start-hub, 48px);
+    border-radius: 50%;
+    background-color: {{ section.settings.background_color | default: '#F0F1F3' }};
+    transform: translate(calc(-50% + {{ hub_offset_x }}px), calc(-50% + {{ hub_offset_y }}px));
+    pointer-events: none;
+  }
+  #shopify-section-{{ section.id }} .where-to-start__card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: {{ section.settings.card_min_height | default: 320 }}px;
+    padding: {{ section.settings.card_padding_y | default: 40 }}px {{ section.settings.card_padding_x | default: 36 }}px;
+    color: {{ card_text_color }};
+    text-align: left;
+  }
+  #shopify-section-{{ section.id }} .where-to-start__card-title {
+    margin: 0 0 16px;
+    color: inherit;
+    font-weight: 700;
+  }
+  #shopify-section-{{ section.id }} .where-to-start__card-text,
+  #shopify-section-{{ section.id }} .where-to-start__card-text p {
+    margin: 0;
+    color: inherit;
+    flex: 1;
+  }
+  #shopify-section-{{ section.id }} .where-to-start__card-cta {
+    margin-top: {{ section.settings.card_button_spacing | default: 24 }}px;
+  }
+
+  {%- for block in section.blocks -%}
+    {%- if block.settings.title_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-title {
+        font-size: {{ block.settings.title_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_weight != blank and block.settings.title_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-title {
+        font-weight: {{ block.settings.title_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.title_font_color != blank -%}
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-title {
+        color: {{ block.settings.title_font_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-text,
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-text p {
+        font-size: {{ block.settings.text_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-text,
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-text p {
+        font-weight: {{ block.settings.text_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_color != blank -%}
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-text,
+      #shopify-section-{{ section.id }} #where-to-start-card-{{ block.id }} .where-to-start__card-text p {
+        color: {{ block.settings.text_font_color }};
+      }
+    {%- endif -%}
+  {%- endfor -%}
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .where-to-start__hub {
+      display: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Where to Start",
+  "tag": "section",
+  "class": "section-where-to-start",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (single line)",
+      "info": "Or use split heading fields below"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Not Sure Where to "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Start?"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Caption",
+      "default": "Where Is Your Team Right Now?"
+    },
+    {
+      "type": "color",
+      "id": "caption_font_color",
+      "label": "Caption color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "caption_font_size",
+      "label": "Caption font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "caption_font_weight",
+      "label": "Caption font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "caption_max_width",
+      "label": "Caption max width",
+      "min": 0,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 720,
+      "info": "0 = no limit."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F0F1F3"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row",
+      "label": "Cards per row (desktop)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_tablet",
+      "label": "Cards per row (tablet)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_mobile",
+      "label": "Cards per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "show_center_hub",
+      "label": "Show center circle",
+      "default": true,
+      "info": "White circle where four cards meet. Requires gap and 4 cards on desktop."
+    },
+    {
+      "type": "range",
+      "id": "center_hub_size",
+      "label": "Center circle size",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "center_hub_offset_x",
+      "label": "Center circle offset — left / right",
+      "min": -80,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "Negative = left. Positive = right."
+    },
+    {
+      "type": "range",
+      "id": "center_hub_offset_y",
+      "label": "Center circle offset — up / down",
+      "min": -80,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "Negative = up. Positive = down."
+    },
+    {
+      "type": "range",
+      "id": "cards_margin_top",
+      "label": "Space above cards",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "card_min_height",
+      "label": "Card minimum height",
+      "min": 200,
+      "max": 560,
+      "step": 20,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "card_padding_y",
+      "label": "Card padding vertical",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_padding_x",
+      "label": "Card padding horizontal",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "card_button_spacing",
+      "label": "Space above card button",
+      "min": 8,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between cards (desktop)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16,
+      "info": "0 = no gap. Center circle needs gap > 0."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between cards (tablet)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between cards (mobile)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Section padding \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Section margin \u2014 Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Card title"
+        },
+        {
+          "type": "color",
+          "id": "title_font_color",
+          "label": "Title color",
+          "info": "Empty = card text color."
+        },
+        {
+          "type": "range",
+          "id": "title_font_size",
+          "label": "Title font size",
+          "min": 0,
+          "max": 96,
+          "step": 2,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme heading scale."
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "label": "Title font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Card description text.</p>"
+        },
+        {
+          "type": "color",
+          "id": "text_font_color",
+          "label": "Description color",
+          "info": "Empty = card text color."
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Description font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Description font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "yellow", "label": "Yellow" },
+            { "value": "primary", "label": "Primary" },
+            { "value": "secondary", "label": "Secondary" },
+            { "value": "outline", "label": "Outline" }
+          ],
+          "default": "yellow"
+        },
+        {
+          "type": "color",
+          "id": "card_background_color",
+          "label": "Card background color",
+          "default": "#51ADA0"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Where to Start",
+      "settings": {
+        "heading_before": "Not Sure Where to ",
+        "heading_highlight": "Start?",
+        "caption": "Where Is Your Team Right Now?",
+        "column_gap": 16,
+        "show_center_hub": true
+      },
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "title": "We're Building a Shared Foundation",
+            "text": "<p>Workshops help teams develop a common understanding of mathematics teaching, student thinking, and instructional practice. Many schools begin here before expanding into additional support.</p>",
+            "button_label": "View Upcoming Workshops",
+            "card_background_color": "#51ADA0"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "We're Strengthening a Specific Area of Instruction",
+            "text": "<p>Focused support helps teams deepen instruction in areas such as fluency, place value, data, questioning, and conferring. Schools can engage with these supports on their own or as part of a broader professional learning plan.</p>",
+            "button_label": "Explore Targeted Support",
+            "card_background_color": "#6B9E8F"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "We Want Support That Continues Into Daily Instruction",
+            "text": "<p>Ongoing support helps teachers strengthen practice over time through collaborative learning, planning, reflection, and classroom-based application.</p>",
+            "button_label": "See Ongoing Support",
+            "card_background_color": "#0A1D3C"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "We're Building Greater Coherence Across Schools or Grade Levels",
+            "text": "<p>School-wide support helps leaders create stronger alignment across classrooms, instructional practices, and mathematical goals.</p>",
+            "button_label": "Explore School-Wide Options",
+            "card_background_color": "#1A2332"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

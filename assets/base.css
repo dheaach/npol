@@ -143,6 +143,7 @@ p, .section-text,
 
 /* Full-bleed: edge-to-edge background or slider; content uses .page-width padding */
 #MainContent > .shopify-section.section-dark-quote,
+#MainContent > .shopify-section.section-learning-cards-banner,
 #MainContent > .shopify-section.section-video-showcase,
 #MainContent > .shopify-section.section-hero-banner,
 #MainContent > .shopify-section.section-cta-banner,
@@ -165,6 +166,7 @@ p, .section-text,
 }
 
 #MainContent > .shopify-section.section-dark-quote .page-width,
+#MainContent > .shopify-section.section-learning-cards-banner .page-width,
 #MainContent > .shopify-section.section-testimonials .testimonials__inner,
 #MainContent > .shopify-section.section-process-steps .process-steps__inner,
 #MainContent > .shopify-section.section-resources-cards .resources-cards__inner,
@@ -817,8 +819,6 @@ p, .section-text,
 .dark-quote-banner__content {
   position: relative;
   z-index: 1;
-  padding-top: 48px;
-  padding-bottom: 48px;
 }
 
 .dark-quote-banner__heading {
@@ -2222,13 +2222,76 @@ p, .section-text,
   align-items: center;
 }
 
-.image-text__inner--stacked {
+.image-text__inner--stacked,
+.image-text__inner--image-only {
   grid-template-columns: 1fr;
+}
+
+.image-text__inner--stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  width: 100%;
+}
+
+.image-text__inner--stacked .image-text__media {
+  width: auto;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-text__inner--stacked .image-text__media img,
+.image-text__inner--stacked .image-text__image {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .image-text__inner--stacked .image-text__content {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-text__inner--stacked .section-heading,
+.image-text__inner--stacked .image-text__text,
+.image-text__inner--stacked .image-text__text p,
+.image-text__inner--stacked .image-text__text li {
+  text-align: center;
+  width: 100%;
+}
+
+.image-text__inner--stacked .rte ul,
+.image-text__inner--stacked .rte ol {
+  padding-left: 0;
+  list-style-position: inside;
+}
+
+.image-text__inner--image-only {
+  justify-items: center;
+}
+
+.image-text__inner--image-only .image-text__media {
+  width: 100%;
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-text__inner--image-only .image-text__media img {
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .image-text__content {
@@ -2274,7 +2337,7 @@ p, .section-text,
   .dark-plan-cta__inner,
   .hero-banner__inner,
   .content-block__inner,
-  .image-text__inner {
+  .image-text__inner:not(.image-text__inner--stacked):not(.image-text__inner--image-only) {
     grid-template-columns: 1fr;
     gap: 32px;
   }

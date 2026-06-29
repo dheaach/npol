@@ -90,6 +90,13 @@
       font-weight: {{ section.settings.subtext_font_weight }};
     }
   {%- endif -%}
+  {%- if section.settings.subtext_max_width > 0 -%}
+    #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
+      max-width: {{ section.settings.subtext_max_width }}px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  {%- endif -%}
   #shopify-section-{{ section.id }} .text-highlight {
     color: {{ section.settings.highlight_color | default: '#51ADA0' }} !important;
   }
@@ -327,6 +334,17 @@
       "label": "Subtext"
     },
     {
+      "type": "range",
+      "id": "subtext_max_width",
+      "label": "Subtext max width",
+      "min": 0,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = no limit (full container width)."
+    },
+    {
       "type": "color",
       "id": "subtext_color",
       "label": "Subtext color",
@@ -383,180 +401,6 @@
     {
       "type": "header",
       "content": "Layout"
-    },
-    {
-      "type": "header",
-      "content": "Section minimum height"
-    },
-    {
-      "type": "range",
-      "id": "section_min_height_4k",
-      "label": "4K (2560px and up)",
-      "min": 160,
-      "max": 1000,
-      "step": 20,
-      "unit": "px",
-      "default": 480
-    },
-    {
-      "type": "range",
-      "id": "section_min_height_desktop",
-      "label": "Desktop (1441px – 2559px)",
-      "min": 160,
-      "max": 900,
-      "step": 20,
-      "unit": "px",
-      "default": 400
-    },
-    {
-      "type": "range",
-      "id": "section_min_height_laptop",
-      "label": "Laptop (1024px – 1440px)",
-      "min": 160,
-      "max": 800,
-      "step": 20,
-      "unit": "px",
-      "default": 320
-    },
-    {
-      "type": "range",
-      "id": "section_min_height_tablet",
-      "label": "Tablet (768px – 1023px)",
-      "min": 160,
-      "max": 700,
-      "step": 20,
-      "unit": "px",
-      "default": 280
-    },
-    {
-      "type": "range",
-      "id": "section_min_height_mobile",
-      "label": "Mobile (767px and below)",
-      "min": 160,
-      "max": 600,
-      "step": 20,
-      "unit": "px",
-      "default": 240
-    },
-    {
-      "type": "header",
-      "content": "Background"
-    },
-    {
-      "type": "image_picker",
-      "id": "background_image",
-      "label": "Background image — tablet and up (768px+)",
-      "info": "Used from tablet breakpoint upward. If empty, uses Theme settings → Brand → Dark quote banner background."
-    },
-    {
-      "type": "image_picker",
-      "id": "background_image_mobile",
-      "label": "Background image — mobile (767px and below)",
-      "info": "Optional separate graphic for phones. If empty, the tablet/desktop image above is used on all sizes."
-    },
-    {
-      "type": "header",
-      "content": "Background size (per breakpoint)"
-    },
-    {
-      "type": "paragraph",
-      "content": "Fit width (squeeze) keeps the graphic full width without cropping. Cover fills the section and may crop edges."
-    },
-    {
-      "type": "select",
-      "id": "background_size_4k",
-      "label": "4K — background fit (2560px+)",
-      "options": [
-        { "value": "fit_width", "label": "Fit width (squeeze)" },
-        { "value": "cover", "label": "Cover (fill, may crop)" },
-        { "value": "contain", "label": "Contain (fit in box)" },
-        { "value": "stretch", "label": "Stretch" }
-      ],
-      "default": "fit_width"
-    },
-    {
-      "type": "select",
-      "id": "background_size_desktop",
-      "label": "Desktop — background fit (1441px–2559px)",
-      "options": [
-        { "value": "fit_width", "label": "Fit width (squeeze)" },
-        { "value": "cover", "label": "Cover (fill, may crop)" },
-        { "value": "contain", "label": "Contain (fit in box)" },
-        { "value": "stretch", "label": "Stretch" }
-      ],
-      "default": "fit_width"
-    },
-    {
-      "type": "select",
-      "id": "background_size_laptop",
-      "label": "Laptop — background fit (1024px–1440px)",
-      "options": [
-        { "value": "fit_width", "label": "Fit width (squeeze)" },
-        { "value": "cover", "label": "Cover (fill, may crop)" },
-        { "value": "contain", "label": "Contain (fit in box)" },
-        { "value": "stretch", "label": "Stretch" }
-      ],
-      "default": "fit_width"
-    },
-    {
-      "type": "select",
-      "id": "background_size_tablet",
-      "label": "Tablet — background fit (768px–1023px)",
-      "options": [
-        { "value": "fit_width", "label": "Fit width (squeeze)" },
-        { "value": "cover", "label": "Cover (fill, may crop)" },
-        { "value": "contain", "label": "Contain (fit in box)" },
-        { "value": "stretch", "label": "Stretch" }
-      ],
-      "default": "fit_width"
-    },
-    {
-      "type": "select",
-      "id": "background_size_mobile",
-      "label": "Mobile — background fit (767px and below)",
-      "options": [
-        { "value": "fit_width", "label": "Fit width (squeeze)" },
-        { "value": "cover", "label": "Cover (fill, may crop)" },
-        { "value": "contain", "label": "Contain (fit in box)" },
-        { "value": "stretch", "label": "Stretch" }
-      ],
-      "default": "fit_width"
-    },
-    {
-      "type": "select",
-      "id": "background_position",
-      "label": "Background position",
-      "options": [
-        { "value": "center center", "label": "Center" },
-        { "value": "center top", "label": "Top" },
-        { "value": "center bottom", "label": "Bottom" }
-      ],
-      "default": "center center"
-    },
-    {
-      "type": "select",
-      "id": "background_flip",
-      "label": "Background flip — tablet and up (768px+)",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "horizontal", "label": "Horizontal (mirror)" },
-        { "value": "vertical", "label": "Vertical" },
-        { "value": "both", "label": "Both axes" }
-      ],
-      "default": "none"
-    },
-    {
-      "type": "select",
-      "id": "background_flip_mobile",
-      "label": "Background flip — mobile (767px and below)",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "horizontal", "label": "Horizontal (mirror)" },
-        { "value": "vertical", "label": "Vertical" },
-        { "value": "both", "label": "Both axes" }
-      ],
-      "default": "none",
-      "info": "Applies only when a separate mobile background image is set."
     },
     {
       "type": "header",
@@ -845,6 +689,180 @@
       "unit": "px",
       "default": 0,
       "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "header",
+      "content": "Section minimum height"
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_4k",
+      "label": "4K (2560px and up)",
+      "min": 160,
+      "max": 1000,
+      "step": 20,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_desktop",
+      "label": "Desktop (1441px – 2559px)",
+      "min": 160,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_laptop",
+      "label": "Laptop (1024px – 1440px)",
+      "min": 160,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_tablet",
+      "label": "Tablet (768px – 1023px)",
+      "min": 160,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_mobile",
+      "label": "Mobile (767px and below)",
+      "min": 160,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image — tablet and up (768px+)",
+      "info": "Used from tablet breakpoint upward. If empty, uses Theme settings → Brand → Dark quote banner background."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image — mobile (767px and below)",
+      "info": "Optional separate graphic for phones. If empty, the tablet/desktop image above is used on all sizes."
+    },
+    {
+      "type": "header",
+      "content": "Background size (per breakpoint)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Fit width (squeeze) keeps the graphic full width without cropping. Cover fills the section and may crop edges."
+    },
+    {
+      "type": "select",
+      "id": "background_size_4k",
+      "label": "4K — background fit (2560px+)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_desktop",
+      "label": "Desktop — background fit (1441px–2559px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_laptop",
+      "label": "Laptop — background fit (1024px–1440px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_tablet",
+      "label": "Tablet — background fit (768px–1023px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_mobile",
+      "label": "Mobile — background fit (767px and below)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top" },
+        { "value": "center bottom", "label": "Bottom" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_flip",
+      "label": "Background flip — tablet and up (768px+)",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "horizontal", "label": "Horizontal (mirror)" },
+        { "value": "vertical", "label": "Vertical" },
+        { "value": "both", "label": "Both axes" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "background_flip_mobile",
+      "label": "Background flip — mobile (767px and below)",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "horizontal", "label": "Horizontal (mirror)" },
+        { "value": "vertical", "label": "Vertical" },
+        { "value": "both", "label": "Both axes" }
+      ],
+      "default": "none",
+      "info": "Applies only when a separate mobile background image is set."
     },
     {
       "type": "header",

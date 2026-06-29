@@ -14,19 +14,34 @@
     assign image_col = 100 | minus: content_col
   endif
   assign gap_d = section.settings.column_gap | default: 48
-  if section.settings.column_gap_tablet > 0
-    assign gap_t = section.settings.column_gap_tablet
-  elsif section.settings.stack_on_tablet
-    assign gap_t = 32
-  else
-    assign gap_t = gap_d
+  assign gap_t = section.settings.column_gap_tablet
+  if gap_t == 0
+    if section.settings.stack_on_tablet
+      assign gap_t = 32
+    else
+      assign gap_t = gap_d
+    endif
   endif
-  if section.settings.column_gap_mobile > 0
-    assign gap_m = section.settings.column_gap_mobile
-  elsif section.settings.stack_on_mobile
-    assign gap_m = 32
-  else
-    assign gap_m = gap_d
+  assign gap_m = section.settings.column_gap_mobile
+  if gap_m == 0
+    if section.settings.stack_on_mobile
+      assign gap_m = 32
+    else
+      assign gap_m = gap_d
+    endif
+  endif
+  assign divider_enabled = true
+  if section.settings.divider_style == 'none'
+    assign divider_enabled = false
+  endif
+  assign steps_gap_d = section.settings.steps_gap | default: 0
+  assign steps_gap_t = section.settings.steps_gap_tablet | default: 0
+  if steps_gap_t == 0
+    assign steps_gap_t = steps_gap_d
+  endif
+  assign steps_gap_m = section.settings.steps_gap_mobile | default: 0
+  if steps_gap_m == 0
+    assign steps_gap_m = steps_gap_t
   endif
 -%}
 
@@ -69,7 +84,27 @@
     <div class="process-steps__list">
       {%- for block in section.blocks -%}
         <div class="process-step{% if forloop.index0 == 1 or forloop.index0 == 3 or forloop.index0 == 5 %} process-step--reverse{% endif %}" {{ block.shopify_attributes }} id="process-step-{{ block.id }}">
-          {%- if block.settings.show_dots_top -%}
+          {%- liquid
+            assign show_dots_top = false
+            assign show_dots_bottom = false
+            assign step_divider = block.settings.divider_position | default: ''
+            if step_divider == blank
+              if block.settings.show_dots_top
+                assign show_dots_top = true
+              endif
+              if block.settings.show_dots_bottom
+                assign show_dots_bottom = true
+              endif
+            elsif step_divider == 'top'
+              assign show_dots_top = true
+            elsif step_divider == 'bottom'
+              assign show_dots_bottom = true
+            elsif step_divider == 'both'
+              assign show_dots_top = true
+              assign show_dots_bottom = true
+            endif
+          -%}
+          {%- if divider_enabled and show_dots_top -%}
             {% render 'process-step-dots', section: section, position: 'top', dots_size: dots_size, dots_spacing: dots_spacing %}
           {%- endif -%}
           <div class="process-step__body{% if section.settings.mobile_stack_order == 'content-first' %} process-step__body--stack-content-first{% endif %}">
@@ -82,6 +117,15 @@
               {%- endif -%}
               {%- if block.settings.text != blank -%}
                 <div class="section-text rte process-step__text">{{ block.settings.text }}</div>
+              {%- endif -%}
+              {%- if block.settings.button_label != blank -%}
+                <div class="process-step__cta">
+                  {% render 'button',
+                    label: block.settings.button_label,
+                    url: block.settings.button_url,
+                    style: block.settings.button_style | default: 'primary'
+                  %}
+                </div>
               {%- endif -%}
             </div>
             <div class="process-step__media">
@@ -109,7 +153,7 @@
               {%- endif -%}
             </div>
           </div>
-          {%- if block.settings.show_dots_bottom -%}
+          {%- if divider_enabled and show_dots_bottom -%}
             {% render 'process-step-dots', section: section, position: 'bottom', dots_size: dots_size, dots_spacing: dots_spacing %}
           {%- endif -%}
         </div>
@@ -196,6 +240,49 @@
     #shopify-section-{{ section.id }} .process-step--reverse .process-step__media { order: 1; }
   }
   {%- endif -%}
+  #shopify-section-{{ section.id }} .process-steps__list {
+    overflow: visible;
+  }
+  #shopify-section-{{ section.id }} .process-step {
+    position: relative;
+    overflow: visible;
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .process-step + .process-step {
+      margin-top: {{ steps_gap_d }}px;
+    }
+    {%- if steps_gap_d < 0 -%}
+    {%- for block in section.blocks -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} {
+        z-index: {{ forloop.index }};
+      }
+    {%- endfor -%}
+    {%- endif -%}
+  }
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .process-step + .process-step {
+      margin-top: {{ steps_gap_t }}px;
+    }
+    {%- if steps_gap_t < 0 -%}
+    {%- for block in section.blocks -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} {
+        z-index: {{ forloop.index }};
+      }
+    {%- endfor -%}
+    {%- endif -%}
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .process-step + .process-step {
+      margin-top: {{ steps_gap_m }}px;
+    }
+    {%- if steps_gap_m < 0 -%}
+    {%- for block in section.blocks -%}
+      #shopify-section-{{ section.id }} #process-step-{{ block.id }} {
+        z-index: {{ forloop.index }};
+      }
+    {%- endfor -%}
+    {%- endif -%}
+  }
   @media screen and (max-width: 1023px) {
     #shopify-section-{{ section.id }} .process-step__body--stack-content-first .process-step__content {
       order: -1;
@@ -649,15 +736,73 @@
     {
       "type": "range",
       "id": "column_gap",
-      "label": "Gap between columns",
-      "min": 16,
-      "max": 96,
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 48,
+      "info": "Space between text and image when side by side. e.g. 40 on desktop."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = inherit desktop (or 32px when stacked). e.g. 40."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = inherit tablet/desktop (or 32px when stacked). e.g. 30."
+    },
+    {
+      "type": "header",
+      "content": "Gap between steps"
+    },
+    {
+      "type": "range",
+      "id": "steps_gap",
+      "label": "Gap between steps",
+      "min": -296,
+      "max": 200,
       "step": 8,
       "unit": "px",
-      "default": 48
+      "default": 0,
+      "info": "Negative values pull the next step up so step images overlap."
     },
-        {"type": "range", "id": "column_gap_tablet", "label": "Gap between columns (tablet)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "768px–1023px when stacked. 0 = theme default (32px)."},
-    {"type": "range", "id": "column_gap_mobile", "label": "Gap between columns (mobile)", "min": 0, "max": 96, "step": 8, "unit": "px", "default": 0, "info": "767px and below when stacked. 0 = theme default (32px)."},
+    {
+      "type": "range",
+      "id": "steps_gap_tablet",
+      "label": "Gap between steps (tablet)",
+      "min": -296,
+      "max": 200,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = inherit desktop."
+    },
+    {
+      "type": "range",
+      "id": "steps_gap_mobile",
+      "label": "Gap between steps (mobile)",
+      "min": -296,
+      "max": 200,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = inherit tablet/desktop."
+    },
     {
       "type": "checkbox",
       "id": "stack_on_tablet",
@@ -686,6 +831,16 @@
     {
       "type": "header",
       "content": "Step divider (dots)"
+    },
+    {
+      "type": "select",
+      "id": "divider_style",
+      "label": "Divider style",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "dots", "label": "Dots" }
+      ],
+      "default": "dots"
     },
     {
       "type": "color",
@@ -1203,6 +1358,32 @@
         },
         {
           "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "primary", "label": "Primary" },
+            { "value": "secondary", "label": "Secondary" },
+            { "value": "outline", "label": "Outline" },
+            { "value": "yellow", "label": "Yellow" }
+          ],
+          "default": "primary"
+        },
+        {
+          "type": "header",
           "content": "Image"
         },
         {
@@ -1350,16 +1531,17 @@
           "content": "Dots divider"
         },
         {
-          "type": "checkbox",
-          "id": "show_dots_top",
-          "label": "Show dots above this step",
-          "default": false
-        },
-        {
-          "type": "checkbox",
-          "id": "show_dots_bottom",
-          "label": "Show dots below this step",
-          "default": false
+          "type": "select",
+          "id": "divider_position",
+          "label": "Divider position",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "top", "label": "Above step" },
+            { "value": "bottom", "label": "Below step" },
+            { "value": "both", "label": "Above and below" }
+          ],
+          "default": "none",
+          "info": "Requires section divider style “Dots”. Legacy per-step checkboxes still apply if this is unset."
         }
       ]
     }
@@ -1367,8 +1549,8 @@
   "presets": [{
     "name": "Process Steps",
     "blocks": [
-      { "type": "step", "settings": { "step_label": "Step 1", "show_dots_bottom": true } },
-      { "type": "step", "settings": { "step_label": "Step 2", "show_dots_bottom": true } },
+      { "type": "step", "settings": { "step_label": "Step 1", "divider_position": "bottom" } },
+      { "type": "step", "settings": { "step_label": "Step 2", "divider_position": "bottom" } },
       { "type": "step", "settings": { "step_label": "Step 3" } }
     ]
   }]

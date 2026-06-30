@@ -37,11 +37,21 @@
   assign body_content_gap = section.settings.content_gap | default: 24
   assign image_align = section.settings.image_align | default: 'center'
   assign image_aspect = section.settings.image_aspect_ratio | default: 'auto'
+
+  assign bg_type = section.settings.background_type | default: 'color'
+  assign grad_start = section.settings.gradient_color_start | default: '#0A1D3C'
+  assign grad_end = section.settings.gradient_color_end | default: '#51ADA0'
+  assign grad_dir = section.settings.gradient_direction | default: 'vertical'
+
+  if grad_dir == 'horizontal'
+    assign grad_css = 'linear-gradient(to right, ' | append: grad_start | append: ' 0%, ' | append: grad_end | append: ' 50%)'
+  else
+    assign grad_css = 'linear-gradient(to bottom, ' | append: grad_start | append: ' 0%, ' | append: grad_end | append: ' 50%)'
+  endif
 -%}
 
 <section
   class="dark-plan-cta"
-  style="background-color: {{ section.settings.background_color | default: '#0A1D3C' }};"
   aria-labelledby="dark-plan-cta-heading-{{ section.id }}"
 >
   {%- if has_bg_mobile -%}
@@ -111,14 +121,16 @@
               {% render 'button',
                 label: section.settings.button_primary_label,
                 url: section.settings.button_primary_url,
-                style: 'yellow'
+                style: 'yellow',
+                class: 'dark-plan-cta__btn-primary'
               %}
             {%- endif -%}
             {%- if section.settings.button_secondary_label != blank -%}
               {% render 'button',
                 label: section.settings.button_secondary_label,
                 url: section.settings.button_secondary_url,
-                style: 'primary'
+                style: 'primary',
+                class: 'dark-plan-cta__btn-secondary'
               %}
             {%- endif -%}
           </div>
@@ -133,6 +145,75 @@
 </section>
 
 <style>
+  {%- if bg_type == 'gradient' -%}
+    #shopify-section-{{ section.id }} {
+      background: {{ grad_css }};
+    }
+  {%- else -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color | default: '#0A1D3C' }};
+    }
+  {%- endif -%}
+  {%- liquid
+    assign btn_primary_bg = section.settings.button_primary_bg_color
+    assign btn_primary_text = section.settings.button_primary_text_color
+    assign btn_primary_border = section.settings.button_primary_border_color
+    if btn_primary_border == blank and btn_primary_bg != blank
+      assign btn_primary_border = btn_primary_bg
+    endif
+    assign btn_secondary_bg = section.settings.button_secondary_bg_color
+    assign btn_secondary_text = section.settings.button_secondary_text_color
+    assign btn_secondary_border = section.settings.button_secondary_border_color
+    if btn_secondary_border == blank and btn_secondary_bg != blank
+      assign btn_secondary_border = btn_secondary_bg
+    endif
+  -%}
+  {%- if btn_primary_bg != blank or btn_primary_text != blank or btn_primary_border != blank -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__btn-primary {
+      {%- if btn_primary_bg != blank -%}
+      background-color: {{ btn_primary_bg }};
+      {%- endif -%}
+      {%- if btn_primary_text != blank -%}
+      color: {{ btn_primary_text }};
+      {%- endif -%}
+      {%- if btn_primary_border != blank -%}
+      border-color: {{ btn_primary_border }};
+      {%- endif -%}
+    }
+    #shopify-section-{{ section.id }} .dark-plan-cta__btn-primary:hover {
+      {%- if btn_primary_bg != blank -%}
+      background-color: {{ btn_primary_bg }};
+      border-color: {{ btn_primary_border | default: btn_primary_bg }};
+      filter: brightness(0.92);
+      {%- endif -%}
+      {%- if btn_primary_text != blank -%}
+      color: {{ btn_primary_text }};
+      {%- endif -%}
+    }
+  {%- endif -%}
+  {%- if btn_secondary_bg != blank or btn_secondary_text != blank or btn_secondary_border != blank -%}
+    #shopify-section-{{ section.id }} .dark-plan-cta__btn-secondary {
+      {%- if btn_secondary_bg != blank -%}
+      background-color: {{ btn_secondary_bg }};
+      {%- endif -%}
+      {%- if btn_secondary_text != blank -%}
+      color: {{ btn_secondary_text }};
+      {%- endif -%}
+      {%- if btn_secondary_border != blank -%}
+      border-color: {{ btn_secondary_border }};
+      {%- endif -%}
+    }
+    #shopify-section-{{ section.id }} .dark-plan-cta__btn-secondary:hover {
+      {%- if btn_secondary_bg != blank -%}
+      background-color: {{ btn_secondary_bg }};
+      border-color: {{ btn_secondary_border | default: btn_secondary_bg }};
+      filter: brightness(0.92);
+      {%- endif -%}
+      {%- if btn_secondary_text != blank -%}
+      color: {{ btn_secondary_text }};
+      {%- endif -%}
+    }
+  {%- endif -%}
   {% render 'section-spacing-styles', root: '.dark-plan-cta', pad_y: '.dark-plan-cta__content', pad_x: '.page-width' %}
   #shopify-section-{{ section.id }} .section-heading {
     color: {{ section.settings.heading_color | default: '#FFFFFF' }};
@@ -582,6 +663,24 @@
       "label": "Primary button link"
     },
     {
+      "type": "color",
+      "id": "button_primary_bg_color",
+      "label": "Primary button background",
+      "info": "Empty = theme yellow button style."
+    },
+    {
+      "type": "color",
+      "id": "button_primary_text_color",
+      "label": "Primary button text color",
+      "info": "Empty = theme default."
+    },
+    {
+      "type": "color",
+      "id": "button_primary_border_color",
+      "label": "Primary button border color",
+      "info": "Empty = match background or theme default."
+    },
+    {
       "type": "text",
       "id": "button_secondary_label",
       "label": "Secondary button label",
@@ -591,6 +690,24 @@
       "type": "url",
       "id": "button_secondary_url",
       "label": "Secondary button link"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_bg_color",
+      "label": "Secondary button background",
+      "info": "Empty = theme primary button style."
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_text_color",
+      "label": "Secondary button text color",
+      "info": "Empty = theme default."
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_border_color",
+      "label": "Secondary button border color",
+      "info": "Empty = match background or theme default."
     },
     {
       "type": "header",
@@ -878,11 +995,46 @@
       "content": "Background"
     },
     {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background type",
+      "options": [
+        { "value": "color", "label": "Solid color" },
+        { "value": "gradient", "label": "Gradient" }
+      ],
+      "default": "color"
+    },
+    {
       "type": "color",
       "id": "background_color",
       "label": "Background fallback color",
       "default": "#0A1D3C",
-      "info": "Shown behind the image or when no image is uploaded."
+      "info": "Used when Background type is Solid color, or behind background images."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_start",
+      "label": "Gradient start color",
+      "default": "#0A1D3C",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_end",
+      "label": "Gradient end color",
+      "default": "#51ADA0",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "select",
+      "id": "gradient_direction",
+      "label": "Gradient direction",
+      "options": [
+        { "value": "vertical", "label": "Vertical (top to bottom)" },
+        { "value": "horizontal", "label": "Horizontal (left to right)" }
+      ],
+      "default": "vertical",
+      "info": "Used when Background type is Gradient."
     },
     {
       "type": "image_picker",

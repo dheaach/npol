@@ -39,9 +39,9 @@
   assign grad_dir = section.settings.gradient_direction | default: 'vertical'
 
   if grad_dir == 'horizontal'
-    assign grad_css = 'linear-gradient(to right, ' | append: grad_start | append: ', ' | append: grad_end | append: ')'
+    assign grad_css = 'linear-gradient(to right, ' | append: grad_start | append: ' 0%, ' | append: grad_end | append: ' 50%)'
   else
-    assign grad_css = 'linear-gradient(to bottom, ' | append: grad_start | append: ', ' | append: grad_end | append: ')'
+    assign grad_css = 'linear-gradient(to bottom, ' | append: grad_start | append: ' 0%, ' | append: grad_end | append: ' 50%)'
   endif
 -%}
 

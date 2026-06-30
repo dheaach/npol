@@ -15,7 +15,13 @@
   assign cols_mobile = section.settings.cards_per_row_mobile | default: 1
   assign content_max = section.settings.content_max_width | default: 1100
   assign grad_top = section.settings.card_bg_gradient_top | default: '#F5F5F5'
-  assign grad_bottom = section.settings.card_bg_gradient_bottom | default: '#E0E0E0'
+  assign grad_bottom = section.settings.card_bg_gradient_bottom | default: '#F5F5F5'
+  assign grad_center = section.settings.card_bg_gradient_center | default: '#E8956A'
+  assign grad_center_pos = section.settings.card_bg_gradient_center_position | default: 50
+  assign enable_center_grad = section.settings.enable_center_gradient
+  if enable_center_grad == nil
+    assign enable_center_grad = true
+  endif
   assign default_border = section.settings.card_border_color | default: '#51ADA0'
 -%}
 
@@ -93,6 +99,17 @@
                     if card_border == blank
                       assign card_border = default_border
                     endif
+
+                    assign card_grad_center = block.settings.gradient_center_color
+                    if card_grad_center == blank
+                      assign card_grad_center = grad_center
+                    endif
+
+                    if enable_center_grad and card_grad_center != blank
+                      assign card_bg = 'linear-gradient(180deg, ' | append: grad_top | append: ' 0%, ' | append: card_grad_center | append: ' ' | append: grad_center_pos | append: '%, ' | append: grad_bottom | append: ' 100%)'
+                    else
+                      assign card_bg = 'linear-gradient(180deg, ' | append: grad_top | append: ' 0%, ' | append: grad_bottom | append: ' 100%)'
+                    endif
                   -%}
                   {%- if block.settings.card_url != blank -%}
                     <a
@@ -101,7 +118,7 @@
                       class="podcast__card podcast__card--linked"
                       style="
                         border-color: {{ card_border }};
-                        background: linear-gradient(180deg, {{ grad_top }} 0%, {{ grad_bottom }} 100%);
+                        background: {{ card_bg }};
                       "
                       {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
                       {{ block.shopify_attributes }}
@@ -124,7 +141,7 @@
                       class="podcast__card"
                       style="
                         border-color: {{ card_border }};
-                        background: linear-gradient(180deg, {{ grad_top }} 0%, {{ grad_bottom }} 100%);
+                        background: {{ card_bg }};
                       "
                       {{ block.shopify_attributes }}
                     >
@@ -492,13 +509,40 @@
       "type": "color",
       "id": "card_bg_gradient_top",
       "label": "Card background gradient — top",
-      "default": "#F5F5F5"
+      "default": "#F5F5F5",
+      "info": "Edge color at the top of the card."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_center_gradient",
+      "label": "Enable center gradient glow",
+      "default": true,
+      "info": "Adds a colored glow in the middle of each card (like the orange band in the design)."
+    },
+    {
+      "type": "color",
+      "id": "card_bg_gradient_center",
+      "label": "Card background gradient — center",
+      "default": "#E8956A",
+      "info": "Center glow color. Used when center gradient is enabled."
+    },
+    {
+      "type": "range",
+      "id": "card_bg_gradient_center_position",
+      "label": "Center gradient position",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Vertical position of the center color peak."
     },
     {
       "type": "color",
       "id": "card_bg_gradient_bottom",
       "label": "Card background gradient — bottom",
-      "default": "#E0E0E0"
+      "default": "#F5F5F5",
+      "info": "Edge color at the bottom of the card."
     },
     {
       "type": "color",
@@ -1047,6 +1091,12 @@
           "id": "border_color",
           "label": "Border color",
           "info": "Empty = section default."
+        },
+        {
+          "type": "color",
+          "id": "gradient_center_color",
+          "label": "Center gradient color override",
+          "info": "Empty = use section center gradient color."
         },
         {
           "type": "url",

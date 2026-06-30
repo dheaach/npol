@@ -1,0 +1,1209 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign bg_type = section.settings.background_type | default: 'color'
+  assign bg_color = section.settings.background_color | default: '#ADE8F6'
+  assign bg_image_url = blank
+  if bg_type == 'image' and section.settings.background_image != blank
+    assign bg_image_url = section.settings.background_image | image_url: width: 2400
+  endif
+
+  assign col_gap_d = section.settings.column_gap | default: 0
+  if col_gap_d == 0
+    assign col_gap_d = 16
+  endif
+  assign col_gap_t = section.settings.column_gap_tablet | default: 0
+  if col_gap_t == 0
+    assign col_gap_t = col_gap_d
+  endif
+  assign col_gap_m = section.settings.column_gap_mobile | default: 0
+  if col_gap_m == 0
+    assign col_gap_m = col_gap_t
+  endif
+
+  assign cols_d = section.settings.cards_per_row | default: 3
+  assign cols_t = section.settings.cards_per_row_tablet | default: 2
+  assign cols_m = section.settings.cards_per_row_mobile | default: 1
+
+  assign card_pad_d = section.settings.card_image_padding | default: 0
+  if card_pad_d == 0
+    assign card_pad_d = 16
+  endif
+  assign card_pad_t = section.settings.card_image_padding_tablet | default: 0
+  if card_pad_t == 0
+    assign card_pad_t = card_pad_d
+  endif
+  assign card_pad_m = section.settings.card_image_padding_mobile | default: 0
+  if card_pad_m == 0
+    assign card_pad_m = card_pad_t
+  endif
+
+  assign card_img_gap_d = section.settings.card_image_gap | default: 0
+  if card_img_gap_d == 0
+    assign card_img_gap_d = 12
+  endif
+  assign card_img_gap_t = section.settings.card_image_gap_tablet | default: 0
+  if card_img_gap_t == 0
+    assign card_img_gap_t = card_img_gap_d
+  endif
+  assign card_img_gap_m = section.settings.card_image_gap_mobile | default: 0
+  if card_img_gap_m == 0
+    assign card_img_gap_m = card_img_gap_t
+  endif
+
+  assign card_img_fit = section.settings.card_image_object_fit | default: 'contain'
+
+  assign card_w_d = section.settings.card_width | default: 0
+  if card_w_d == 0
+    assign card_w_d = 405
+  endif
+  assign card_h_d = section.settings.card_height | default: 0
+  if card_h_d == 0
+    assign card_h_d = 543
+  endif
+  assign card_w_t = section.settings.card_width_tablet | default: 0
+  if card_w_t == 0
+    assign card_w_t = card_w_d
+  endif
+  assign card_h_t = section.settings.card_height_tablet | default: 0
+  if card_h_t == 0
+    assign card_h_t = card_h_d
+  endif
+  assign card_w_m = section.settings.card_width_mobile | default: 0
+  if card_w_m == 0
+    assign card_w_m = card_w_t
+  endif
+  assign card_h_m = section.settings.card_height_mobile | default: 0
+  if card_h_m == 0
+    assign card_h_m = card_h_t
+  endif
+-%}
+
+<section
+  class="media-label-cards section-spacing"
+  aria-label="{{ section.settings.accessibility_label | default: 'Media cards' | escape }}"
+>
+  {%- if bg_image_url != blank -%}
+    <div
+      class="media-label-cards__bg"
+      style="
+        background-image: url({{ bg_image_url }});
+        background-size: {{ section.settings.background_object_fit | default: 'cover' }};
+        background-position: {{ section.settings.background_position | default: 'center center' }};
+      "
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
+
+  <div class="page-width">
+    <div
+      class="media-label-cards__grid"
+      style="
+        --mlc-columns: {{ cols_d }};
+        --mlc-columns-tablet: {{ cols_t }};
+        --mlc-columns-mobile: {{ cols_m }};
+        --mlc-card-w-d: {{ card_w_d }}px;
+        --mlc-card-h-d: {{ card_h_d }}px;
+        --mlc-card-w-t: {{ card_w_t }}px;
+        --mlc-card-h-t: {{ card_h_t }}px;
+        --mlc-card-w-m: {{ card_w_m }}px;
+        --mlc-card-h-m: {{ card_h_m }}px;
+      "
+    >
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign card_bg = block.settings.card_bg_color | default: '#0A1D3C'
+          assign card_url = blank
+          assign link_type = block.settings.link_type | default: 'none'
+
+          case link_type
+            when 'page'
+              if block.settings.link_page != blank
+                assign card_url = block.settings.link_page.url
+              endif
+            when 'product'
+              if block.settings.link_product != blank
+                assign card_url = block.settings.link_product.url
+              endif
+            when 'collection'
+              if block.settings.link_collection != blank
+                assign card_url = block.settings.link_collection.url
+              endif
+            when 'custom'
+              if block.settings.card_link != blank
+                assign card_url = block.settings.card_link
+              endif
+          endcase
+
+          if card_url == blank and block.settings.card_link != blank
+            assign card_url = block.settings.card_link
+          endif
+
+          assign content_mode = block.settings.content_mode | default: 'richtext'
+          assign text_align = block.settings.text_alignment | default: 'center'
+          assign text_transform = block.settings.text_transform | default: 'uppercase'
+
+          assign block_pad_d = block.settings.image_padding | default: 0
+          if block_pad_d == 0
+            assign block_pad_d = card_pad_d
+          endif
+          assign block_pad_t = block.settings.image_padding_tablet | default: 0
+          if block_pad_t == 0
+            assign block_pad_t = card_pad_t
+          endif
+          assign block_pad_m = block.settings.image_padding_mobile | default: 0
+          if block_pad_m == 0
+            assign block_pad_m = card_pad_m
+          endif
+
+          assign block_img_fit = block.settings.image_object_fit | default: 'inherit'
+          if block_img_fit == blank or block_img_fit == 'inherit'
+            assign block_img_fit = card_img_fit
+          endif
+        -%}
+        {%- capture card_inner -%}
+          {%- if block.settings.image != blank -%}
+            <div class="media-label-card__media">
+              {% render 'responsive-image',
+                image: block.settings.image,
+                alt: block.settings.image_alt,
+                class: 'media-label-card__image',
+                width: 800
+              %}
+            </div>
+          {%- else -%}
+            <div class="media-label-card__media media-label-card__media--placeholder" role="img" aria-label="{{ block.settings.image_alt | default: 'Card image' | escape }}">
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+
+          <div class="media-label-card__body section-text rte text-{{ text_align }}">
+            {%- if content_mode == 'html' and block.settings.content_html != blank -%}
+              {{ block.settings.content_html }}
+            {%- elsif block.settings.content != blank -%}
+              {{ block.settings.content }}
+            {%- endif -%}
+          </div>
+        {%- endcapture -%}
+
+        {%- if card_url != blank -%}
+          <a
+            id="media-label-card-{{ block.id }}"
+            href="{{ card_url }}"
+            class="media-label-card media-label-card--linked"
+            style="
+              --media-label-card-bg: {{ card_bg }};
+              --mlc-card-pad-d: {{ block_pad_d }}px;
+              --mlc-card-pad-t: {{ block_pad_t }}px;
+              --mlc-card-pad-m: {{ block_pad_m }}px;
+              --mlc-card-img-gap-d: {{ card_img_gap_d }}px;
+              --mlc-card-img-gap-t: {{ card_img_gap_t }}px;
+              --mlc-card-img-gap-m: {{ card_img_gap_m }}px;
+              --mlc-card-image-fit: {{ block_img_fit }};
+            "
+            {{ block.shopify_attributes }}
+          >
+            {{ card_inner }}
+          </a>
+        {%- else -%}
+          <article
+            id="media-label-card-{{ block.id }}"
+            class="media-label-card"
+            style="
+              --media-label-card-bg: {{ card_bg }};
+              --mlc-card-pad-d: {{ block_pad_d }}px;
+              --mlc-card-pad-t: {{ block_pad_t }}px;
+              --mlc-card-pad-m: {{ block_pad_m }}px;
+              --mlc-card-img-gap-d: {{ card_img_gap_d }}px;
+              --mlc-card-img-gap-t: {{ card_img_gap_t }}px;
+              --mlc-card-img-gap-m: {{ card_img_gap_m }}px;
+              --mlc-card-image-fit: {{ block_img_fit }};
+            "
+            {{ block.shopify_attributes }}
+          >
+            {{ card_inner }}
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  #shopify-section-{{ section.id }} {
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: clip;
+    max-width: 100%;
+    background-color: {{ bg_color }};
+  }
+  #shopify-section-{{ section.id }} .media-label-cards {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .media-label-cards__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+  }
+  #shopify-section-{{ section.id }} .media-label-cards .page-width {
+    position: relative;
+    z-index: 1;
+  }
+  {% render 'section-spacing-styles', root: '.media-label-cards', pad_x: '.page-width' %}
+  {% render 'section-spacing-gap', section: section, selector: '.media-label-cards__grid', gap_id: 'column_gap', stack_breakpoint: '0' %}
+  #shopify-section-{{ section.id }} .media-label-cards__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--mlc-columns, 3), var(--mlc-card-w-d, 405px));
+    justify-content: center;
+    justify-items: stretch;
+  }
+  #shopify-section-{{ section.id }} .media-label-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: var(--mlc-card-h-d, 543px);
+    min-width: 0;
+    max-width: var(--mlc-card-w-d, 405px);
+    text-decoration: none;
+    color: inherit;
+    background-color: var(--media-label-card-bg, #0A1D3C);
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .media-label-card--linked:hover .media-label-card__body,
+  #shopify-section-{{ section.id }} .media-label-card--linked:focus-visible .media-label-card__body {
+    filter: brightness(1.08);
+  }
+  #shopify-section-{{ section.id }} .media-label-card__media {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--mlc-card-pad-d, 16px) var(--mlc-card-pad-d, 16px) var(--mlc-card-img-gap-d, 12px);
+    background-color: transparent;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__image {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: var(--mlc-card-image-fit, contain);
+    object-position: center center;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__media--placeholder {
+    min-height: 0;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__media--placeholder .placeholder-svg {
+    width: 56%;
+    max-width: 160px;
+    height: auto;
+    opacity: 0.35;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__body {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--media-label-card-bg, #0A1D3C);
+    padding: 16px 14px;
+    min-height: 72px;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__body > *:first-child {
+    margin-top: 0;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__body > *:last-child {
+    margin-bottom: 0;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__body h1,
+  #shopify-section-{{ section.id }} .media-label-card__body h2,
+  #shopify-section-{{ section.id }} .media-label-card__body h3,
+  #shopify-section-{{ section.id }} .media-label-card__body h4,
+  #shopify-section-{{ section.id }} .media-label-card__body h5,
+  #shopify-section-{{ section.id }} .media-label-card__body h6,
+  #shopify-section-{{ section.id }} .media-label-card__body p {
+    margin: 0;
+  }
+  #shopify-section-{{ section.id }} .media-label-card__body p + p {
+    margin-top: 0.5em;
+  }
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .media-label-cards__grid {
+      grid-template-columns: repeat(var(--mlc-columns-tablet, 2), var(--mlc-card-w-t, 405px));
+    }
+    #shopify-section-{{ section.id }} .media-label-card {
+      height: var(--mlc-card-h-t, 543px);
+      max-width: var(--mlc-card-w-t, 405px);
+    }
+    #shopify-section-{{ section.id }} .media-label-card__media {
+      padding: var(--mlc-card-pad-t, 16px) var(--mlc-card-pad-t, 16px) var(--mlc-card-img-gap-t, 12px);
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .media-label-cards__grid {
+      grid-template-columns: repeat(var(--mlc-columns-mobile, 1), minmax(0, 1fr));
+    }
+    #shopify-section-{{ section.id }} .media-label-card {
+      width: 100%;
+      max-width: min(var(--mlc-card-w-m, 405px), 100%);
+      height: var(--mlc-card-h-m, 543px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #shopify-section-{{ section.id }} .media-label-card__media {
+      padding: var(--mlc-card-pad-m, 16px) var(--mlc-card-pad-m, 16px) var(--mlc-card-img-gap-m, 12px);
+    }
+  }
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign text_transform = block.settings.text_transform | default: 'uppercase'
+    -%}
+    #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body {
+      {%- if text_transform != 'none' -%}
+      text-transform: {{ text_transform }};
+      {%- endif -%}
+    }
+    {%- if block.settings.text_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body p,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h1,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h2,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h3,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h4 {
+        font-size: {{ block.settings.text_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_weight != blank and block.settings.text_font_weight != 'inherit' -%}
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body p,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h1,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h2,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h3,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h4 {
+        font-weight: {{ block.settings.text_font_weight }};
+      }
+    {%- endif -%}
+    {%- if block.settings.text_font_color != blank -%}
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body p,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h1,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h2,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h3,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body h4,
+      #shopify-section-{{ section.id }} #media-label-card-{{ block.id }} .media-label-card__body a {
+        color: {{ block.settings.text_font_color }} !important;
+      }
+    {%- endif -%}
+  {%- endfor -%}
+</style>
+
+{% schema %}
+{
+  "name": "Media Label Cards",
+  "tag": "section",
+  "class": "section-media-label-cards",
+  "settings": [
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Accessibility label",
+      "default": "Media cards",
+      "info": "Screen reader label for the section."
+    },
+    {
+      "type": "header",
+      "content": "Grid layout"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row",
+      "label": "Cards per row (desktop)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3,
+      "info": "1024px and up."
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_tablet",
+      "label": "Cards per row (tablet)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "info": "768px–1023px."
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_mobile",
+      "label": "Cards per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1,
+      "info": "767px and below."
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between cards (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "1024px and up. 0 = theme default (16px)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between cards (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between cards (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Card dimensions"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width (desktop)",
+      "min": 0,
+      "max": 600,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "1024px and up. 0 = theme default (405px)."
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Card height (desktop)",
+      "min": 0,
+      "max": 800,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "1024px and up. 0 = theme default (543px)."
+    },
+    {
+      "type": "range",
+      "id": "card_width_tablet",
+      "label": "Card width (tablet)",
+      "min": 0,
+      "max": 600,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = use desktop default."
+    },
+    {
+      "type": "range",
+      "id": "card_height_tablet",
+      "label": "Card height (tablet)",
+      "min": 0,
+      "max": 800,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = use desktop default."
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Card width (mobile)",
+      "min": 0,
+      "max": 600,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet or desktop default."
+    },
+    {
+      "type": "range",
+      "id": "card_height_mobile",
+      "label": "Card height (mobile)",
+      "min": 0,
+      "max": 800,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet or desktop default."
+    },
+    {
+      "type": "header",
+      "content": "Card image area"
+    },
+    {
+      "type": "range",
+      "id": "card_image_padding",
+      "label": "Image padding (desktop)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "Space around the image inside the card. 0 = theme default (16px)."
+    },
+    {
+      "type": "range",
+      "id": "card_image_padding_tablet",
+      "label": "Image padding (tablet)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "card_image_padding_mobile",
+      "label": "Image padding (mobile)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "card_image_gap",
+      "label": "Gap below image (desktop)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "Space between image and footer label. 0 = theme default (12px)."
+    },
+    {
+      "type": "range",
+      "id": "card_image_gap_tablet",
+      "label": "Gap below image (tablet)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "card_image_gap_mobile",
+      "label": "Gap below image (mobile)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "select",
+      "id": "card_image_object_fit",
+      "label": "Image fit",
+      "options": [
+        { "value": "contain", "label": "Contain (fit inside with padding)" },
+        { "value": "cover", "label": "Cover (fill area, may crop)" }
+      ],
+      "default": "contain"
+    },
+    {
+      "type": "header",
+      "content": "Section background"
+    },
+    {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background type",
+      "options": [
+        { "value": "color", "label": "Color" },
+        { "value": "image", "label": "Image" }
+      ],
+      "default": "color"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ADE8F6",
+      "info": "Used when Background type is Color, or as fallback behind the image."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "Used when Background type is Image."
+    },
+    {
+      "type": "select",
+      "id": "background_object_fit",
+      "label": "Background image fit",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "auto", "label": "Natural size" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background image position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top" },
+        { "value": "center bottom", "label": "Bottom" },
+        { "value": "left center", "label": "Left" },
+        { "value": "right center", "label": "Right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text (SEO)"
+        },
+        {
+          "type": "range",
+          "id": "image_padding",
+          "label": "Image padding override (desktop)",
+          "min": 0,
+          "max": 48,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use section default."
+        },
+        {
+          "type": "range",
+          "id": "image_padding_tablet",
+          "label": "Image padding override (tablet)",
+          "min": 0,
+          "max": 48,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use section or desktop default."
+        },
+        {
+          "type": "range",
+          "id": "image_padding_mobile",
+          "label": "Image padding override (mobile)",
+          "min": 0,
+          "max": 48,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use section or tablet default."
+        },
+        {
+          "type": "select",
+          "id": "image_object_fit",
+          "label": "Image fit override",
+          "options": [
+            { "value": "inherit", "label": "Use section default" },
+            { "value": "contain", "label": "Contain (fit inside with padding)" },
+            { "value": "cover", "label": "Cover (fill area, may crop)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Card footer"
+        },
+        {
+          "type": "color",
+          "id": "card_bg_color",
+          "label": "Card background color",
+          "default": "#0A1D3C",
+          "info": "Background for the entire card, visible as padding frame around the image."
+        },
+        {
+          "type": "select",
+          "id": "content_mode",
+          "label": "Content type",
+          "options": [
+            { "value": "richtext", "label": "Rich text (heading & paragraph)" },
+            { "value": "html", "label": "Custom HTML" }
+          ],
+          "default": "richtext"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content (rich text)",
+          "default": "<p>Card label</p>",
+          "info": "Supports headings and paragraphs. Used when Content type is Rich text."
+        },
+        {
+          "type": "html",
+          "id": "content_html",
+          "label": "Content (HTML)",
+          "info": "Used when Content type is Custom HTML."
+        },
+        {
+          "type": "color",
+          "id": "text_font_color",
+          "label": "Text color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Text font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "label": "Text font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "text_transform",
+          "label": "Text transform",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "uppercase", "label": "Uppercase" },
+            { "value": "capitalize", "label": "Capitalize" },
+            { "value": "lowercase", "label": "Lowercase" }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "header",
+          "content": "Link (optional)"
+        },
+        {
+          "type": "select",
+          "id": "link_type",
+          "label": "Link to",
+          "options": [
+            { "value": "none", "label": "No link" },
+            { "value": "page", "label": "Page" },
+            { "value": "product", "label": "Product" },
+            { "value": "collection", "label": "Collection" },
+            { "value": "custom", "label": "Custom URL" }
+          ],
+          "default": "none",
+          "info": "Makes the entire card clickable when a destination is set."
+        },
+        {
+          "type": "page",
+          "id": "link_page",
+          "label": "Page",
+          "info": "Used when Link to is Page."
+        },
+        {
+          "type": "product",
+          "id": "link_product",
+          "label": "Product",
+          "info": "Used when Link to is Product."
+        },
+        {
+          "type": "collection",
+          "id": "link_collection",
+          "label": "Collection",
+          "info": "Used when Link to is Collection."
+        },
+        {
+          "type": "url",
+          "id": "card_link",
+          "label": "Custom URL",
+          "info": "Used when Link to is Custom URL."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Media Label Cards",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "card_bg_color": "#51ADA0",
+            "content": "<p>1st Grade Curriculum</p>"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "card_bg_color": "#0A1D3C",
+            "content": "<p>2nd Grade Curriculum</p>"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "card_bg_color": "#2E86AB",
+            "content": "<p>Additional Resources</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

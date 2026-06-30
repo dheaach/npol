@@ -11,6 +11,15 @@
           class: 'intro-content__image',
           loading: section.settings.image_loading
         %}
+        {%- if section.settings.image_button_label != blank -%}
+          <div class="intro-content__media-cta">
+            {% render 'button',
+              label: section.settings.image_button_label,
+              url: section.settings.image_button_url,
+              style: section.settings.image_button_style
+            %}
+          </div>
+        {%- endif -%}
       </div>
 
       <div class="intro-content__text">
@@ -198,6 +207,18 @@
       margin-inline: auto;
     }
   }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .intro-content__media-cta {
+    margin-top: 20px;
+  }
+  {%- if section.settings.image_button_alignment == 'center' -%}
+    #shopify-section-{{ section.id }} .intro-content__media-cta {
+      text-align: center;
+    }
+  {%- elsif section.settings.image_button_alignment == 'right' -%}
+    #shopify-section-{{ section.id }} .intro-content__media-cta {
+      text-align: right;
+    }
   {%- endif -%}
 </style>
 
@@ -532,6 +553,39 @@
       "unit": "%",
       "default": 0,
       "info": "767px and below. 0 = theme default (full width)."
+    },
+    {
+      "type": "text",
+      "id": "image_button_label",
+      "label": "Button label (below image)"
+    },
+    {
+      "type": "url",
+      "id": "image_button_url",
+      "label": "Button link (below image)"
+    },
+    {
+      "type": "select",
+      "id": "image_button_style",
+      "label": "Button style (below image)",
+      "options": [
+        { "value": "primary", "label": "Primary" },
+        { "value": "secondary", "label": "Secondary" },
+        { "value": "outline", "label": "Outline" },
+        { "value": "yellow", "label": "Yellow" }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "image_button_alignment",
+      "label": "Button alignment (below image)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
     },
     {
       "type": "header",

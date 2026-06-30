@@ -1,0 +1,56 @@
+---
+description: Section outer background color — apply to main section only, not inner cards
+alwaysApply: true
+---
+
+# Section background color (required for new sections)
+
+When creating or editing `sections/*.liquid`, add a **section background color** setting for the **outer/main section**, not inner cards, banners, or content boxes.
+
+## Schema
+
+Group under header `Section style`:
+
+```json
+{
+  "type": "color",
+  "id": "background_color",
+  "label": "Section background color",
+  "info": "Applies to the outer section only, not inner cards or banners."
+}
+```
+
+Use a sensible `default` when the design calls for one (e.g. `#F8F8F8`). Empty = no override.
+
+Inner surfaces use **separate** settings, e.g. `card_background_color`, `banner_background_color`.
+
+## Markup & CSS
+
+Apply to the **Shopify section wrapper** or root `<section>` — never to `.page-width`, cards, or nested wrappers.
+
+**Preferred (scoped style block):**
+
+```liquid
+{%- if section.settings.background_color != blank -%}
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.background_color }};
+  }
+{%- endif -%}
+```
+
+**Alternative (inline on root element):**
+
+```liquid
+<section
+  class="my-section section-spacing"
+  {% if section.settings.background_color != blank %}
+    style="background-color: {{ section.settings.background_color }};"
+  {% endif %}
+>
+```
+
+## Do not
+
+- Put `background_color` on inner cards, banners, or `.page-width` when it is meant to be the section backdrop
+- Reuse `background_color` for both outer section and inner card — use distinct setting IDs
+- Skip the setting when the section has a visible outer background area

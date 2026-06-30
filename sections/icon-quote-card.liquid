@@ -1,0 +1,978 @@
+{% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'icon-quote-card__card-inner', gap_fallback_tablet: 32, gap_fallback_mobile: 24 %}
+
+{%- liquid
+  assign card_bg = section.settings.card_background_color | default: '#FFFFFF'
+  assign banner_bg = section.settings.banner_background_color | default: '#A2E5E0'
+  assign banner_overlap = section.settings.banner_overlap | default: 48
+  assign banner_radius = section.settings.banner_border_radius | default: 16
+  assign content_max = section.settings.content_max_width | default: 960
+  assign card_pad_y = section.settings.card_padding_y | default: 40
+  assign card_pad_x = section.settings.card_padding_x | default: 48
+  assign banner_pad_bottom = section.settings.banner_padding_bottom | default: 28
+  assign icon_max_w = section.settings.image_max_width | default: 160
+-%}
+
+<section
+  class="icon-quote-card section-spacing"
+  aria-labelledby="icon-quote-card-heading-{{ section.id }}"
+>
+  <div class="page-width">
+    <div class="icon-quote-card__stack" style="max-width: {{ content_max }}px;">
+      <div
+        class="icon-quote-card__card"
+        style="background-color: {{ card_bg }};"
+      >
+        <div class="icon-quote-card__card-inner">
+          <div class="icon-quote-card__media">
+            {%- if section.settings.image != blank -%}
+              {% render 'responsive-image',
+                image: section.settings.image,
+                alt: section.settings.image_alt,
+                class: 'icon-quote-card__image',
+                width: icon_max_w | times: 2
+              %}
+            {%- else -%}
+              <div class="icon-quote-card__image-placeholder" aria-hidden="true">
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="icon-quote-card__content">
+            {%- if section.settings.heading != blank -%}
+              <h2
+                id="icon-quote-card-heading-{{ section.id }}"
+                class="icon-quote-card__heading section-heading section-heading--h3"
+              >
+                {{ section.settings.heading }}
+              </h2>
+            {%- endif -%}
+
+            {%- if section.settings.subheading != blank -%}
+              <p class="icon-quote-card__subheading">{{ section.settings.subheading }}</p>
+            {%- endif -%}
+
+            {%- if section.settings.text != blank -%}
+              <div class="icon-quote-card__text section-text rte">{{ section.settings.text }}</div>
+            {%- endif -%}
+
+            {%- if section.settings.text_2 != blank -%}
+              <div class="icon-quote-card__text icon-quote-card__text--secondary section-text rte">{{ section.settings.text_2 }}</div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      {%- if section.settings.banner_text != blank -%}
+        <div
+          class="icon-quote-card__banner"
+          style="
+            background-color: {{ banner_bg }};
+            margin-top: -{{ banner_overlap }}px;
+            padding-top: {{ banner_overlap | plus: 16 }}px;
+            padding-bottom: {{ banner_pad_bottom }}px;
+            border-radius: 0 0 {{ banner_radius }}px {{ banner_radius }}px;
+          "
+        >
+          <p class="icon-quote-card__banner-text">{{ section.settings.banner_text }}</p>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.icon-quote-card', pad_x: '.page-width' %}
+
+  {%- if section.settings.background_color != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .icon-quote-card__stack {
+    margin-inline: auto;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__card {
+    position: relative;
+    z-index: 2;
+    padding: {{ card_pad_y }}px {{ card_pad_x }}px;
+    box-shadow: 0 4px 24px rgba(10, 29, 60, 0.08);
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__card-inner {
+    display: grid;
+    align-items: center;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__image {
+    width: 100%;
+    max-width: {{ icon_max_w }}px;
+    height: auto;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__image-placeholder {
+    width: 100%;
+    max-width: {{ icon_max_w }}px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 29, 60, 0.04);
+    border-radius: 8px;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__image-placeholder .placeholder-svg {
+    width: 60%;
+    height: auto;
+    opacity: 0.35;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__heading {
+    margin: 0 0 12px;
+    color: {{ section.settings.heading_font_color | default: '#0A1D3C' }};
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__subheading {
+    margin: 0 0 16px;
+    color: {{ section.settings.subheading_font_color | default: '#51ADA0' }};
+    font-weight: 600;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__text {
+    margin: 0 0 12px;
+    color: {{ section.settings.text_font_color | default: '#3D4F6B' }};
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__text--secondary {
+    margin-bottom: 0;
+    color: {{ section.settings.text_2_font_color | default: '#3D4F6B' }};
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__text p {
+    margin: 0 0 0.75em;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__banner {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    margin-inline: auto;
+    text-align: center;
+    padding-left: {{ card_pad_x }}px;
+    padding-right: {{ card_pad_x }}px;
+    box-sizing: border-box;
+  }
+
+  #shopify-section-{{ section.id }} .icon-quote-card__banner-text {
+    margin: 0;
+    max-width: 640px;
+    margin-inline: auto;
+    color: {{ section.settings.banner_text_font_color | default: '#0A1D3C' }};
+  }
+
+  {%- if section.settings.heading_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__heading {
+      font-size: {{ section.settings.heading_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.heading_font_weight != blank and section.settings.heading_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__heading {
+      font-weight: {{ section.settings.heading_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.heading_font_color != blank -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__heading {
+      color: {{ section.settings.heading_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.subheading_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__subheading {
+      font-size: {{ section.settings.subheading_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.subheading_font_weight != blank and section.settings.subheading_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__subheading {
+      font-weight: {{ section.settings.subheading_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.subheading_font_color != blank -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__subheading {
+      color: {{ section.settings.subheading_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary),
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary) p {
+      font-size: {{ section.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_weight != blank and section.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary),
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary) p {
+      font-weight: {{ section.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary),
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary) p,
+    #shopify-section-{{ section.id }} .icon-quote-card__text:not(.icon-quote-card__text--secondary) a {
+      color: {{ section.settings.text_font_color }} !important;
+    }
+  {%- endif -%}
+
+  {%- if section.settings.text_2_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary,
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary p {
+      font-size: {{ section.settings.text_2_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_2_font_weight != blank and section.settings.text_2_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary,
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary p {
+      font-weight: {{ section.settings.text_2_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_2_font_color != blank -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary,
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary p,
+    #shopify-section-{{ section.id }} .icon-quote-card__text--secondary a {
+      color: {{ section.settings.text_2_font_color }} !important;
+    }
+  {%- endif -%}
+
+  {%- if section.settings.banner_text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__banner-text {
+      font-size: {{ section.settings.banner_text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.banner_text_font_weight != blank and section.settings.banner_text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__banner-text {
+      font-weight: {{ section.settings.banner_text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.banner_text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .icon-quote-card__banner-text {
+      color: {{ section.settings.banner_text_font_color }};
+    }
+  {%- endif -%}
+
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .icon-quote-card__card-inner {
+      text-align: center;
+    }
+    #shopify-section-{{ section.id }} .icon-quote-card__media {
+      margin-bottom: 8px;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .icon-quote-card__card {
+      padding: {{ section.settings.card_padding_y_mobile | default: 28 }}px {{ section.settings.card_padding_x_mobile | default: 24 }}px;
+    }
+    #shopify-section-{{ section.id }} .icon-quote-card__banner {
+      padding-left: {{ section.settings.card_padding_x_mobile | default: 24 }}px;
+      padding-right: {{ section.settings.card_padding_x_mobile | default: 24 }}px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Icon Quote Card",
+  "tag": "section",
+  "class": "section-icon-quote-card",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#F8F8F8",
+      "info": "Applies to the outer section only, not the white card or banner."
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 600,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "default": 960
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Icon image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "Speech bubbles"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image max width",
+      "min": 80,
+      "max": 280,
+      "step": 8,
+      "unit": "px",
+      "default": 160
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "These aren't small questions."
+    },
+    {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "They're the core of teaching in student-centered classrooms."
+    },
+    {
+      "type": "color",
+      "id": "subheading_font_color",
+      "label": "Subheading color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "subheading_font_size",
+      "label": "Subheading font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "subheading_font_weight",
+      "label": "Subheading font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Paragraph 1",
+      "default": "<p>These decisions shape whether students develop big ideas, strategies, and models—or get stuck in procedures.</p>"
+    },
+    {
+      "type": "color",
+      "id": "text_font_color",
+      "label": "Paragraph 1 color",
+      "default": "#3D4F6B"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Paragraph 1 font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Paragraph 1 font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "richtext",
+      "id": "text_2",
+      "label": "Paragraph 2",
+      "default": "<p>This is exactly where teachers need support...</p>"
+    },
+    {
+      "type": "color",
+      "id": "text_2_font_color",
+      "label": "Paragraph 2 color",
+      "default": "#3D4F6B"
+    },
+    {
+      "type": "range",
+      "id": "text_2_font_size",
+      "label": "Paragraph 2 font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_2_font_weight",
+      "label": "Paragraph 2 font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Bottom banner"
+    },
+    {
+      "type": "text",
+      "id": "banner_text",
+      "label": "Banner text",
+      "default": "...and where a thinking partner makes the difference."
+    },
+    {
+      "type": "color",
+      "id": "banner_background_color",
+      "label": "Banner background color",
+      "default": "#A2E5E0"
+    },
+    {
+      "type": "color",
+      "id": "banner_text_font_color",
+      "label": "Banner text color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "banner_text_font_size",
+      "label": "Banner text font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "banner_text_font_weight",
+      "label": "Banner text font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "banner_overlap",
+      "label": "Banner overlap (behind card)",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "banner_border_radius",
+      "label": "Banner bottom corner radius",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_bottom",
+      "label": "Banner padding bottom",
+      "min": 12,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "card_padding_y",
+      "label": "Card padding vertical",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_padding_x",
+      "label": "Card padding horizontal",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "card_padding_y_mobile",
+      "label": "Card padding vertical (mobile)",
+      "min": 16,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "card_padding_x_mobile",
+      "label": "Card padding horizontal (mobile)",
+      "min": 16,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Icon column width (desktop)",
+      "min": 20,
+      "max": 45,
+      "step": 1,
+      "unit": "%",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Icon Quote Card"
+    }
+  ]
+}
+{% endschema %}

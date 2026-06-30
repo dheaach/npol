@@ -53,7 +53,7 @@
         %}
       </div>
       {%- if section.settings.description != blank -%}
-        <div class="program-cards__header-right section-text rte">{{ section.settings.description }}</div>
+        <div class="program-cards__header-right section-text rte text-{{ section.settings.description_text_alignment | default: 'left' }}">{{ section.settings.description }}</div>
       {%- endif -%}
     </div>
 
@@ -216,6 +216,13 @@
   }
   {% render 'section-spacing-styles', root: '.program-cards', pad_x: '.page-width' %}
   {% render 'section-spacing-gap', section: section, selector: '.program-cards__grid', gap_id: 'cards_grid_gap', stack_breakpoint: '0' %}
+  {%- if section.settings.column_1_width <= 0 -%}
+    @media screen and (min-width: 1024px) {
+      #shopify-section-{{ section.id }} .program-cards__header-left {
+        display: none;
+      }
+    }
+  {%- endif -%}
   {%- liquid
     assign program_heading_color = section.settings.heading_font_color
     if program_heading_color == blank
@@ -610,17 +617,39 @@
       "type": "range",
       "id": "column_1_width",
       "label": "Heading column width",
-      "min": 25,
+      "min": 0,
       "max": 100,
       "step": 5,
       "unit": "%",
       "default": 50,
-      "info": "Description column uses the remaining width. At 100%, description stacks below on desktop. Stacks on tablet and below."
+      "info": "Relative width of the heading column. 0% hides the heading column on desktop so description uses the full row. At 100%, description stacks below."
+    },
+    {
+      "type": "range",
+      "id": "column_2_width",
+      "label": "Description column width",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (100% minus heading column). Set both columns for a custom ratio."
     },
     {
       "type": "select",
       "id": "heading_text_alignment",
       "label": "Heading text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "description_text_alignment",
+      "label": "Description text alignment",
       "options": [
         { "value": "left", "label": "Left" },
         { "value": "center", "label": "Center" },

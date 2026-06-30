@@ -22,14 +22,34 @@
           if tc_heading_font_color == blank
             assign tc_heading_font_color = section.settings.heading_color
           endif
+          assign tc_heading_before_color = section.settings.heading_before_color
+          if tc_heading_before_color == blank
+            assign tc_heading_before_color = section.settings.heading_color
+          endif
+          assign tc_heading_after_color = section.settings.heading_after_color
+          if tc_heading_after_color == blank
+            assign tc_heading_after_color = section.settings.heading_color
+          endif
         -%}
         {% render 'highlighted-heading',
           heading: section.settings.heading,
           heading_font_size: section.settings.heading_font_size,
           heading_weight: section.settings.heading_weight,
           heading_font_color: tc_heading_font_color,
+          heading_before: section.settings.heading_before,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_before_font_size: section.settings.heading_before_font_size,
+          heading_before_color: tc_heading_before_color,
+          heading_highlight: section.settings.heading_highlight,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_after: section.settings.heading_after,
+          heading_after_weight: section.settings.heading_after_weight,
+          heading_after_font_size: section.settings.heading_after_font_size,
+          heading_after_color: tc_heading_after_color,
           heading_tag: section.settings.heading_tag,
-          heading_size: section.settings.heading_tag
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
         %}
       </div>
 
@@ -74,11 +94,29 @@
       margin-right: 0;
     }
   {%- endif -%}
+  {%- liquid
+    assign tc_heading_base_color = section.settings.heading_before_color
+    if tc_heading_base_color == blank
+      assign tc_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if tc_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #text-content-heading-{{ section.id }} .section-heading {
+      color: {{ tc_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #text-content-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#51ADA0' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #text-content-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
   {%- if section.settings.heading_font_color != blank -%}
     #shopify-section-{{ section.id }} #text-content-heading-{{ section.id }} .section-heading {
       color: {{ section.settings.heading_font_color }};
     }
-  {%- elsif section.settings.heading_color != blank -%}
+  {%- elsif section.settings.heading_color != blank and section.settings.heading != blank -%}
     #shopify-section-{{ section.id }} #text-content-heading-{{ section.id }} .section-heading {
       color: {{ section.settings.heading_color }};
     }
@@ -139,19 +177,86 @@
     {
       "type": "text",
       "id": "heading",
-      "label": "Heading",
-      "default": "Your Heading Here"
+      "label": "Heading (single line)",
+      "default": "Your Heading Here",
+      "info": "Optional. When filled, overrides the split heading fields below."
     },
     {
       "type": "color",
       "id": "heading_font_color",
-      "label": "Heading color",
+      "label": "Heading color (single line)",
       "info": "Empty = theme heading color."
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = same as color before highlight."
     },
     {
       "type": "range",
       "id": "heading_font_size",
-      "label": "Heading font size",
+      "label": "Font size (single line heading)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
       "min": 0,
       "max": 96,
       "step": 2,
@@ -162,7 +267,52 @@
     {
       "type": "select",
       "id": "heading_weight",
-      "label": "Heading font weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
       "options": [
         { "value": "inherit", "label": "Theme default" },
         { "value": "300", "label": "Light (300)" },
@@ -314,8 +464,9 @@
     {
       "type": "color",
       "id": "heading_color",
-      "label": "Heading color (legacy)",
-      "info": "Used when Heading color above is empty."
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
     },
     {
       "type": "header",

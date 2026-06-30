@@ -4,54 +4,138 @@
   assign bg_color = section.settings.background_color
   assign text_align = section.settings.text_alignment
   assign layout = section.settings.layout
+  assign show_divider = section.settings.show_divider
+  assign divider_style = section.settings.divider_style | default: 'dotted'
+  assign divider_color = section.settings.divider_color | default: '#51ADA0'
+  assign divider_thickness = section.settings.divider_thickness | default: 2
+  assign divider_dot_size = section.settings.divider_dot_size | default: 4
+  assign divider_dot_spacing = section.settings.divider_dot_spacing | default: 12
+  assign divider_spacing = section.settings.divider_spacing | default: 32
+  assign text_2_spacing = section.settings.text_2_spacing_top | default: 24
 -%}
 
 <section
   class="content-block section-spacing{% if layout == 'reverse' %} content-block--reverse{% endif %}"
-  {% if bg_color != blank and bg_color != 'rgba(0,0,0,0)' %}
-    style="background-color: {{ bg_color }};"
-  {% endif %}
   aria-labelledby="content-block-heading-{{ section.id }}"
 >
   <div class="page-width">
-    <div class="content-block__inner{% if layout == 'reverse' %} content-block__inner--reverse{% endif %}">
-      <div class="content-block__media">
-        {% render 'responsive-image',
-          image: section.settings.image,
-          alt: section.settings.image_alt,
-          class: 'content-block__image',
-          loading: section.settings.image_loading
-        %}
-      </div>
-
-      <div class="content-block__content text-{{ text_align }}">
-        {%- if section.settings.badge != blank -%}
-          <span class="content-block__badge">{{ section.settings.badge }}</span>
-        {%- endif -%}
-
-        {% render 'section-heading',
-          heading: section.settings.heading,
-          heading_tag: section.settings.heading_tag,
-          heading_size: section.settings.heading_tag
-        %}
-
-        {%- if section.settings.text != blank -%}
-          <div class="section-text rte">
-            {{ section.settings.text }}
-          </div>
-        {%- endif -%}
-
-        {%- if section.settings.button_label != blank -%}
-          {% render 'button',
-            label: section.settings.button_label,
-            url: section.settings.button_url,
-            style: section.settings.button_style
+    <div class="content-block__wrapper">
+      <div class="content-block__inner{% if layout == 'reverse' %} content-block__inner--reverse{% endif %}">
+        <div class="content-block__media">
+          {% render 'responsive-image',
+            image: section.settings.image,
+            alt: section.settings.image_alt,
+            class: 'content-block__image',
+            loading: section.settings.image_loading
           %}
-        {%- endif -%}
+        </div>
+
+        <div class="content-block__content text-{{ text_align }}">
+          {%- if section.settings.badge != blank -%}
+            <span class="content-block__badge">{{ section.settings.badge }}</span>
+          {%- endif -%}
+
+          {% render 'section-heading',
+            heading: section.settings.heading,
+            heading_tag: section.settings.heading_tag,
+            heading_size: section.settings.heading_tag
+          %}
+
+          {%- if section.settings.text != blank -%}
+            <div class="section-text rte">
+              {{ section.settings.text }}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.button_label != blank -%}
+            {% render 'button',
+              label: section.settings.button_label,
+              url: section.settings.button_url,
+              style: section.settings.button_style
+            %}
+          {%- endif -%}
+        </div>
       </div>
+
+      {%- if section.settings.text_2 != blank -%}
+        <div class="content-block__description-2 section-text rte text-{{ text_align }}">
+          {{ section.settings.text_2 }}
+        </div>
+      {%- endif -%}
+
+      {%- if show_divider -%}
+        <hr
+          class="content-block__divider content-block__divider--{{ divider_style }}"
+          aria-hidden="true"
+        >
+      {%- endif -%}
     </div>
   </div>
 </section>
+
+<style>
+  {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ bg_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .content-block__wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .content-block__description-2 {
+    width: 100%;
+    margin-top: {{ text_2_spacing }}px;
+  }
+  {%- if section.settings.text_2_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .content-block__description-2,
+    #shopify-section-{{ section.id }} .content-block__description-2 p {
+      font-size: {{ section.settings.text_2_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_2_font_weight != blank and section.settings.text_2_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .content-block__description-2,
+    #shopify-section-{{ section.id }} .content-block__description-2 p {
+      font-weight: {{ section.settings.text_2_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_2_font_color != blank -%}
+    #shopify-section-{{ section.id }} .content-block__description-2,
+    #shopify-section-{{ section.id }} .content-block__description-2 p,
+    #shopify-section-{{ section.id }} .content-block__description-2 a {
+      color: {{ section.settings.text_2_font_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .content-block__divider {
+    display: block;
+    width: 100%;
+    flex-shrink: 0;
+    margin: {{ divider_spacing }}px 0 0;
+    padding: 0;
+    border: none;
+    color: {{ divider_color }};
+  }
+  #shopify-section-{{ section.id }} .content-block__divider--dotted {
+    height: {{ divider_dot_size }}px;
+    background-image: radial-gradient(
+      circle,
+      {{ divider_color }} calc({{ divider_dot_size }}px / 2),
+      transparent calc({{ divider_dot_size }}px / 2)
+    );
+    background-size: {{ divider_dot_spacing }}px {{ divider_dot_size }}px;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+  #shopify-section-{{ section.id }} .content-block__divider--dashed {
+    height: 0;
+    border-top: {{ divider_thickness }}px dashed {{ divider_color }};
+  }
+  #shopify-section-{{ section.id }} .content-block__divider--solid {
+    height: 0;
+    border-top: {{ divider_thickness }}px solid {{ divider_color }};
+  }
+</style>
 
 {% schema %}
 {
@@ -90,8 +174,60 @@
     {
       "type": "richtext",
       "id": "text",
-      "label": "Description",
+      "label": "Description (beside image)",
       "default": "<p>Add your content here. This reusable section can be duplicated across any page.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Description 2"
+    },
+    {
+      "type": "richtext",
+      "id": "text_2",
+      "label": "Description (full width below row)",
+      "info": "Optional second paragraph shown full width between the image/text row and the divider."
+    },
+    {
+      "type": "color",
+      "id": "text_2_font_color",
+      "label": "Description 2 color"
+    },
+    {
+      "type": "range",
+      "id": "text_2_font_size",
+      "label": "Description 2 font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_2_font_weight",
+      "label": "Description 2 font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "text_2_spacing_top",
+      "label": "Space above description 2",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24,
+      "info": "Gap between the image/text row and description 2."
     },
     {
       "type": "text",
@@ -169,6 +305,75 @@
       "type": "color",
       "id": "background_color",
       "label": "Background color"
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider below content",
+      "default": true,
+      "info": "Displays a horizontal line below the text and image row."
+    },
+    {
+      "type": "select",
+      "id": "divider_style",
+      "label": "Divider style",
+      "options": [
+        { "value": "dotted", "label": "Dotted" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "solid", "label": "Solid" }
+      ],
+      "default": "dotted"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "divider_thickness",
+      "label": "Divider thickness (solid/dashed)",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "divider_dot_size",
+      "label": "Dot size (dotted)",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "divider_dot_spacing",
+      "label": "Dot spacing (dotted)",
+      "min": 6,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "divider_spacing",
+      "label": "Space above divider",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "Gap between description 2 (or the image/text row) and the divider."
     },
     {
       "type": "header",

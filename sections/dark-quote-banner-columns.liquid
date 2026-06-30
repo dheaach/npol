@@ -32,6 +32,17 @@
 
   assign columns_alignment = section.settings.columns_alignment | default: 'center'
   assign columns_horizontal_alignment = section.settings.columns_horizontal_alignment | default: 'center'
+
+  assign bg_type = section.settings.background_type | default: 'color'
+  assign grad_start = section.settings.gradient_color_start | default: '#0A1D3C'
+  assign grad_end = section.settings.gradient_color_end | default: '#51ADA0'
+  assign grad_dir = section.settings.gradient_direction | default: 'vertical'
+
+  if grad_dir == 'horizontal'
+    assign grad_css = 'linear-gradient(to right, ' | append: grad_start | append: ', ' | append: grad_end | append: ')'
+  else
+    assign grad_css = 'linear-gradient(to bottom, ' | append: grad_start | append: ', ' | append: grad_end | append: ')'
+  endif
 -%}
 
 <section
@@ -304,7 +315,11 @@
   #shopify-section-{{ section.id }} {
     position: relative;
     overflow: hidden;
+    {%- if bg_type == 'gradient' -%}
+    background: {{ grad_css }};
+    {%- else -%}
     background-color: {{ section.settings.background_color | default: '#0A1D3C' }};
+    {%- endif -%}
   }
   #shopify-section-{{ section.id }} .dark-quote-banner-columns__bg {
     position: absolute;
@@ -855,10 +870,46 @@
       "content": "Colors (defaults)"
     },
     {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background type",
+      "options": [
+        { "value": "color", "label": "Solid color" },
+        { "value": "gradient", "label": "Gradient" }
+      ],
+      "default": "color"
+    },
+    {
       "type": "color",
       "id": "background_color",
       "label": "Background color",
-      "default": "#0A1D3C"
+      "default": "#0A1D3C",
+      "info": "Used when Background type is Solid color."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_start",
+      "label": "Gradient start color",
+      "default": "#0A1D3C",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_end",
+      "label": "Gradient end color",
+      "default": "#51ADA0",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "select",
+      "id": "gradient_direction",
+      "label": "Gradient direction",
+      "options": [
+        { "value": "vertical", "label": "Vertical (top to bottom)" },
+        { "value": "horizontal", "label": "Horizontal (left to right)" }
+      ],
+      "default": "vertical",
+      "info": "Used when Background type is Gradient."
     },
     {
       "type": "color",

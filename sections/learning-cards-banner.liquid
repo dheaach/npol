@@ -16,17 +16,29 @@
   assign cards_columns = section.settings.cards_per_row | default: 4
   assign cards_columns_tablet = section.settings.cards_per_row_tablet | default: 2
   assign cards_columns_mobile = section.settings.cards_per_row_mobile | default: 1
-  assign cards_gap = section.settings.column_gap | default: 0
-  if cards_gap == 0
-    assign cards_gap = 16
+  assign cards_column_gap = section.settings.column_gap | default: 0
+  if cards_column_gap == 0
+    assign cards_column_gap = 16
   endif
-  assign cards_gap_tablet = section.settings.column_gap_tablet | default: 0
-  if cards_gap_tablet == 0
-    assign cards_gap_tablet = cards_gap
+  assign cards_row_gap = section.settings.row_gap | default: 0
+  if cards_row_gap == 0
+    assign cards_row_gap = cards_column_gap
   endif
-  assign cards_gap_mobile = section.settings.column_gap_mobile | default: 0
-  if cards_gap_mobile == 0
-    assign cards_gap_mobile = cards_gap_tablet
+  assign cards_column_gap_tablet = section.settings.column_gap_tablet | default: 0
+  if cards_column_gap_tablet == 0
+    assign cards_column_gap_tablet = cards_column_gap
+  endif
+  assign cards_row_gap_tablet = section.settings.row_gap_tablet | default: 0
+  if cards_row_gap_tablet == 0
+    assign cards_row_gap_tablet = cards_row_gap
+  endif
+  assign cards_column_gap_mobile = section.settings.column_gap_mobile | default: 0
+  if cards_column_gap_mobile == 0
+    assign cards_column_gap_mobile = cards_column_gap_tablet
+  endif
+  assign cards_row_gap_mobile = section.settings.row_gap_mobile | default: 0
+  if cards_row_gap_mobile == 0
+    assign cards_row_gap_mobile = cards_row_gap_tablet
   endif
 
   assign card_row_width_desktop = section.settings.card_row_width_mode | default: 'same_width'
@@ -126,6 +138,13 @@
         {%- liquid
           assign card_count = section.blocks.size
           assign cards_max_cols = cards_columns
+          assign any_card_badge = false
+          for block in section.blocks
+            if block.settings.show_badge and block.settings.badge_text != blank
+              assign any_card_badge = true
+              break
+            endif
+          endfor
           if card_count <= cards_max_cols
             assign cards_row_count = 1
             assign cards_row_base = card_count
@@ -137,14 +156,20 @@
           endif
         -%}
         <div
-          class="learning-cards-banner__cards learning-cards-banner__cards--count-{{ card_count }} learning-cards-banner__cards--width-mobile-{{ card_row_width_mobile }} learning-cards-banner__cards--width-tablet-{{ card_row_width_tablet }} learning-cards-banner__cards--width-desktop-{{ card_row_width_desktop }}"
+          class="learning-cards-banner__cards learning-cards-banner__cards--count-{{ card_count }} learning-cards-banner__cards--width-mobile-{{ card_row_width_mobile }} learning-cards-banner__cards--width-tablet-{{ card_row_width_tablet }} learning-cards-banner__cards--width-desktop-{{ card_row_width_desktop }}{% if any_card_badge %} learning-cards-banner__cards--has-badges{% endif %}"
           style="
             --learning-cards-columns: {{ cards_columns }};
             --learning-cards-columns-tablet: {{ cards_columns_tablet }};
             --learning-cards-columns-mobile: {{ cards_columns_mobile }};
-            --learning-cards-gap: {{ cards_gap }}px;
-            --learning-cards-gap-tablet: {{ cards_gap_tablet }}px;
-            --learning-cards-gap-mobile: {{ cards_gap_mobile }}px;
+            --learning-cards-column-gap: {{ cards_column_gap }}px;
+            --learning-cards-row-gap: {{ cards_row_gap }}px;
+            --learning-cards-column-gap-tablet: {{ cards_column_gap_tablet }}px;
+            --learning-cards-row-gap-tablet: {{ cards_row_gap_tablet }}px;
+            --learning-cards-column-gap-mobile: {{ cards_column_gap_mobile }}px;
+            --learning-cards-row-gap-mobile: {{ cards_row_gap_mobile }}px;
+            {%- if any_card_badge -%}
+            --learning-card-badge-overhang: {{ section.settings.card_badge_overflow_space | default: 28 }}px;
+            {%- endif -%}
           "
         >
           {%- assign block_idx = 0 -%}
@@ -190,10 +215,37 @@
             -%}
             <article
               id="learning-card-{{ block.id }}"
-              class="learning-cards-banner__card"
+              class="learning-cards-banner__card{% if block.settings.show_badge and block.settings.badge_text != blank %} learning-cards-banner__card--has-badge{% endif %}"
               style="background-color: {{ block.settings.card_background_color | default: '#51ADA0' }};"
               {{ block.shopify_attributes }}
             >
+              {%- if block.settings.show_badge and block.settings.badge_text != blank -%}
+                {%- liquid
+                  assign badge_bg_type = block.settings.badge_background_type | default: 'color'
+                  assign badge_bg_color = block.settings.badge_background_color | default: '#F5D547'
+                  assign badge_use_image = false
+                  if badge_bg_type == 'image' and block.settings.badge_background_image != blank
+                    assign badge_use_image = true
+                  endif
+                -%}
+                <span
+                  class="learning-cards-banner__card-badge learning-cards-banner__card-badge--{% if badge_use_image %}image{% else %}color{% endif %}"
+                  style="background-color: {{ badge_bg_color }};"
+                >
+                  {%- if badge_use_image -%}
+                    <span class="learning-cards-banner__card-badge-bg" aria-hidden="true">
+                      {% render 'responsive-image',
+                        image: block.settings.badge_background_image,
+                        alt: '',
+                        class: 'learning-cards-banner__card-badge-bg-img',
+                        width: 600
+                      %}
+                    </span>
+                  {%- endif -%}
+                  <span class="learning-cards-banner__card-badge-text">{{ block.settings.badge_text }}</span>
+                </span>
+              {%- endif -%}
+
               {%- if block.settings.icon != blank -%}
                 <div
                   class="learning-cards-banner__card-icon"
@@ -439,11 +491,28 @@
 
   #shopify-section-{{ section.id }} .learning-cards-banner__cards {
     display: flex;
-    gap: var(--learning-cards-gap-mobile, 16px);
+    row-gap: var(--learning-cards-row-gap-mobile, 16px);
+    column-gap: var(--learning-cards-column-gap-mobile, 16px);
     margin-top: {{ section.settings.cards_margin_top | default: 48 }}px;
     text-align: center;
   }
+  #shopify-section-{{ section.id }} .learning-cards-banner__cards--has-badges {
+    padding-top: calc(var(--learning-card-badge-overhang, 28px) / 2);
+    overflow: visible;
+    row-gap: calc(var(--learning-cards-row-gap-mobile, 16px) + var(--learning-card-badge-overhang, 28px) / 2);
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__cards--has-badges .learning-cards-banner__row {
+    overflow: visible;
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__card--has-badge {
+    padding-top: calc(40px + var(--learning-card-badge-overhang, 28px) / 2);
+    overflow: visible;
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__card--has-badge .learning-cards-banner__card-badge {
+    z-index: 3;
+  }
   #shopify-section-{{ section.id }} .learning-cards-banner__card {
+    position: relative;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -451,6 +520,50 @@
     padding: 40px 20px 32px;
     min-height: {{ section.settings.card_min_height | default: 280 }}px;
     color: {{ section.settings.card_text_color | default: '#FFFFFF' }};
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__card-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    {%- if section.settings.card_badge_width > 0 -%}
+      width: {{ section.settings.card_badge_width }}%;
+      max-width: {{ section.settings.card_badge_width }}%;
+    {%- else -%}
+      max-width: calc(100% + 32px);
+    {%- endif -%}
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__card-badge-text {
+    position: relative;
+    z-index: 1;
+    padding: 8px 18px;
+    font-family: var(--font-heading);
+    font-size: {{ section.settings.card_badge_font_size | default: 13 }}px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    color: {{ section.settings.card_badge_text_color | default: '#0A1D3C' }};
+    white-space: normal;
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__card-badge-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  #shopify-section-{{ section.id }} .learning-cards-banner__card-badge-bg-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: fill;
   }
   @media screen and (max-width: 767px) {
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-full_width {
@@ -462,7 +575,7 @@
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-full_width .learning-cards-banner__card {
       flex: 1 1 0;
-      min-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
+      min-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-column-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
       max-width: 100%;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width {
@@ -472,19 +585,23 @@
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width .learning-cards-banner__row {
       display: flex;
       flex-wrap: nowrap;
-      gap: var(--learning-cards-gap-mobile, 16px);
+      gap: var(--learning-cards-column-gap-mobile, 16px);
       width: 100%;
       justify-content: {{ card_row_align_mobile }};
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width .learning-cards-banner__card {
-      flex: 0 0 calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
-      max-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
+      flex: 0 0 calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-column-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
+      max-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-column-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
       min-width: 0;
     }
   }
   @media screen and (min-width: 768px) and (max-width: 1023px) {
     #shopify-section-{{ section.id }} .learning-cards-banner__cards {
-      gap: var(--learning-cards-gap-tablet, 16px);
+      row-gap: var(--learning-cards-row-gap-tablet, 16px);
+      column-gap: var(--learning-cards-column-gap-tablet, 16px);
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--has-badges {
+      row-gap: calc(var(--learning-cards-row-gap-tablet, 16px) + var(--learning-card-badge-overhang, 28px) / 2);
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-full_width {
       flex-wrap: wrap;
@@ -495,7 +612,7 @@
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-full_width .learning-cards-banner__card {
       flex: 1 1 0;
-      min-width: calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
+      min-width: calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-column-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
       max-width: 100%;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width {
@@ -505,13 +622,13 @@
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width .learning-cards-banner__row {
       display: flex;
       flex-wrap: nowrap;
-      gap: var(--learning-cards-gap-tablet, 16px);
+      gap: var(--learning-cards-column-gap-tablet, 16px);
       width: 100%;
       justify-content: {{ card_row_align_tablet }};
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width .learning-cards-banner__card {
-      flex: 0 0 calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
-      max-width: calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
+      flex: 0 0 calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-column-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
+      max-width: calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-column-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
       min-width: 0;
     }
   }
@@ -519,12 +636,16 @@
     #shopify-section-{{ section.id }} .learning-cards-banner__cards {
       flex-direction: column;
       flex-wrap: nowrap;
-      gap: var(--learning-cards-gap, 16px);
+      row-gap: var(--learning-cards-row-gap, 16px);
+      column-gap: 0;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--has-badges {
+      row-gap: calc(var(--learning-cards-row-gap, 16px) + var(--learning-card-badge-overhang, 28px) / 2);
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-full_width .learning-cards-banner__row {
       display: flex;
       flex-wrap: nowrap;
-      gap: var(--learning-cards-gap, 16px);
+      gap: var(--learning-cards-column-gap, 16px);
       width: 100%;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-full_width .learning-cards-banner__row .learning-cards-banner__card {
@@ -535,13 +656,13 @@
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-same_width .learning-cards-banner__row {
       display: flex;
       flex-wrap: nowrap;
-      gap: var(--learning-cards-gap, 16px);
+      gap: var(--learning-cards-column-gap, 16px);
       width: 100%;
       justify-content: {{ card_row_align_desktop }};
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-same_width .learning-cards-banner__card {
-      flex: 0 0 calc((100% - (var(--learning-cards-columns) - 1) * var(--learning-cards-gap)) / var(--learning-cards-columns));
-      max-width: calc((100% - (var(--learning-cards-columns) - 1) * var(--learning-cards-gap)) / var(--learning-cards-columns));
+      flex: 0 0 calc((100% - (var(--learning-cards-columns) - 1) * var(--learning-cards-column-gap)) / var(--learning-cards-columns));
+      max-width: calc((100% - (var(--learning-cards-columns) - 1) * var(--learning-cards-column-gap)) / var(--learning-cards-columns));
       min-width: 0;
     }
   }
@@ -706,6 +827,22 @@
     {%- if block.settings.number_font_color != blank -%}
       #shopify-section-{{ section.id }} #learning-card-{{ block.id }} .learning-cards-banner__card-number {
         color: {{ block.settings.number_font_color }};
+      }
+    {%- endif -%}
+    {%- if block.settings.badge_font_size > 0 -%}
+      #shopify-section-{{ section.id }} #learning-card-{{ block.id }} .learning-cards-banner__card-badge-text {
+        font-size: {{ block.settings.badge_font_size }}px;
+      }
+    {%- endif -%}
+    {%- if block.settings.badge_width > 0 -%}
+      #shopify-section-{{ section.id }} #learning-card-{{ block.id }} .learning-cards-banner__card-badge {
+        width: {{ block.settings.badge_width }}%;
+        max-width: {{ block.settings.badge_width }}%;
+      }
+    {%- endif -%}
+    {%- if block.settings.badge_text_color != blank -%}
+      #shopify-section-{{ section.id }} #learning-card-{{ block.id }} .learning-cards-banner__card-badge-text {
+        color: {{ block.settings.badge_text_color }};
       }
     {%- endif -%}
     {%- assign block_img_fit = block.settings.image_object_fit | default: 'inherit' -%}
@@ -1094,6 +1231,48 @@
     },
     {
       "type": "header",
+      "content": "Card badge"
+    },
+    {
+      "type": "range",
+      "id": "card_badge_overflow_space",
+      "label": "Badge overflow clearance",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 28,
+      "info": "Extra space reserved above cards and between rows so badges do not overlap adjacent cards. Increase if badges still collide."
+    },
+    {
+      "type": "range",
+      "id": "card_badge_font_size",
+      "label": "Default badge font size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "card_badge_width",
+      "label": "Default badge width",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = fit text (auto). Width relative to the card."
+    },
+    {
+      "type": "color",
+      "id": "card_badge_text_color",
+      "label": "Default badge text color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "header",
       "content": "Card width in row"
     },
     {
@@ -1164,6 +1343,84 @@
         { "value": "flex-end", "label": "Right" }
       ],
       "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Card spacing — Desktop (1024px+)"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Horizontal gap between cards",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 16,
+      "info": "Space between cards in the same row."
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Vertical gap between rows",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = same as horizontal gap."
+    },
+    {
+      "type": "header",
+      "content": "Card spacing — Tablet (768px–1023px)"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Horizontal gap between cards",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "row_gap_tablet",
+      "label": "Vertical gap between rows",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop row gap."
+    },
+    {
+      "type": "header",
+      "content": "Card spacing — Mobile (767px and below)"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Horizontal gap between cards",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "range",
+      "id": "row_gap_mobile",
+      "label": "Vertical gap between rows",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop row gap."
     },
     {
       "type": "range",
@@ -1377,42 +1634,6 @@
       "unit": "px",
       "default": 20,
       "info": "Gap between bottom divider (or title block) and description."
-    },
-    {
-      "type": "header",
-      "content": "Column spacing"
-    },
-    {
-      "type": "range",
-      "id": "column_gap",
-      "label": "Gap between cards (desktop)",
-      "min": 0,
-      "max": 48,
-      "step": 4,
-      "unit": "px",
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "column_gap_tablet",
-      "label": "Gap between cards (tablet)",
-      "min": 0,
-      "max": 48,
-      "step": 4,
-      "unit": "px",
-      "default": 0,
-      "info": "0 = use desktop value."
-    },
-    {
-      "type": "range",
-      "id": "column_gap_mobile",
-      "label": "Gap between cards (mobile)",
-      "min": 0,
-      "max": 48,
-      "step": 4,
-      "unit": "px",
-      "default": 0,
-      "info": "0 = use tablet or desktop value."
     },
     {
       "type": "header",
@@ -1850,6 +2071,74 @@
       "type": "card",
       "name": "Card",
       "settings": [
+        {
+          "type": "header",
+          "content": "Badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_badge",
+          "label": "Show top badge",
+          "default": false,
+          "info": "Badge overlaps the top edge of the card."
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text",
+          "default": "You choose the unit"
+        },
+        {
+          "type": "select",
+          "id": "badge_background_type",
+          "label": "Badge background type",
+          "options": [
+            { "value": "color", "label": "Solid color" },
+            { "value": "image", "label": "Image" }
+          ],
+          "default": "color"
+        },
+        {
+          "type": "color",
+          "id": "badge_background_color",
+          "label": "Badge background color",
+          "default": "#F5D547",
+          "info": "Used when background type is Solid color, or as fallback behind the image."
+        },
+        {
+          "type": "image_picker",
+          "id": "badge_background_image",
+          "label": "Badge background image",
+          "info": "Used when background type is Image. Text is shown on top."
+        },
+        {
+          "type": "color",
+          "id": "badge_text_color",
+          "label": "Badge text color",
+          "info": "Empty = section default badge text color."
+        },
+        {
+          "type": "range",
+          "id": "badge_font_size",
+          "label": "Badge font size",
+          "min": 0,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = section default badge font size."
+        },
+        {
+          "type": "range",
+          "id": "badge_width",
+          "label": "Badge width",
+          "min": 0,
+          "max": 120,
+          "step": 5,
+          "unit": "%",
+          "default": 0,
+          "info": "0 = section default. Width relative to the card."
+        },
         {
           "type": "header",
           "content": "Icon"

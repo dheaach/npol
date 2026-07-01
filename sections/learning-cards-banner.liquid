@@ -28,11 +28,51 @@
   if cards_gap_mobile == 0
     assign cards_gap_mobile = cards_gap_tablet
   endif
+
+  assign card_row_width_desktop = section.settings.card_row_width_mode | default: 'same_width'
+  assign card_row_width_tablet = section.settings.card_row_width_mode_tablet | default: 'inherit'
+  if card_row_width_tablet == blank or card_row_width_tablet == 'inherit'
+    assign card_row_width_tablet = card_row_width_desktop
+  endif
+  assign card_row_width_mobile = section.settings.card_row_width_mode_mobile | default: 'inherit'
+  if card_row_width_mobile == blank or card_row_width_mobile == 'inherit'
+    assign card_row_width_mobile = card_row_width_tablet
+  endif
+
+  assign card_row_align_desktop = section.settings.card_row_align | default: 'center'
+  assign card_row_align_tablet = section.settings.card_row_align_tablet | default: 'inherit'
+  if card_row_align_tablet == blank or card_row_align_tablet == 'inherit'
+    assign card_row_align_tablet = card_row_align_desktop
+  endif
+  assign card_row_align_mobile = section.settings.card_row_align_mobile | default: 'inherit'
+  if card_row_align_mobile == blank or card_row_align_mobile == 'inherit'
+    assign card_row_align_mobile = card_row_align_tablet
+  endif
+
+  assign bg_type = section.settings.background_type | default: 'color'
+  assign bg_color = section.settings.background_color | default: '#0A1D3C'
+  assign grad_start = section.settings.gradient_color_start | default: '#0A1D3C'
+  assign grad_end = section.settings.gradient_color_end | default: '#51ADA0'
+  assign grad_start_pos = section.settings.gradient_start_position | default: 0
+  assign grad_end_pos = section.settings.gradient_end_position | default: 100
+  assign grad_type = section.settings.gradient_type | default: 'linear'
+
+  if grad_type == 'radial'
+    assign radial_pos = section.settings.gradient_radial_position | default: 'center center'
+    assign grad_css = 'radial-gradient(circle at ' | append: radial_pos | append: ', ' | append: grad_start | append: ' ' | append: grad_start_pos | append: '%, ' | append: grad_end | append: ' ' | append: grad_end_pos | append: '%)'
+  else
+    assign linear_dir = section.settings.gradient_linear_direction | default: 'to bottom'
+    if linear_dir == 'custom'
+      assign angle = section.settings.gradient_linear_angle | default: 180
+      assign grad_css = 'linear-gradient(' | append: angle | append: 'deg, ' | append: grad_start | append: ' ' | append: grad_start_pos | append: '%, ' | append: grad_end | append: ' ' | append: grad_end_pos | append: '%)'
+    else
+      assign grad_css = 'linear-gradient(' | append: linear_dir | append: ', ' | append: grad_start | append: ' ' | append: grad_start_pos | append: '%, ' | append: grad_end | append: ' ' | append: grad_end_pos | append: '%)'
+    endif
+  endif
 -%}
 
 <section
   class="learning-cards-banner"
-  style="background-color: {{ section.settings.background_color | default: '#0A1D3C' }};"
   aria-labelledby="learning-cards-heading-{{ section.id }}"
 >
   {%- liquid
@@ -97,7 +137,7 @@
           endif
         -%}
         <div
-          class="learning-cards-banner__cards learning-cards-banner__cards--count-{{ card_count }}"
+          class="learning-cards-banner__cards learning-cards-banner__cards--count-{{ card_count }} learning-cards-banner__cards--width-mobile-{{ card_row_width_mobile }} learning-cards-banner__cards--width-tablet-{{ card_row_width_tablet }} learning-cards-banner__cards--width-desktop-{{ card_row_width_desktop }}"
           style="
             --learning-cards-columns: {{ cards_columns }};
             --learning-cards-columns-tablet: {{ cards_columns_tablet }};
@@ -240,6 +280,16 @@
 
 <style>
   {% render 'section-spacing-styles', root: '.learning-cards-banner', pad_y: '.learning-cards-banner__content', pad_x: '.page-width' %}
+
+  {%- if bg_type == 'gradient' -%}
+    #shopify-section-{{ section.id }} {
+      background: {{ grad_css }};
+    }
+  {%- else -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ bg_color }};
+    }
+  {%- endif -%}
 
   #shopify-section-{{ section.id }} .learning-cards-banner {
     position: relative;
@@ -389,26 +439,80 @@
 
   #shopify-section-{{ section.id }} .learning-cards-banner__cards {
     display: flex;
-    flex-wrap: wrap;
     gap: var(--learning-cards-gap-mobile, 16px);
     margin-top: {{ section.settings.cards_margin_top | default: 48 }}px;
     text-align: center;
   }
-  #shopify-section-{{ section.id }} .learning-cards-banner__row {
-    display: contents;
-  }
   #shopify-section-{{ section.id }} .learning-cards-banner__card {
-    flex: 1 1 0;
-    min-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
-    max-width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 32px;
+    min-height: {{ section.settings.card_min_height | default: 280 }}px;
+    color: {{ section.settings.card_text_color | default: '#FFFFFF' }};
   }
-  @media screen and (min-width: 768px) {
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-full_width {
+      flex-wrap: wrap;
+      flex-direction: row;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-full_width .learning-cards-banner__row {
+      display: contents;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-full_width .learning-cards-banner__card {
+      flex: 1 1 0;
+      min-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
+      max-width: 100%;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width .learning-cards-banner__row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--learning-cards-gap-mobile, 16px);
+      width: 100%;
+      justify-content: {{ card_row_align_mobile }};
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width .learning-cards-banner__card {
+      flex: 0 0 calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
+      max-width: calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
+      min-width: 0;
+    }
+  }
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
     #shopify-section-{{ section.id }} .learning-cards-banner__cards {
       gap: var(--learning-cards-gap-tablet, 16px);
     }
-    #shopify-section-{{ section.id }} .learning-cards-banner__card {
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-full_width {
+      flex-wrap: wrap;
+      flex-direction: row;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-full_width .learning-cards-banner__row {
+      display: contents;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-full_width .learning-cards-banner__card {
+      flex: 1 1 0;
       min-width: calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
+      max-width: 100%;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width .learning-cards-banner__row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--learning-cards-gap-tablet, 16px);
+      width: 100%;
+      justify-content: {{ card_row_align_tablet }};
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width .learning-cards-banner__card {
+      flex: 0 0 calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
+      max-width: calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
+      min-width: 0;
     }
   }
   @media screen and (min-width: 1024px) {
@@ -417,25 +521,29 @@
       flex-wrap: nowrap;
       gap: var(--learning-cards-gap, 16px);
     }
-    #shopify-section-{{ section.id }} .learning-cards-banner__row {
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-full_width .learning-cards-banner__row {
       display: flex;
       flex-wrap: nowrap;
       gap: var(--learning-cards-gap, 16px);
       width: 100%;
     }
-    #shopify-section-{{ section.id }} .learning-cards-banner__row .learning-cards-banner__card {
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-full_width .learning-cards-banner__row .learning-cards-banner__card {
       flex: 1 1 0;
       min-width: 0;
       max-width: none;
     }
-  }
-  #shopify-section-{{ section.id }} .learning-cards-banner__card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px 32px;
-    min-height: {{ section.settings.card_min_height | default: 280 }}px;
-    color: {{ section.settings.card_text_color | default: '#FFFFFF' }};
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-same_width .learning-cards-banner__row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--learning-cards-gap, 16px);
+      width: 100%;
+      justify-content: {{ card_row_align_desktop }};
+    }
+    #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-desktop-same_width .learning-cards-banner__card {
+      flex: 0 0 calc((100% - (var(--learning-cards-columns) - 1) * var(--learning-cards-gap)) / var(--learning-cards-columns));
+      max-width: calc((100% - (var(--learning-cards-columns) - 1) * var(--learning-cards-gap)) / var(--learning-cards-columns));
+      min-width: 0;
+    }
   }
   #shopify-section-{{ section.id }} .learning-cards-banner__card-icon {
     width: var(--learning-card-icon-width, 40%);
@@ -825,10 +933,113 @@
       "content": "Colors"
     },
     {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background style",
+      "options": [
+        { "value": "color", "label": "Solid color" },
+        { "value": "gradient", "label": "Gradient" }
+      ],
+      "default": "color"
+    },
+    {
       "type": "color",
       "id": "background_color",
       "label": "Background color",
-      "default": "#0A1D3C"
+      "default": "#0A1D3C",
+      "info": "Used when Background style is Solid color, or behind background images."
+    },
+    {
+      "type": "header",
+      "content": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_start",
+      "label": "Start color",
+      "default": "#0A1D3C",
+      "info": "Used when Background style is Gradient."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_end",
+      "label": "End color",
+      "default": "#51ADA0",
+      "info": "Used when Background style is Gradient."
+    },
+    {
+      "type": "select",
+      "id": "gradient_type",
+      "label": "Gradient type",
+      "options": [
+        { "value": "linear", "label": "Linear" },
+        { "value": "radial", "label": "Radial" }
+      ],
+      "default": "linear"
+    },
+    {
+      "type": "select",
+      "id": "gradient_linear_direction",
+      "label": "Linear direction",
+      "info": "Used when Gradient type is Linear.",
+      "options": [
+        { "value": "to bottom", "label": "Top to bottom" },
+        { "value": "to top", "label": "Bottom to top" },
+        { "value": "to right", "label": "Left to right" },
+        { "value": "to left", "label": "Right to left" },
+        { "value": "custom", "label": "Custom angle" }
+      ],
+      "default": "to bottom"
+    },
+    {
+      "type": "range",
+      "id": "gradient_linear_angle",
+      "label": "Linear angle",
+      "min": 0,
+      "max": 360,
+      "step": 15,
+      "unit": "deg",
+      "default": 180,
+      "info": "Used when Linear direction is Custom angle."
+    },
+    {
+      "type": "select",
+      "id": "gradient_radial_position",
+      "label": "Radial center",
+      "info": "Used when Gradient type is Radial.",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top center" },
+        { "value": "center bottom", "label": "Bottom center" },
+        { "value": "left center", "label": "Center left" },
+        { "value": "right center", "label": "Center right" },
+        { "value": "left top", "label": "Top left" },
+        { "value": "right top", "label": "Top right" },
+        { "value": "left bottom", "label": "Bottom left" },
+        { "value": "right bottom", "label": "Bottom right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "range",
+      "id": "gradient_start_position",
+      "label": "Start color position",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "gradient_end_position",
+      "label": "End color position",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "info": "End position should be greater than start for a smooth transition."
     },
     {
       "type": "color",
@@ -880,6 +1091,79 @@
       "max": 3,
       "step": 1,
       "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Card width in row"
+    },
+    {
+      "type": "select",
+      "id": "card_row_width_mode",
+      "label": "Card width (desktop, 1024px+)",
+      "options": [
+        { "value": "same_width", "label": "Same width (fixed column size)" },
+        { "value": "full_width", "label": "Full width (stretch to fill row)" }
+      ],
+      "default": "same_width",
+      "info": "Same width keeps every card the same size when a row has fewer cards than the max per row."
+    },
+    {
+      "type": "select",
+      "id": "card_row_width_mode_tablet",
+      "label": "Card width (tablet, 768px–1023px)",
+      "options": [
+        { "value": "inherit", "label": "Use desktop setting" },
+        { "value": "same_width", "label": "Same width (fixed column size)" },
+        { "value": "full_width", "label": "Full width (stretch to fill row)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "card_row_width_mode_mobile",
+      "label": "Card width (mobile, 767px and below)",
+      "options": [
+        { "value": "inherit", "label": "Use tablet or desktop setting" },
+        { "value": "same_width", "label": "Same width (fixed column size)" },
+        { "value": "full_width", "label": "Full width (stretch to fill row)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "card_row_align",
+      "label": "Incomplete row alignment (desktop)",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "flex-start", "label": "Left" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "center",
+      "info": "Aligns cards when a row has fewer cards. Used with Same width."
+    },
+    {
+      "type": "select",
+      "id": "card_row_align_tablet",
+      "label": "Incomplete row alignment (tablet)",
+      "options": [
+        { "value": "inherit", "label": "Use desktop setting" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-start", "label": "Left" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "card_row_align_mobile",
+      "label": "Incomplete row alignment (mobile)",
+      "options": [
+        { "value": "inherit", "label": "Use tablet or desktop setting" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-start", "label": "Left" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "range",

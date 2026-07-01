@@ -12,6 +12,16 @@
   assign divider_dot_spacing = section.settings.divider_dot_spacing | default: 12
   assign divider_spacing = section.settings.divider_spacing | default: 32
   assign text_2_spacing = section.settings.text_2_spacing_top | default: 24
+  assign show_heading_dot_divider = section.settings.show_heading_dot_divider
+  assign heading_dot_color = section.settings.heading_dot_divider_color | default: '#7EC8D0'
+  assign heading_dot_size = section.settings.heading_dot_divider_size | default: 4
+  assign heading_dot_spacing = section.settings.heading_dot_divider_spacing | default: 10
+  assign heading_dot_width = section.settings.heading_dot_divider_width | default: 85
+  assign heading_dot_margin_top = section.settings.heading_dot_divider_margin_top | default: 8
+  assign heading_dot_margin_bottom = section.settings.heading_dot_divider_margin_bottom | default: 4
+  assign section_offset_top = section.settings.section_offset_top | default: 0
+  assign section_offset_unit = section.settings.section_offset_unit | default: 'em'
+  assign enable_section_offset = section.settings.enable_section_offset
 -%}
 
 <section
@@ -35,11 +45,25 @@
             <span class="content-block__badge">{{ section.settings.badge }}</span>
           {%- endif -%}
 
-          {% render 'section-heading',
-            heading: section.settings.heading,
-            heading_tag: section.settings.heading_tag,
-            heading_size: section.settings.heading_tag
-          %}
+          <div id="content-block-heading-{{ section.id }}">
+            {% render 'highlighted-heading',
+              heading: section.settings.heading,
+              heading_weight: section.settings.heading_weight,
+              heading_before: section.settings.heading_before,
+              heading_highlight: section.settings.heading_highlight,
+              heading_after: section.settings.heading_after,
+              heading_before_weight: section.settings.heading_before_weight,
+              heading_highlight_weight: section.settings.heading_highlight_weight,
+              heading_after_weight: section.settings.heading_after_weight,
+              heading_tag: section.settings.heading_tag,
+              heading_size: section.settings.heading_tag,
+              highlight_color: section.settings.highlight_color
+            %}
+          </div>
+
+          {%- if show_heading_dot_divider -%}
+            <span class="content-block__heading-dots" aria-hidden="true"></span>
+          {%- endif -%}
 
           {%- if section.settings.text != blank -%}
             <div class="section-text rte">
@@ -77,6 +101,12 @@
   {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
     #shopify-section-{{ section.id }} {
       background-color: {{ bg_color }};
+    }
+  {%- endif -%}
+  {%- if enable_section_offset -%}
+    #shopify-section-{{ section.id }} {
+      position: relative;
+      top: {{ section_offset_top }}{{ section_offset_unit }};
     }
   {%- endif -%}
   #shopify-section-{{ section.id }} .content-block__wrapper {
@@ -135,6 +165,39 @@
     height: 0;
     border-top: {{ divider_thickness }}px solid {{ divider_color }};
   }
+  #shopify-section-{{ section.id }} .content-block__heading-dots {
+    display: block;
+    width: {{ heading_dot_width }}%;
+    max-width: 100%;
+    height: {{ heading_dot_size }}px;
+    margin-top: {{ heading_dot_margin_top }}px;
+    margin-bottom: {{ heading_dot_margin_bottom }}px;
+    flex-shrink: 0;
+    background-image: radial-gradient(
+      circle,
+      {{ heading_dot_color }} calc({{ heading_dot_size }}px / 2),
+      transparent calc({{ heading_dot_size }}px / 2)
+    );
+    background-size: {{ heading_dot_spacing }}px {{ heading_dot_size }}px;
+    background-repeat: repeat-x;
+    background-position: 0 50%;
+  }
+  #shopify-section-{{ section.id }} .text-center .content-block__heading-dots {
+    margin-left: auto;
+    margin-right: auto;
+    background-position: center;
+  }
+  {%- liquid
+    assign highlight_color = section.settings.highlight_color | default: '#51ADA0'
+    assign highlight_weight = section.settings.heading_highlight_weight | default: '900'
+    if highlight_weight == blank or highlight_weight == 'inherit'
+      assign highlight_weight = '900'
+    endif
+  -%}
+  #shopify-section-{{ section.id }} .text-highlight {
+    color: {{ highlight_color }};
+    font-weight: {{ highlight_weight }};
+  }
 </style>
 
 {% schema %}
@@ -155,8 +218,94 @@
     {
       "type": "text",
       "id": "heading",
-      "label": "Heading",
-      "default": "Your Heading Here"
+      "label": "Heading (single line)",
+      "default": "Your Heading Here",
+      "info": "Or use split heading fields below."
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Font weight (single line heading)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "900"
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "select",
@@ -170,6 +319,76 @@
       ],
       "default": "h2",
       "info": "Use only one H1 per page for SEO"
+    },
+    {
+      "type": "header",
+      "content": "Heading dot divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading_dot_divider",
+      "label": "Show dot divider below heading",
+      "default": false,
+      "info": "Dotted line between the heading and description, beside the image."
+    },
+    {
+      "type": "color",
+      "id": "heading_dot_divider_color",
+      "label": "Dot color",
+      "default": "#7EC8D0"
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_divider_size",
+      "label": "Dot size",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_divider_spacing",
+      "label": "Dot spacing",
+      "min": 6,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_divider_width",
+      "label": "Divider width",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 85,
+      "info": "Width relative to the text column."
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_divider_margin_top",
+      "label": "Space above divider",
+      "min": 0,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 8,
+      "info": "Gap between heading and dots."
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_divider_margin_bottom",
+      "label": "Space below divider",
+      "min": 0,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 4,
+      "info": "Extra gap before description (column gap also applies)."
     },
     {
       "type": "richtext",
@@ -280,6 +499,37 @@
     {
       "type": "header",
       "content": "Layout"
+    },
+    {
+      "type": "header",
+      "content": "Section position"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_section_offset",
+      "label": "Enable vertical offset",
+      "default": false,
+      "info": "Shift the entire section up (negative) or down (positive), e.g. top: -5em to overlap the section above."
+    },
+    {
+      "type": "range",
+      "id": "section_offset_top",
+      "label": "Vertical offset value",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "default": -5,
+      "info": "Use with em for relative sizing (e.g. -5). Positive moves down."
+    },
+    {
+      "type": "select",
+      "id": "section_offset_unit",
+      "label": "Vertical offset unit",
+      "options": [
+        { "value": "em", "label": "em (relative to font size)" },
+        { "value": "px", "label": "px (fixed pixels)" }
+      ],
+      "default": "em"
     },
     {
       "type": "select",

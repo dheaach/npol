@@ -1,0 +1,1457 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign content_bg = section.settings.content_box_background_color | default: '#FFFFFF'
+  assign content_border = section.settings.content_box_border_color | default: '#A0C4D1'
+  assign content_radius = section.settings.content_box_border_radius | default: 10
+  assign content_pad_y = section.settings.content_box_padding_y | default: 60
+  assign content_pad_x = section.settings.content_box_padding_x | default: 60
+  assign content_pad_right = section.settings.content_box_padding_right | default: 280
+  assign pricing_bg = section.settings.pricing_box_background_color | default: '#1CC7C1'
+  assign pricing_width = section.settings.pricing_box_width | default: 34
+  assign pricing_bleed = section.settings.pricing_box_vertical_bleed | default: 32
+  assign pricing_pad_y = section.settings.pricing_box_padding_y | default: 40
+  assign pricing_pad_x = section.settings.pricing_box_padding_x | default: 24
+  assign checklist_box_bg = section.settings.checklist_icon_background_color | default: '#A0C4D1'
+  assign checklist_icon_color = section.settings.checklist_icon_color | default: '#FFFFFF'
+  assign checklist_icon_encoded = checklist_icon_color | replace: '#', '%23'
+-%}
+
+<section
+  class="schools-pricing-panel section-spacing"
+  aria-labelledby="schools-pricing-heading-{{ section.id }}"
+>
+  <div class="page-width">
+    <div
+      class="schools-pricing-panel__stage"
+      style="
+        --spp-pricing-width: {{ pricing_width }}%;
+        --spp-pricing-bleed: {{ pricing_bleed }}px;
+        --spp-content-pad-y: {{ content_pad_y }}px;
+        --spp-content-pad-x: {{ content_pad_x }}px;
+        --spp-content-pad-right: {{ content_pad_right }}px;
+        --spp-pricing-pad-y: {{ pricing_pad_y }}px;
+        --spp-pricing-pad-x: {{ pricing_pad_x }}px;
+        --spp-pricing-gap: 48px;
+        --spp-pricing-margin-right: 20%;
+      "
+    >
+      <div
+        class="schools-pricing-panel__content-box"
+        style="
+          background-color: {{ content_bg }};
+          border-color: {{ content_border }};
+          border-radius: {{ content_radius }}px;
+        "
+      >
+        <div class="schools-pricing-panel__content">
+          <div id="schools-pricing-heading-{{ section.id }}">
+            {% render 'section-heading',
+              heading: section.settings.heading,
+              heading_tag: section.settings.heading_tag,
+              heading_size: section.settings.heading_tag
+            %}
+          </div>
+
+          {%- if section.settings.subheading != blank -%}
+            <p class="schools-pricing-panel__subheading">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+
+          {%- if section.settings.list_items != blank -%}
+            <ul class="schools-pricing-panel__list">
+              {%- assign items = section.settings.list_items | newline_to_br | split: '<br />' -%}
+              {%- for item in items -%}
+                {%- assign trimmed = item | strip -%}
+                {%- if trimmed != blank -%}
+                  <li>{{ trimmed }}</li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if section.settings.footer_text != blank -%}
+            <div class="schools-pricing-panel__footer section-text rte">{{ section.settings.footer_text }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <aside
+        class="schools-pricing-panel__pricing-box"
+        style="background-color: {{ pricing_bg }};"
+        aria-label="{{ section.settings.pricing_box_aria_label | default: 'School pricing' | escape }}"
+      >
+        {%- if section.settings.tape_label != blank and section.settings.tape_background_image != blank -%}
+          <div
+            class="schools-pricing-panel__tape"
+            style="background-image: url('{{ section.settings.tape_background_image | image_url: width: 800 }}');"
+          >
+            <span class="schools-pricing-panel__tape-label">{{ section.settings.tape_label }}</span>
+          </div>
+        {%- endif -%}
+
+        <div class="schools-pricing-panel__pricing-inner{% if section.settings.tape_label != blank and section.settings.tape_background_image != blank %} schools-pricing-panel__pricing-inner--has-tape{% endif %}">
+          {%- if section.settings.disclaimer != blank -%}
+            <p class="schools-pricing-panel__disclaimer">{{ section.settings.disclaimer }}</p>
+          {%- endif -%}
+
+          {%- if section.blocks.size > 0 -%}
+            <div class="schools-pricing-panel__tiers">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'pricing_tier' -%}
+                  <div class="schools-pricing-panel__tier" {{ block.shopify_attributes }}>
+                    {%- if block.settings.tier_title != blank -%}
+                      <p class="schools-pricing-panel__tier-title">{{ block.settings.tier_title }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.tier_detail != blank -%}
+                      <p class="schools-pricing-panel__tier-detail">{{ block.settings.tier_detail }}</p>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.button_label != blank -%}
+            <div class="schools-pricing-panel__cta">
+              {% render 'button',
+                label: section.settings.button_label,
+                url: section.settings.button_url,
+                style: section.settings.button_style | default: 'yellow',
+                class: 'schools-pricing-panel__button'
+              %}
+            </div>
+          {%- endif -%}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.schools-pricing-panel', pad_x: '.page-width' %}
+  {% render 'section-spacing-gap', section: section, selector: '.schools-pricing-panel__stage', stack_breakpoint: '0' %}
+
+  {%- if section.settings.background_color != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__stage {
+    position: relative;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__content-box {
+    border: 2px solid #258296;
+    padding: var(--spp-content-pad-y) var(--spp-content-pad-x);
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .schools-pricing-panel__stage {
+      display: grid;
+      grid-template-columns: 1fr min(var(--spp-pricing-width), 420px);
+      align-items: center;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__content-box {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      padding: var(--spp-content-pad-y) max(
+        var(--spp-content-pad-right),
+        calc(
+          var(--spp-pricing-margin-right) + min(var(--spp-pricing-width), 420px) + var(--spp-pricing-gap)
+        )
+      ) var(--spp-content-pad-y) var(--spp-content-pad-x);
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-box {
+      grid-column: 2;
+      grid-row: 1;
+      margin-top: calc(var(--spp-pricing-bleed) * -1);
+      margin-bottom: calc(var(--spp-pricing-bleed) * -1);
+      margin-right: var(--spp-pricing-margin-right);
+      width: 100%;
+      max-width: 420px;
+      justify-self: end;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__list li {
+    position: relative;
+    margin: 0;
+    padding-left: 36px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__list li::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 3px;
+    width: 22px;
+    height: 22px;
+    background-color: {{ checklist_box_bg }};
+    border-radius: 4px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='{{ checklist_icon_encoded }}' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px 14px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-box {
+    z-index: 2;
+    position: relative;
+    overflow: visible;
+    width: 100%;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spp-pricing-pad-y) var(--spp-pricing-pad-x);
+    gap: 20px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-inner--has-tape {
+    padding-top: calc(var(--spp-pricing-pad-y) + 18px);
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tape {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    min-height: 40px;
+    padding: 10px 28px;
+    transform: translate(-50%, -50%);
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tape-label {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #0A1D3C;
+    line-height: 1.2;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__disclaimer {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #FFFFFF;
+    max-width: 280px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tiers {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier {
+    padding: 20px 0;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier + .schools-pricing-panel__tier {
+    border-top: none;
+    position: relative;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier + .schools-pricing-panel__tier::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 2.5px, transparent 2.5px);
+    background-size: 17px 5px;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title,
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier-detail {
+    margin: 0;
+    color: #FFFFFF;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__tier-detail {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__cta {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-pricing-panel__footer p {
+    margin: 0;
+  }
+
+  {%- if section.settings.heading_font_size > 0 -%}
+    #shopify-section-{{ section.id }} #schools-pricing-heading-{{ section.id }} .section-heading {
+      font-size: {{ section.settings.heading_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.heading_font_weight != blank and section.settings.heading_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} #schools-pricing-heading-{{ section.id }} .section-heading {
+      font-weight: {{ section.settings.heading_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.heading_font_color != blank -%}
+    #shopify-section-{{ section.id }} #schools-pricing-heading-{{ section.id }} .section-heading {
+      color: {{ section.settings.heading_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.subheading_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__subheading {
+      font-size: {{ section.settings.subheading_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.subheading_font_weight != blank and section.settings.subheading_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__subheading {
+      font-weight: {{ section.settings.subheading_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.subheading_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__subheading {
+      color: {{ section.settings.subheading_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.list_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list li {
+      font-size: {{ section.settings.list_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_weight != blank and section.settings.list_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list li {
+      font-weight: {{ section.settings.list_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list li {
+      color: {{ section.settings.list_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.footer_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer p {
+      font-size: {{ section.settings.footer_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_weight != blank and section.settings.footer_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer p {
+      font-weight: {{ section.settings.footer_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.footer_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer p,
+    #shopify-section-{{ section.id }} .schools-pricing-panel__footer a {
+      color: {{ section.settings.footer_font_color }} !important;
+    }
+  {%- endif -%}
+
+  {%- if section.settings.disclaimer_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__disclaimer {
+      font-size: {{ section.settings.disclaimer_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.disclaimer_font_weight != blank and section.settings.disclaimer_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__disclaimer {
+      font-weight: {{ section.settings.disclaimer_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.disclaimer_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__disclaimer {
+      color: {{ section.settings.disclaimer_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.tape_label_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tape-label {
+      font-size: {{ section.settings.tape_label_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.tape_label_font_weight != blank and section.settings.tape_label_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tape-label {
+      font-weight: {{ section.settings.tape_label_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.tape_label_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tape-label {
+      color: {{ section.settings.tape_label_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.tier_title_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title {
+      font-size: {{ section.settings.tier_title_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.tier_title_font_weight != blank and section.settings.tier_title_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title {
+      font-weight: {{ section.settings.tier_title_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.tier_title_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title {
+      color: {{ section.settings.tier_title_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.tier_detail_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-detail {
+      font-size: {{ section.settings.tier_detail_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.tier_detail_font_weight != blank and section.settings.tier_detail_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-detail {
+      font-weight: {{ section.settings.tier_detail_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.tier_detail_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-detail {
+      color: {{ section.settings.tier_detail_font_color }};
+    }
+  {%- endif -%}
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .schools-pricing-panel__stage {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__content-box {
+      padding: var(--spp-content-pad-y) var(--spp-content-pad-x);
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__content {
+      max-width: none;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-box {
+      max-width: 520px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title {
+      font-size: 24px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tape-label {
+      min-height: 60px;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .schools-pricing-panel__stage {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__content-box {
+      padding: max(32px, calc(var(--spp-content-pad-y) * 0.65)) max(20px, calc(var(--spp-content-pad-x) * 0.65));
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__content {
+      max-width: none;
+      gap: 16px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__subheading {
+      font-size: clamp(16px, 4.5vw, 20px);
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__list {
+      gap: 12px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-box {
+      max-width: none;
+      margin: 0;
+      width: 100%;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__pricing-inner {
+      padding: max(28px, calc(var(--spp-pricing-pad-y) * 0.75)) max(16px, calc(var(--spp-pricing-pad-x) * 0.75));
+      gap: 16px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tape {
+      max-width: calc(100% - 24px);
+      padding: 8px 16px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tape-label {
+      min-height: auto;
+      font-size: 11px;
+      white-space: normal;
+      text-align: center;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__disclaimer {
+      max-width: 100%;
+      font-size: 11px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier {
+      padding: 16px 0;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-title {
+      font-size: 22px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__tier-detail {
+      font-size: 14px;
+    }
+
+    #shopify-section-{{ section.id }} .schools-pricing-panel__cta .btn {
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      justify-content: center;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Schools Pricing Panel",
+  "tag": "section",
+  "class": "section-schools-pricing-panel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "info": "Applies to the outer section only, not inner cards or banners."
+    },
+    {
+      "type": "header",
+      "content": "Content box"
+    },
+    {
+      "type": "color",
+      "id": "content_box_background_color",
+      "label": "Content box background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "content_box_border_color",
+      "label": "Content box border color",
+      "default": "#A0C4D1"
+    },
+    {
+      "type": "range",
+      "id": "content_box_border_radius",
+      "label": "Content box border radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "content_box_padding_y",
+      "label": "Content box padding top & bottom",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "content_box_padding_x",
+      "label": "Content box padding left",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "content_box_padding_right",
+      "label": "Content box padding right (desktop overlap)",
+      "min": 16,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 280,
+      "info": "Minimum right padding on desktop; auto-expands if the pricing panel is wider."
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "For Schools"
+    },
+    {
+      "type": "color",
+      "id": "heading_font_color",
+      "label": "Heading color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "A Coherent Approach to Supporting Student Thinking at Scale"
+    },
+    {
+      "type": "color",
+      "id": "subheading_font_color",
+      "label": "Subheading color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "subheading_font_size",
+      "label": "Subheading font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "subheading_font_weight",
+      "label": "Subheading font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "header",
+      "content": "Checklist"
+    },
+    {
+      "type": "textarea",
+      "id": "list_items",
+      "label": "Checklist items",
+      "info": "One item per line",
+      "default": "Structured support for teacher-led mathematical discourse\nAligned to your existing professional learning goals\nScalable implementation across grade levels"
+    },
+    {
+      "type": "color",
+      "id": "checklist_icon_background_color",
+      "label": "Checklist icon background",
+      "default": "#A0C4D1"
+    },
+    {
+      "type": "color",
+      "id": "checklist_icon_color",
+      "label": "Checklist icon color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "list_font_color",
+      "label": "Checklist text color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "list_font_size",
+      "label": "Checklist font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "list_font_weight",
+      "label": "Checklist font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Footer text"
+    },
+    {
+      "type": "richtext",
+      "id": "footer_text",
+      "label": "Footer text",
+      "default": "<p>Get more out of your existing professional learning <u>budget</u>.</p>"
+    },
+    {
+      "type": "color",
+      "id": "footer_font_color",
+      "label": "Footer text color",
+      "default": "#1CC7C1"
+    },
+    {
+      "type": "range",
+      "id": "footer_font_size",
+      "label": "Footer font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "footer_font_weight",
+      "label": "Footer font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Pricing panel"
+    },
+    {
+      "type": "text",
+      "id": "pricing_box_aria_label",
+      "label": "Pricing panel accessible label",
+      "default": "School pricing"
+    },
+    {
+      "type": "color",
+      "id": "pricing_box_background_color",
+      "label": "Pricing panel background",
+      "default": "#1CC7C1"
+    },
+    {
+      "type": "range",
+      "id": "pricing_box_width",
+      "label": "Pricing panel width (desktop)",
+      "min": 24,
+      "max": 50,
+      "step": 2,
+      "unit": "%",
+      "default": 34
+    },
+    {
+      "type": "range",
+      "id": "pricing_box_vertical_bleed",
+      "label": "Pricing panel vertical bleed",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "How far the panel extends above and below the content box on desktop."
+    },
+    {
+      "type": "range",
+      "id": "pricing_box_padding_y",
+      "label": "Pricing panel padding top & bottom",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "pricing_box_padding_x",
+      "label": "Pricing panel padding left & right",
+      "min": 12,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Tape banner"
+    },
+    {
+      "type": "text",
+      "id": "tape_label",
+      "label": "Tape label",
+      "default": "Annual price per teacher"
+    },
+    {
+      "type": "image_picker",
+      "id": "tape_background_image",
+      "label": "Tape background image",
+      "info": "Upload the full tape banner asset (shape and color included)."
+    },
+    {
+      "type": "color",
+      "id": "tape_label_font_color",
+      "label": "Tape label color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "tape_label_font_size",
+      "label": "Tape label font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "tape_label_font_weight",
+      "label": "Tape label font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "header",
+      "content": "Disclaimer"
+    },
+    {
+      "type": "textarea",
+      "id": "disclaimer",
+      "label": "Disclaimer",
+      "default": "*School pricing available for 10 or more teachers (or whole school if fewer than 10 at the school)."
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_font_color",
+      "label": "Disclaimer color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_font_size",
+      "label": "Disclaimer font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "disclaimer_font_weight",
+      "label": "Disclaimer font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Pricing tier typography"
+    },
+    {
+      "type": "color",
+      "id": "tier_title_font_color",
+      "label": "Tier title color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "tier_title_font_size",
+      "label": "Tier title font size",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default."
+    },
+    {
+      "type": "select",
+      "id": "tier_title_font_weight",
+      "label": "Tier title font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "color",
+      "id": "tier_detail_font_color",
+      "label": "Tier detail color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "tier_detail_font_size",
+      "label": "Tier detail font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "tier_detail_font_weight",
+      "label": "Tier detail font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Contact Us For A Quote"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        { "value": "yellow", "label": "Yellow" },
+        { "value": "primary", "label": "Primary" },
+        { "value": "secondary", "label": "Secondary" }
+      ],
+      "default": "yellow"
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "Used when layout stacks on tablet and mobile."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pricing_tier",
+      "name": "Pricing tier",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tier_title",
+          "label": "Tier title",
+          "default": "Basic: $75"
+        },
+        {
+          "type": "text",
+          "id": "tier_detail",
+          "label": "Tier detail",
+          "default": "4 sessions/month"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Schools Pricing Panel",
+      "blocks": [
+        {
+          "type": "pricing_tier",
+          "settings": {
+            "tier_title": "Basic: $75",
+            "tier_detail": "4 sessions/month"
+          }
+        },
+        {
+          "type": "pricing_tier",
+          "settings": {
+            "tier_title": "Standard: $125",
+            "tier_detail": "12 sessions/month"
+          }
+        },
+        {
+          "type": "pricing_tier",
+          "settings": {
+            "tier_title": "Pro: $325",
+            "tier_detail": "40 sessions/month"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

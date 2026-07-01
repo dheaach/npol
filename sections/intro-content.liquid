@@ -62,6 +62,9 @@
             if list_style == 'number'
               assign list_tag = 'ol'
               assign list_class = 'intro-content__list intro-content__list--ordered'
+            elsif list_style == 'checklist'
+              assign list_tag = 'ul'
+              assign list_class = 'intro-content__list intro-content__list--checklist'
             else
               assign list_tag = 'ul'
               assign list_class = 'intro-content__list'
@@ -164,6 +167,32 @@
   #shopify-section-{{ section.id }} .intro-content__list--ordered li::before {
     content: none;
     display: none;
+  }
+  #shopify-section-{{ section.id }} .intro-content__list--checklist li {
+    padding-left: 36px;
+  }
+  {%- liquid
+    assign checklist_box_bg = section.settings.checklist_box_background_color | default: '#ffffff'
+    assign checklist_box_border = section.settings.checklist_box_border_color | default: '#ADE8F6'
+    assign checklist_icon_color = section.settings.checklist_icon_color | default: '#51ADA0'
+    assign checklist_icon_encoded = checklist_icon_color | replace: '#', '%23'
+  -%}
+  #shopify-section-{{ section.id }} .intro-content__list--checklist li::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 3px;
+    width: 22px;
+    height: 22px;
+    background-color: {{ checklist_box_bg }};
+    border: 1px solid {{ checklist_box_border }};
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(10, 29, 60, 0.08);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='{{ checklist_icon_encoded }}' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px 14px;
   }
   {%- if section.settings.text_after_list_font_size > 0 -%}
     #shopify-section-{{ section.id }} .intro-content__text-after,
@@ -421,9 +450,35 @@
       "label": "List style",
       "options": [
         { "value": "bullet", "label": "Bullet list" },
-        { "value": "number", "label": "Numbered list" }
+        { "value": "number", "label": "Numbered list" },
+        { "value": "checklist", "label": "Checklist" }
       ],
       "default": "bullet"
+    },
+    {
+      "type": "header",
+      "content": "Checklist style"
+    },
+    {
+      "type": "color",
+      "id": "checklist_box_background_color",
+      "label": "Checklist box background",
+      "default": "#FFFFFF",
+      "info": "Applies when List style is Checklist."
+    },
+    {
+      "type": "color",
+      "id": "checklist_box_border_color",
+      "label": "Checklist box border",
+      "default": "#ADE8F6",
+      "info": "Applies when List style is Checklist."
+    },
+    {
+      "type": "color",
+      "id": "checklist_icon_color",
+      "label": "Checklist checkmark color",
+      "default": "#51ADA0",
+      "info": "Applies when List style is Checklist."
     },
     {
       "type": "textarea",

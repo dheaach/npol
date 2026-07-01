@@ -1,0 +1,35 @@
+---
+description: When a design specifies an uploadable image, render it plain — no polaroid/tape/decorative CSS unless explicitly requested.
+globs: sections/*.liquid
+alwaysApply: false
+---
+
+# Uploadable image — no decorative frame CSS
+
+When the user or design spec says an image is **uploadable** (image picker), treat the asset as **final artwork**. The merchant uploads the complete visual (including any polaroid frame, tape, shadows, or rotation baked into the file).
+
+## Do
+
+- Use `{% render 'responsive-image' %}` with a BEM class on the section
+- Apply only layout CSS: `max-width: 100%`, `height: auto`, alignment, optional max-width range setting
+- Label schema fields **Image** / **Image alt text** — not "Polaroid image"
+
+## Do not
+
+- Render `polaroid-image` snippet or add `.polaroid`, tape, rotation, white border, or shadow CSS
+- Add tape color, rotation, or frame settings unless the user **explicitly** asks for a CSS-generated polaroid effect
+
+## When polaroid snippet is OK
+
+Use `snippets/polaroid-image.liquid` only when the user **explicitly** requests a theme-generated polaroid frame (e.g. "add polaroid styling in CSS") — not when they say "uploadable image" or "polaroid image" meaning a pre-designed asset to upload.
+
+## Example
+
+```liquid
+{% render 'responsive-image',
+  image: section.settings.image,
+  alt: section.settings.image_alt,
+  class: 'my-section__image',
+  loading: 'lazy'
+%}
+```

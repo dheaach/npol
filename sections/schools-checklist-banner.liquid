@@ -1,0 +1,1281 @@
+{% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'schools-checklist-banner__main-inner', gap_fallback_tablet: 32, gap_fallback_mobile: 24 %}
+
+{%- liquid
+  assign main_bg = section.settings.main_box_background_color | default: '#E5F7F3'
+  assign bottom_bg = section.settings.bottom_box_background_color | default: '#0A1D3C'
+  assign bottom_width = section.settings.bottom_box_width | default: 80
+  assign main_pad_y = section.settings.main_box_padding_y | default: 48
+  assign main_pad_x = section.settings.main_box_padding_x | default: 48
+  assign bottom_pad_y = section.settings.bottom_box_padding_y | default: 24
+  assign bottom_pad_x = section.settings.bottom_box_padding_x | default: 32
+  assign main_radius = section.settings.main_box_border_radius | default: 16
+  assign bottom_radius = section.settings.bottom_box_border_radius | default: 12
+  assign overlap = section.settings.bottom_box_overlap | default: 40
+-%}
+
+<section
+  class="schools-checklist-banner section-spacing"
+  aria-labelledby="schools-checklist-heading-{{ section.id }}"
+>
+  <div class="page-width">
+    <div
+      class="schools-checklist-banner__stage"
+      style="--scb-overlap: {{ overlap }}px;"
+    >
+      <div
+        class="schools-checklist-banner__main-box"
+        style="
+          background-color: {{ main_bg }};
+          border-radius: {{ main_radius }}px;
+          --scb-main-pad-y: {{ main_pad_y }}px;
+          --scb-main-pad-x: {{ main_pad_x }}px;
+        "
+      >
+        <div class="schools-checklist-banner__main-inner{% if section.settings.layout == 'reverse' %} schools-checklist-banner__main-inner--reverse{% endif %}{% if section.settings.mobile_stack_order == 'image-first' %} schools-checklist-banner__main-inner--mobile-image-first{% endif %}">
+          <div class="schools-checklist-banner__content">
+            <div id="schools-checklist-heading-{{ section.id }}">
+              {%- liquid
+                assign scb_heading_before_color = section.settings.heading_before_color
+                if scb_heading_before_color == blank
+                  assign scb_heading_before_color = section.settings.heading_color
+                endif
+                assign scb_heading_after_color = section.settings.heading_after_color
+                if scb_heading_after_color == blank
+                  assign scb_heading_after_color = section.settings.heading_color
+                endif
+              -%}
+              {% render 'highlighted-heading',
+                heading_before: section.settings.heading_before,
+                heading_before_weight: section.settings.heading_before_weight,
+                heading_before_font_size: section.settings.heading_before_font_size,
+                heading_before_color: scb_heading_before_color,
+                heading_highlight: section.settings.heading_highlight,
+                heading_highlight_weight: section.settings.heading_highlight_weight,
+                heading_highlight_font_size: section.settings.heading_highlight_font_size,
+                heading_after: section.settings.heading_after,
+                heading_after_weight: section.settings.heading_after_weight,
+                heading_after_font_size: section.settings.heading_after_font_size,
+                heading_after_color: scb_heading_after_color,
+                heading_tag: section.settings.heading_tag,
+                heading_size: section.settings.heading_tag,
+                highlight_color: section.settings.highlight_color
+              %}
+            </div>
+
+            {%- if section.settings.text != blank -%}
+              <div class="section-text rte schools-checklist-banner__description">{{ section.settings.text }}</div>
+            {%- endif -%}
+
+            {%- if section.settings.list_items != blank -%}
+              <ul class="schools-checklist-banner__list">
+                {%- assign items = section.settings.list_items | newline_to_br | split: '<br />' -%}
+                {%- for item in items -%}
+                  {%- assign trimmed = item | strip -%}
+                  {%- if trimmed != blank -%}
+                    <li>{{ trimmed }}</li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+
+          <div class="schools-checklist-banner__media">
+            {% render 'responsive-image',
+              image: section.settings.image,
+              alt: section.settings.image_alt,
+              class: 'schools-checklist-banner__image',
+              loading: 'lazy'
+            %}
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="schools-checklist-banner__bottom-box"
+        style="
+          background-color: {{ bottom_bg }};
+          border-radius: {{ bottom_radius }}px;
+          width: {{ bottom_width }}%;
+          --scb-bottom-pad-y: {{ bottom_pad_y }}px;
+          --scb-bottom-pad-x: {{ bottom_pad_x }}px;
+        "
+      >
+        <div class="schools-checklist-banner__bottom-inner{% if section.settings.bottom_layout == 'reverse' %} schools-checklist-banner__bottom-inner--reverse{% endif %}">
+          <div class="schools-checklist-banner__logo">
+            {%- if section.settings.logo_image != blank -%}
+              {% render 'responsive-image',
+                image: section.settings.logo_image,
+                alt: section.settings.logo_image_alt,
+                class: 'schools-checklist-banner__logo-image',
+                loading: 'lazy'
+              %}
+            {%- endif -%}
+          </div>
+
+          <div class="schools-checklist-banner__bottom-text">
+            {%- if section.settings.bottom_line_1 != blank -%}
+              <p class="schools-checklist-banner__bottom-line">{{ section.settings.bottom_line_1 }}</p>
+            {%- endif -%}
+
+            {%- if section.settings.bottom_line_2_before != blank or section.settings.bottom_line_2_highlight != blank or section.settings.bottom_line_2_after != blank -%}
+              <p class="schools-checklist-banner__bottom-line schools-checklist-banner__bottom-line--combined">
+                {%- if section.settings.bottom_line_2_before != blank -%}
+                  <span class="schools-checklist-banner__bottom-segment">{{ section.settings.bottom_line_2_before }}</span>
+                {%- endif -%}
+                {%- if section.settings.bottom_line_2_highlight != blank -%}
+                  <span class="schools-checklist-banner__bottom-highlight">{{ section.settings.bottom_line_2_highlight }}</span>
+                {%- endif -%}
+                {%- if section.settings.bottom_line_2_after != blank -%}
+                  <span class="schools-checklist-banner__bottom-segment">{{ section.settings.bottom_line_2_after }}</span>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.schools-checklist-banner', pad_x: '.page-width' %}
+
+  {%- if section.settings.background_color != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__stage {
+    position: relative;
+    padding-bottom: var(--scb-overlap);
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__main-box {
+    padding: var(--scb-main-pad-y) var(--scb-main-pad-x);
+    padding-bottom: calc(var(--scb-main-pad-y) + var(--scb-overlap));
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__main-inner {
+    display: grid;
+    align-items: center;
+  }
+
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .schools-checklist-banner__main-inner--reverse .schools-checklist-banner__content {
+      order: 2;
+    }
+    #shopify-section-{{ section.id }} .schools-checklist-banner__main-inner--reverse .schools-checklist-banner__media {
+      order: 1;
+    }
+  }
+
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .schools-checklist-banner__main-inner--reverse .schools-checklist-banner__content,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__main-inner--reverse .schools-checklist-banner__media {
+      order: unset;
+    }
+    #shopify-section-{{ section.id }} .schools-checklist-banner__main-inner--mobile-image-first .schools-checklist-banner__media {
+      order: -1;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__media {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__list li {
+    position: relative;
+    padding-left: 36px;
+    margin: 0;
+  }
+
+  {%- liquid
+    assign checklist_box_bg = section.settings.checklist_box_background_color | default: '#51ADA0'
+    assign checklist_icon_color = section.settings.checklist_icon_color | default: '#FFFFFF'
+    assign checklist_icon_encoded = checklist_icon_color | replace: '#', '%23'
+  -%}
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__list li::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 3px;
+    width: 22px;
+    height: 22px;
+    background-color: {{ checklist_box_bg }};
+    border-radius: 4px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='{{ checklist_icon_encoded }}' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px 14px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-box {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(var(--scb-overlap) * -1);
+    margin-left: auto;
+    margin-right: auto;
+    padding: var(--scb-bottom-pad-y) var(--scb-bottom-pad-x);
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-inner {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-inner--reverse {
+    flex-direction: row-reverse;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__logo {
+    flex-shrink: 0;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__logo-image {
+    display: block;
+    max-width: {{ section.settings.logo_max_width | default: 160 }}px;
+    width: 100%;
+    height: auto;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line {
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line + .schools-checklist-banner__bottom-line {
+    margin-top: 4px;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line--combined {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.35em;
+  }
+
+  #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-highlight {
+    color: {{ section.settings.bottom_highlight_color | default: '#51ADA0' }};
+  }
+
+  {%- liquid
+    assign scb_heading_base_color = section.settings.heading_before_color
+    if scb_heading_base_color == blank
+      assign scb_heading_base_color = section.settings.heading_color
+    endif
+  -%}
+  {%- if scb_heading_base_color != blank -%}
+    #shopify-section-{{ section.id }} #schools-checklist-heading-{{ section.id }} .section-heading {
+      color: {{ scb_heading_base_color }};
+    }
+    #shopify-section-{{ section.id }} #schools-checklist-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color | default: '#51ADA0' }};
+    }
+  {%- elsif section.settings.highlight_color != blank -%}
+    #shopify-section-{{ section.id }} #schools-checklist-heading-{{ section.id }} .section-heading .text-highlight {
+      color: {{ section.settings.highlight_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.text_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description p {
+      font-size: {{ section.settings.text_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_weight != blank and section.settings.text_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description p {
+      font-weight: {{ section.settings.text_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.text_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description p,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__description a {
+      color: {{ section.settings.text_font_color }} !important;
+    }
+  {%- endif -%}
+
+  {%- if section.settings.list_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__list,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__list li {
+      font-size: {{ section.settings.list_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_weight != blank and section.settings.list_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__list,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__list li {
+      font-weight: {{ section.settings.list_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.list_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__list,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__list li {
+      color: {{ section.settings.list_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.bottom_line_1_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line {
+      font-size: {{ section.settings.bottom_line_1_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.bottom_line_1_font_weight != blank and section.settings.bottom_line_1_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line {
+      font-weight: {{ section.settings.bottom_line_1_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.bottom_line_1_font_color != blank -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line,
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-segment {
+      color: {{ section.settings.bottom_line_1_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.bottom_line_2_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line--combined {
+      font-size: {{ section.settings.bottom_line_2_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.bottom_line_2_font_weight != blank and section.settings.bottom_line_2_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line--combined {
+      font-weight: {{ section.settings.bottom_line_2_font_weight }};
+    }
+  {%- endif -%}
+
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-inner {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 40px;
+    }
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-inner--reverse {
+      flex-direction: column;
+    }
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-text {
+      text-align: center;
+    }
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-line--combined {
+      justify-content: center;
+    }
+    #shopify-section-{{ section.id }} .schools-checklist-banner__bottom-box {
+      width: 80% !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Schools Checklist",
+  "tag": "section",
+  "class": "section-schools-checklist-banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "info": "Applies to the outer section only, not inner cards or banners."
+    },
+    {
+      "type": "header",
+      "content": "Main box"
+    },
+    {
+      "type": "color",
+      "id": "main_box_background_color",
+      "label": "Main box background color",
+      "default": "#E5F7F3"
+    },
+    {
+      "type": "range",
+      "id": "main_box_border_radius",
+      "label": "Main box border radius",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "main_box_padding_y",
+      "label": "Main box padding top & bottom",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "main_box_padding_x",
+      "label": "Main box padding left & right",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "Safe, Focused, and"
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Designed for Schools"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = same as color before highlight."
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color (legacy fallback)",
+      "default": "#0A1D3C",
+      "info": "Used when per-segment heading colors above are empty."
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "info": "Optional text shown between the heading and checklist."
+    },
+    {
+      "type": "color",
+      "id": "text_font_color",
+      "label": "Description color",
+      "default": "#0A1D3C",
+      "info": "Empty = theme body color."
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Checklist"
+    },
+    {
+      "type": "textarea",
+      "id": "list_items",
+      "label": "Checklist items",
+      "info": "One item per line",
+      "default": "No student names, images, or data required\nNot student-facing. No grading or tutoring\nPurpose-built for K–6 mathematics\nConversations are not used to train general AI models\nBuilt specifically for teaching mathematics, not general AI use."
+    },
+    {
+      "type": "color",
+      "id": "checklist_box_background_color",
+      "label": "Checklist icon background",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "color",
+      "id": "checklist_icon_color",
+      "label": "Checklist checkmark color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "list_font_color",
+      "label": "Checklist text color",
+      "default": "#0A1D3C",
+      "info": "Empty = theme body color."
+    },
+    {
+      "type": "range",
+      "id": "list_font_size",
+      "label": "Checklist font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "list_font_weight",
+      "label": "Checklist font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (SEO)"
+    },
+    {
+      "type": "header",
+      "content": "Bottom box"
+    },
+    {
+      "type": "color",
+      "id": "bottom_box_background_color",
+      "label": "Bottom box background color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "bottom_box_width",
+      "label": "Bottom box width (% of main box)",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "bottom_box_overlap",
+      "label": "Bottom box overlap",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40,
+      "info": "How far the bottom box overlaps the main box."
+    },
+    {
+      "type": "range",
+      "id": "bottom_box_border_radius",
+      "label": "Bottom box border radius",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "bottom_box_padding_y",
+      "label": "Bottom box padding top & bottom",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "bottom_box_padding_x",
+      "label": "Bottom box padding left & right",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "bottom_layout",
+      "label": "Bottom box layout",
+      "options": [
+        { "value": "default", "label": "Logo left, text right" },
+        { "value": "reverse", "label": "Logo right, text left" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "header",
+      "content": "Bottom box — Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo image"
+    },
+    {
+      "type": "text",
+      "id": "logo_image_alt",
+      "label": "Logo alt text (SEO)",
+      "default": "Studio Adelaide"
+    },
+    {
+      "type": "range",
+      "id": "logo_max_width",
+      "label": "Logo max width",
+      "min": 80,
+      "max": 280,
+      "step": 10,
+      "unit": "px",
+      "default": 160
+    },
+    {
+      "type": "header",
+      "content": "Bottom box — Text"
+    },
+    {
+      "type": "text",
+      "id": "bottom_line_1",
+      "label": "Line 1",
+      "default": "Teachers stay in control of teaching."
+    },
+    {
+      "type": "color",
+      "id": "bottom_line_1_font_color",
+      "label": "Bottom text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "bottom_line_1_font_size",
+      "label": "Bottom text font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "bottom_line_1_font_weight",
+      "label": "Bottom text font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "text",
+      "id": "bottom_line_2_before",
+      "label": "Line 2 (before highlight)",
+      "default": "Studio Adelaide supports decisions,"
+    },
+    {
+      "type": "text",
+      "id": "bottom_line_2_highlight",
+      "label": "Line 2 (highlight)",
+      "default": "it doesn't replace them."
+    },
+    {
+      "type": "text",
+      "id": "bottom_line_2_after",
+      "label": "Line 2 (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "bottom_highlight_color",
+      "label": "Line 2 highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "bottom_line_2_font_size",
+      "label": "Line 2 font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = same as line 1."
+    },
+    {
+      "type": "select",
+      "id": "bottom_line_2_font_weight",
+      "label": "Line 2 font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Main box layout",
+      "options": [
+        { "value": "default", "label": "Content left, image right" },
+        { "value": "reverse", "label": "Content right, image left" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Content column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 55,
+      "info": "Image column uses the remaining width."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "mobile_stack_order",
+      "label": "Tablet & mobile column order",
+      "info": "When the layout stacks (1023px and below), controls whether the image or content appears first.",
+      "options": [
+        { "value": "content-first", "label": "Content first" },
+        { "value": "image-first", "label": "Image first" }
+      ],
+      "default": "content-first"
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Schools Checklist"
+    }
+  ]
+}
+{% endschema %}

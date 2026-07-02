@@ -314,7 +314,14 @@
           break;
         }
       }
-      if (!matched) select.value = '';
+      if (!matched) {
+        var hasEmptyOption = select.querySelector('option[value=""]');
+        if (hasEmptyOption) {
+          select.value = '';
+        } else if (select.options.length > 0) {
+          select.value = select.options[0].value;
+        }
+      }
     });
     var sortSelect = form.querySelector('[name="sort_by"]');
     if (sortSelect && searchParams.has('sort_by')) {

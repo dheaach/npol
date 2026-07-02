@@ -43,13 +43,32 @@
 >
   <div class="page-width">
     <div class="image-text__inner{% if image_only %} image-text__inner--image-only{% elsif layout == 'stacked' %} image-text__inner--stacked text-center{% endif %}{% if layout == 'side-by-side' and section.settings.image_position == 'right' %} image-text__inner--reverse{% endif %}">
-      <div class="image-text__media">
-        {% render 'responsive-image',
-          image: section.settings.image,
-          alt: section.settings.image_alt,
-          class: 'image-text__image',
-          loading: section.settings.image_loading
-        %}
+      <div class="image-text__media{% if section.settings.image_mobile != blank %} image-text__media--has-mobile{% endif %}">
+        {%- if section.settings.image_mobile != blank -%}
+          <div class="image-text__image-wrap image-text__image-wrap--desktop">
+            {% render 'responsive-image',
+              image: section.settings.image,
+              alt: section.settings.image_alt,
+              class: 'image-text__image',
+              loading: section.settings.image_loading
+            %}
+          </div>
+          <div class="image-text__image-wrap image-text__image-wrap--mobile">
+            {% render 'responsive-image',
+              image: section.settings.image_mobile,
+              alt: section.settings.image_alt,
+              class: 'image-text__image',
+              loading: section.settings.image_loading
+            %}
+          </div>
+        {%- else -%}
+          {% render 'responsive-image',
+            image: section.settings.image,
+            alt: section.settings.image_alt,
+            class: 'image-text__image',
+            loading: section.settings.image_loading
+          %}
+        {%- endif -%}
       </div>
 
       {%- unless image_only -%}
@@ -190,6 +209,18 @@
       color: {{ section.settings.text_font_color }} !important;
     }
   {%- endif -%}
+  {%- if section.settings.image_mobile != blank -%}
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .image-text__image-wrap--desktop {
+      display: none;
+    }
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .image-text__image-wrap--mobile {
+      display: none;
+    }
+  }
+  {%- endif -%}
 </style>
 
 {% schema %}
@@ -315,7 +346,13 @@
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Image"
+      "label": "Image — tablet and up (768px+)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Image — mobile (767px and below)",
+      "info": "Optional. If empty, the tablet/desktop image above is used on all sizes."
     },
     {
       "type": "text",
@@ -408,11 +445,11 @@
       "id": "column_1_width",
       "label": "Image column width",
       "min": 25,
-      "max": 75,
+      "max": 100,
       "step": 5,
       "unit": "%",
       "default": 50,
-      "info": "Text column uses the remainder. Side-by-side on desktop only."
+      "info": "Text column uses the remainder. 100% = single column on desktop. Side-by-side on desktop only."
     },
     {
       "type": "range",

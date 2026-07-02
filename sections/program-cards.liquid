@@ -117,6 +117,8 @@
               assign card_align_items = 'flex-start'
           endcase
 
+          assign text_html_img_src_width = block.settings.text_html_image_width | default: 600
+
         -%}
         <article
           id="program-card-{{ block.id }}"
@@ -180,6 +182,17 @@
 
             {%- if block.settings.text_html != blank -%}
               <div class="section-text program-card__text-html">{{ block.settings.text_html }}</div>
+            {%- endif -%}
+
+            {%- if block.settings.text_html_image != blank -%}
+              <div class="program-card__text-html-image">
+                {% render 'responsive-image',
+                  image: block.settings.text_html_image,
+                  alt: block.settings.text_html_image_alt,
+                  class: 'program-card__text-html-image-el',
+                  width: text_html_img_src_width
+                %}
+              </div>
             {%- endif -%}
 
             {%- if block.settings.button_label != blank -%}
@@ -302,8 +315,18 @@
   #shopify-section-{{ section.id }} .program-card__title-html,
   #shopify-section-{{ section.id }} .program-card__text,
   #shopify-section-{{ section.id }} .program-card__text-html,
+  #shopify-section-{{ section.id }} .program-card__text-html-image,
   #shopify-section-{{ section.id }} .program-card__title-group {
     width: 100%;
+  }
+  #shopify-section-{{ section.id }} .program-card__text-html-image {
+    margin-top: 12px;
+  }
+  #shopify-section-{{ section.id }} .program-card__text-html-image-el {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
   #shopify-section-{{ section.id }} .program-cards__grid {
     display: flex;
@@ -470,6 +493,30 @@
       #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__tag-label {
         font-size: {{ block.settings.tag_font_size }}px;
       }
+    {%- endif -%}
+    {%- if block.settings.text_html_image != blank -%}
+      {%- if block.settings.text_html_image_max_width > 0 -%}
+        #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text-html-image-el {
+          max-width: {{ block.settings.text_html_image_max_width }}px;
+          width: auto;
+        }
+      {%- endif -%}
+      {%- if block.settings.text_html_image_max_width_tablet > 0 -%}
+      @media screen and (min-width: 768px) and (max-width: 1023px) {
+        #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text-html-image-el {
+          max-width: {{ block.settings.text_html_image_max_width_tablet }}px;
+          width: auto;
+        }
+      }
+      {%- endif -%}
+      {%- if block.settings.text_html_image_max_width_mobile > 0 -%}
+      @media screen and (max-width: 767px) {
+        #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text-html-image-el {
+          max-width: {{ block.settings.text_html_image_max_width_mobile }}px;
+          width: auto;
+        }
+      }
+      {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
   @media screen and (min-width: 768px) and (max-width: 1023px) {
@@ -1560,6 +1607,60 @@
           "type": "html",
           "id": "text_html",
           "label": "Additional HTML"
+        },
+        {
+          "type": "image_picker",
+          "id": "text_html_image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "text_html_image_alt",
+          "label": "Image alt text (SEO)"
+        },
+        {
+          "type": "range",
+          "id": "text_html_image_width",
+          "label": "Image file width (src)",
+          "min": 400,
+          "max": 1600,
+          "step": 100,
+          "unit": "px",
+          "default": 600,
+          "info": "Max width requested from Shopify CDN."
+        },
+        {
+          "type": "range",
+          "id": "text_html_image_max_width",
+          "label": "Image display max width (desktop)",
+          "min": 0,
+          "max": 480,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "1024px and up. 0 = full card width."
+        },
+        {
+          "type": "range",
+          "id": "text_html_image_max_width_tablet",
+          "label": "Image display max width (tablet)",
+          "min": 0,
+          "max": 480,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "768px–1023px. 0 = use desktop width."
+        },
+        {
+          "type": "range",
+          "id": "text_html_image_max_width_mobile",
+          "label": "Image display max width (mobile)",
+          "min": 0,
+          "max": 480,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "767px and below. 0 = use tablet or desktop width."
         },
         {
           "type": "color",

@@ -1,0 +1,2102 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign section_bg_url = blank
+  if section.settings.background_image != blank
+    assign section_bg_url = section.settings.background_image | image_url: width: 2400
+  endif
+
+  assign section_bg_mobile_url = blank
+  if section.settings.background_image_mobile != blank
+    assign section_bg_mobile_url = section.settings.background_image_mobile | image_url: width: 1200
+  endif
+
+  assign columns_count = section.settings.columns_count | default: '1'
+  assign col1 = section.settings.column_1_width | default: 50
+  assign col2_setting = section.settings.column_2_width | default: 0
+  assign col3_setting = section.settings.column_3_width | default: 0
+
+  if col2_setting > 0
+    assign col2 = col2_setting
+  elsif columns_count == '3'
+    assign col2 = 100 | minus: col1 | divided_by: 2
+  else
+    assign col2 = 100 | minus: col1
+  endif
+
+  if col3_setting > 0
+    assign col3 = col3_setting
+  else
+    assign col3 = 100 | minus: col1 | minus: col2
+  endif
+
+  assign columns_alignment = section.settings.columns_alignment | default: 'center'
+  assign columns_horizontal_alignment = section.settings.columns_horizontal_alignment | default: 'center'
+
+  assign bg_type = section.settings.background_type | default: 'color'
+  assign grad_start = section.settings.gradient_color_start | default: '#0A1D3C'
+  assign grad_end = section.settings.gradient_color_end | default: '#51ADA0'
+  assign grad_dir = section.settings.gradient_direction | default: 'vertical'
+
+  if grad_dir == 'horizontal'
+    assign grad_css = 'linear-gradient(to right, ' | append: grad_start | append: ' 0%, ' | append: grad_end | append: ' 50%)'
+  else
+    assign grad_css = 'linear-gradient(to bottom, ' | append: grad_start | append: ' 0%, ' | append: grad_end | append: ' 50%)'
+  endif
+-%}
+
+<section
+  class="dark-step-banner-columns"
+  {% if section.settings.top_heading != blank or section.settings.top_heading_before != blank or section.settings.top_heading_highlight != blank or section.settings.top_heading_after != blank %}
+    aria-labelledby="dark-step-banner-top-heading-{{ section.id }}"
+  {% else %}
+    aria-label="{{ section.settings.section_aria_label | default: 'Step banner' | escape }}"
+  {% endif %}
+>
+  {%- liquid
+    assign bg_flip_desktop = section.settings.background_flip | default: 'none'
+    assign bg_flip_mobile = section.settings.background_flip_mobile | default: 'none'
+  -%}
+  {%- if section_bg_mobile_url != blank -%}
+    <div
+      class="dark-step-banner-columns__bg dark-step-banner-columns__bg--mobile{% if bg_flip_mobile != 'none' %} dark-step-banner-columns__bg--flip-{{ bg_flip_mobile }}{% endif %}"
+      style="background-image: url({{ section_bg_mobile_url }});"
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
+  {%- if section_bg_url != blank -%}
+    <div
+      class="dark-step-banner-columns__bg{% if section_bg_mobile_url != blank %} dark-step-banner-columns__bg--desktop{% endif %}{% if bg_flip_desktop != 'none' %} dark-step-banner-columns__bg--flip-{{ bg_flip_desktop }}{% endif %}"
+      style="background-image: url({{ section_bg_url }});"
+      aria-hidden="true"
+    ></div>
+  {%- endif -%}
+
+  <div class="dark-step-banner-columns__content section-spacing">
+    <div class="page-width dark-step-banner-columns__layout">
+      {%- liquid
+        assign top_heading_align = section.settings.top_heading_align | default: 'center'
+        assign has_top_heading = false
+        if section.settings.top_heading != blank or section.settings.top_heading_before != blank or section.settings.top_heading_highlight != blank or section.settings.top_heading_after != blank
+          assign has_top_heading = true
+        endif
+        assign top_heading_color = section.settings.top_heading_font_color
+        if top_heading_color == blank
+          assign top_heading_color = section.settings.text_color
+        endif
+      -%}
+      {%- if has_top_heading -%}
+        <div
+          id="dark-step-banner-top-heading-{{ section.id }}"
+          class="dark-step-banner-columns__top-heading text-{{ top_heading_align }}"
+        >
+          {% render 'highlighted-heading',
+            heading: section.settings.top_heading,
+            heading_font_size: section.settings.top_heading_font_size,
+            heading_weight: section.settings.top_heading_font_weight,
+            heading_font_color: top_heading_color,
+            heading_before: section.settings.top_heading_before,
+            heading_before_weight: section.settings.top_heading_before_weight,
+            heading_before_font_size: section.settings.top_heading_before_font_size,
+            heading_before_color: section.settings.top_heading_before_color,
+            heading_highlight: section.settings.top_heading_highlight,
+            heading_highlight_weight: section.settings.top_heading_highlight_weight,
+            heading_highlight_font_size: section.settings.top_heading_highlight_font_size,
+            heading_after: section.settings.top_heading_after,
+            heading_after_weight: section.settings.top_heading_after_weight,
+            heading_after_font_size: section.settings.top_heading_after_font_size,
+            heading_tag: section.settings.top_heading_tag,
+            heading_size: section.settings.top_heading_tag,
+            highlight_color: section.settings.top_heading_highlight_color
+          %}
+        </div>
+      {%- endif -%}
+      <div class="dark-step-banner-columns__grid dark-step-banner-columns__grid--cols-{{ columns_count }}">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign col_text_color = block.settings.text_color
+            if col_text_color == blank
+              assign col_text_color = section.settings.text_color
+            endif
+            assign col_subtext_color = block.settings.subtext_font_color
+            if col_subtext_color == blank
+              assign col_subtext_color = col_text_color
+            endif
+            assign col_highlight = block.settings.highlight_color
+            if col_highlight == blank
+              assign col_highlight = section.settings.highlight_color
+            endif
+            assign col_align = block.settings.text_align | default: 'center'
+            assign img_position = block.settings.image_position | default: 'above'
+            assign img_side = false
+            if img_position == 'left' or img_position == 'right'
+              assign img_side = true
+            endif
+            assign col_img_width = block.settings.image_width | default: 800
+            if block.settings.image_src_width_tablet > 0 and block.settings.image_src_width_tablet < col_img_width
+              assign col_img_width = block.settings.image_src_width_tablet
+            endif
+            if block.settings.image_src_width_mobile > 0 and block.settings.image_src_width_mobile < col_img_width
+              assign col_img_width = block.settings.image_src_width_mobile
+            endif
+          -%}
+          <div
+            id="step-column-{{ block.id }}"
+            class="dark-step-banner-columns__column text-{{ col_align }}{% if img_side %} dark-step-banner-columns__column--image-side dark-step-banner-columns__column--image-{{ img_position }}{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.image != blank and img_position == 'above' -%}
+              <div class="dark-step-banner-columns__media dark-step-banner-columns__media--align-{{ block.settings.image_align | default: 'center' }}">
+                {% render 'responsive-image',
+                  image: block.settings.image,
+                  alt: block.settings.image_alt,
+                  class: 'dark-step-banner-columns__image',
+                  loading: block.settings.image_loading,
+                  width: col_img_width
+                %}
+              </div>
+            {%- endif -%}
+
+            {%- if img_side -%}
+              <div class="dark-step-banner-columns__row">
+                {%- if img_position == 'left' and block.settings.image != blank -%}
+                  <div class="dark-step-banner-columns__media dark-step-banner-columns__media--side dark-step-banner-columns__media--align-{{ block.settings.image_align | default: 'center' }}">
+                    {% render 'responsive-image',
+                      image: block.settings.image,
+                      alt: block.settings.image_alt,
+                      class: 'dark-step-banner-columns__image',
+                      loading: block.settings.image_loading,
+                      width: col_img_width
+                    %}
+                  </div>
+                {%- endif -%}
+
+                <div class="dark-step-banner-columns__body">
+                  <div class="dark-step-banner-columns__heading{% if block.settings.heading != blank %} dark-step-banner-columns__heading--single{% endif %}">
+                    {% render 'highlighted-heading',
+                      heading: block.settings.heading,
+                      heading_weight: block.settings.heading_weight,
+                      heading_before: block.settings.heading_before,
+                      heading_highlight: block.settings.heading_highlight,
+                      heading_after: block.settings.heading_after,
+                      heading_before_weight: block.settings.heading_before_weight,
+                      heading_highlight_weight: block.settings.heading_highlight_weight,
+                      heading_after_weight: block.settings.heading_after_weight,
+                      heading_tag: block.settings.heading_tag,
+                      heading_size: block.settings.heading_tag,
+                      highlight_color: col_highlight
+                    %}
+                  </div>
+
+                  {%- if block.settings.subtext != blank -%}
+                    <div class="dark-step-banner-columns__subtext section-text rte">{{ block.settings.subtext }}</div>
+                  {%- endif -%}
+                </div>
+
+                {%- if img_position == 'right' and block.settings.image != blank -%}
+                  <div class="dark-step-banner-columns__media dark-step-banner-columns__media--side dark-step-banner-columns__media--align-{{ block.settings.image_align | default: 'center' }}">
+                    {% render 'responsive-image',
+                      image: block.settings.image,
+                      alt: block.settings.image_alt,
+                      class: 'dark-step-banner-columns__image',
+                      loading: block.settings.image_loading,
+                      width: col_img_width
+                    %}
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- else -%}
+              <div class="dark-step-banner-columns__heading{% if block.settings.heading != blank %} dark-step-banner-columns__heading--single{% endif %}">
+                {% render 'highlighted-heading',
+                  heading: block.settings.heading,
+                  heading_weight: block.settings.heading_weight,
+                  heading_before: block.settings.heading_before,
+                  heading_highlight: block.settings.heading_highlight,
+                  heading_after: block.settings.heading_after,
+                  heading_before_weight: block.settings.heading_before_weight,
+                  heading_highlight_weight: block.settings.heading_highlight_weight,
+                  heading_after_weight: block.settings.heading_after_weight,
+                  heading_tag: block.settings.heading_tag,
+                  heading_size: block.settings.heading_tag,
+                  highlight_color: col_highlight
+                %}
+              </div>
+
+              {%- if block.settings.subtext != blank -%}
+                <div class="dark-step-banner-columns__subtext section-text rte">{{ block.settings.subtext }}</div>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if block.settings.image != blank and img_position == 'below' -%}
+              <div class="dark-step-banner-columns__media dark-step-banner-columns__media--below dark-step-banner-columns__media--align-{{ block.settings.image_align | default: 'center' }}">
+                {% render 'responsive-image',
+                  image: block.settings.image,
+                  alt: block.settings.image_alt,
+                  class: 'dark-step-banner-columns__image',
+                  loading: block.settings.image_loading,
+                  width: col_img_width
+                %}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <style>
+            #shopify-section-{{ section.id }} #step-column-{{ block.id }} .section-heading {
+              color: {{ col_text_color | default: '#FFFFFF' }};
+            }
+            #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext,
+            #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext p,
+            #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext a,
+            #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext li {
+              color: {{ col_subtext_color | default: '#FFFFFF' }};
+            }
+            {%- if block.settings.subtext_font_size > 0 -%}
+              #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext,
+              #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext p {
+                font-size: {{ block.settings.subtext_font_size }}px;
+              }
+            {%- endif -%}
+            {%- if block.settings.subtext_font_weight != blank and block.settings.subtext_font_weight != 'inherit' -%}
+              #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext,
+              #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__subtext p {
+                font-weight: {{ block.settings.subtext_font_weight }};
+              }
+            {%- endif -%}
+            #shopify-section-{{ section.id }} #step-column-{{ block.id }} .text-highlight {
+              color: {{ col_highlight | default: '#51ADA0' }} !important;
+            }
+            {%- if block.settings.heading != blank -%}
+              #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__heading--single .section-heading {
+                max-width: {{ block.settings.heading_max_width | default: 720 }}px;
+                {%- if col_align == 'center' -%}
+                  margin-left: auto;
+                  margin-right: auto;
+                {%- elsif col_align == 'right' -%}
+                  margin-left: auto;
+                  margin-right: 0;
+                {%- else -%}
+                  margin-left: 0;
+                  margin-right: auto;
+                {%- endif -%}
+              }
+            {%- endif -%}
+            {%- if block.settings.image != blank -%}
+              #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__image {
+                width: 100%;
+                height: auto;
+                display: block;
+                object-fit: {{ block.settings.image_object_fit | default: 'contain' }};
+                {%- if block.settings.image_border_radius > 0 -%}
+                border-radius: {{ block.settings.image_border_radius }}px;
+                {%- endif -%}
+                {%- if block.settings.image_max_width > 0 -%}
+                max-width: {{ block.settings.image_max_width }}px;
+                {%- endif -%}
+              }
+              {%- if block.settings.image_align == 'center' or block.settings.image_max_width > 0 -%}
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__media {
+                  display: flex;
+                  justify-content: center;
+                }
+              {%- elsif block.settings.image_align == 'right' -%}
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__media {
+                  display: flex;
+                  justify-content: flex-end;
+                }
+              {%- elsif block.settings.image_align == 'left' -%}
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__media {
+                  display: flex;
+                  justify-content: flex-start;
+                }
+              {%- endif -%}
+              {%- if block.settings.image_display_width > 0 -%}
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__image {
+                  width: {{ block.settings.image_display_width }}%;
+                }
+              {%- endif -%}
+              {%- if block.settings.image_display_width_tablet > 0 -%}
+              @media screen and (min-width: 768px) and (max-width: 1023px) {
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__image {
+                  width: {{ block.settings.image_display_width_tablet }}%;
+                  max-width: 100%;
+                }
+              }
+              {%- endif -%}
+              {%- if block.settings.image_display_width_mobile > 0 -%}
+              @media screen and (max-width: 767px) {
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__image {
+                  width: {{ block.settings.image_display_width_mobile }}%;
+                  max-width: 100%;
+                }
+              }
+              {%- endif -%}
+              {%- if block.settings.image_max_width_tablet > 0 -%}
+              @media screen and (min-width: 768px) and (max-width: 1023px) {
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__image {
+                  max-width: {{ block.settings.image_max_width_tablet }}px;
+                }
+              }
+              {%- endif -%}
+              {%- if block.settings.image_max_width_mobile > 0 -%}
+              @media screen and (max-width: 767px) {
+                #shopify-section-{{ section.id }} #step-column-{{ block.id }} .dark-step-banner-columns__image {
+                  max-width: {{ block.settings.image_max_width_mobile }}px;
+                }
+              }
+              {%- endif -%}
+            {%- endif -%}
+          </style>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #shopify-section-{{ section.id }} {
+    position: relative;
+    overflow: hidden;
+    {%- if bg_type == 'gradient' -%}
+    background: {{ grad_css }};
+    {%- else -%}
+    background-color: {{ section.settings.background_color | default: '#0A1D3C' }};
+    {%- endif -%}
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+  {% render 'section-spacing-styles', root: '.dark-step-banner-columns', pad_y: '.dark-step-banner-columns__content', pad_x: '.page-width' %}
+  #shopify-section-{{ section.id }} .text-highlight {
+    color: {{ section.settings.highlight_color | default: '#51ADA0' }} !important;
+  }
+  {%- liquid
+    assign legacy_bg_mode = section.settings.background_size | default: 'fit_width'
+    if legacy_bg_mode == '100% auto' or legacy_bg_mode == 'contain'
+      assign legacy_bg_mode = 'fit_width'
+    elsif legacy_bg_mode == '100% 100%'
+      assign legacy_bg_mode = 'stretch'
+    endif
+    assign bg_mode_mobile = section.settings.background_size_mobile | default: 'fit_width'
+    assign bg_mode_tablet = section.settings.background_size_tablet | default: 'fit_width'
+    assign bg_mode_laptop = section.settings.background_size_laptop | default: legacy_bg_mode
+    assign bg_mode_desktop = section.settings.background_size_desktop | default: 'fit_width'
+    assign bg_mode_4k = section.settings.background_size_4k | default: 'fit_width'
+    assign bg_position = section.settings.background_position | default: 'center center'
+  -%}
+  {%- capture bg_size_mobile -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_mobile %}{%- endcapture -%}
+  {%- capture bg_size_tablet -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_tablet %}{%- endcapture -%}
+  {%- capture bg_size_laptop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_laptop %}{%- endcapture -%}
+  {%- capture bg_size_desktop -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_desktop %}{%- endcapture -%}
+  {%- capture bg_size_4k -%}{% render 'dark-quote-banner-bg-size', mode: bg_mode_4k %}{%- endcapture -%}
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__bg {
+    background-size: {{ bg_size_mobile | strip }};
+    background-position: {{ bg_position }};
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__bg--flip-horizontal {
+    transform: scaleX(-1);
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__bg--flip-vertical {
+    transform: scaleY(-1);
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__bg--flip-both {
+    transform: scale(-1, -1);
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__bg {
+      background-size: {{ bg_size_tablet | strip }};
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__bg {
+      background-size: {{ bg_size_laptop | strip }};
+    }
+  }
+  @media screen and (min-width: 1441px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__bg {
+      background-size: {{ bg_size_desktop | strip }};
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__bg {
+      background-size: {{ bg_size_4k | strip }};
+    }
+  }
+  {%- if section_bg_mobile_url != blank and section_bg_url != blank -%}
+    @media screen and (max-width: 767px) {
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__bg--desktop {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- if section_bg_mobile_url != blank -%}
+    @media screen and (min-width: 768px) {
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__bg--mobile {
+        display: none;
+      }
+    }
+  {%- endif -%}
+  {%- liquid
+    assign legacy_min_height = section.settings.section_min_height | default: 320
+    assign min_height_mobile = section.settings.section_min_height_mobile | default: 240
+    assign min_height_tablet = section.settings.section_min_height_tablet | default: 280
+    assign min_height_laptop = section.settings.section_min_height_laptop | default: legacy_min_height
+    assign min_height_desktop = section.settings.section_min_height_desktop | default: 400
+    assign min_height_4k = section.settings.section_min_height_4k | default: 480
+  -%}
+  #shopify-section-{{ section.id }},
+  #shopify-section-{{ section.id }} .dark-step-banner-columns,
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__content {
+    min-height: {{ min_height_mobile }}px;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__layout {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  {%- liquid
+    assign top_heading_gap = section.settings.top_heading_gap | default: 32
+    assign top_heading_gap_tablet = section.settings.top_heading_gap_tablet | default: 0
+    if top_heading_gap_tablet == 0
+      assign top_heading_gap_tablet = top_heading_gap
+    endif
+    assign top_heading_gap_mobile = section.settings.top_heading_gap_mobile | default: 0
+    if top_heading_gap_mobile == 0
+      assign top_heading_gap_mobile = top_heading_gap_tablet
+    endif
+    assign top_heading_color_css = section.settings.top_heading_font_color
+    if top_heading_color_css == blank
+      assign top_heading_color_css = section.settings.text_color | default: '#FFFFFF'
+    endif
+  -%}
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading {
+    width: 100%;
+    margin-bottom: {{ top_heading_gap }}px;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading .section-heading {
+    color: {{ top_heading_color_css }};
+    text-transform: {{ section.settings.top_heading_text_transform | default: 'uppercase' }};
+    margin: 0;
+  }
+  {%- if section.settings.top_heading_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading .section-heading {
+      font-size: {{ section.settings.top_heading_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.top_heading_font_weight != blank and section.settings.top_heading_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading .section-heading {
+      font-weight: {{ section.settings.top_heading_font_weight }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading .text-highlight {
+    color: {{ section.settings.top_heading_highlight_color | default: section.settings.highlight_color | default: '#51ADA0' }} !important;
+  }
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading {
+      margin-bottom: {{ top_heading_gap_tablet }}px;
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__top-heading {
+      margin-bottom: {{ top_heading_gap_mobile }}px;
+    }
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__grid {
+    display: grid;
+    width: 100%;
+    align-items: {{ columns_alignment }};
+    justify-items: {{ columns_horizontal_alignment }};
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+    display: flex;
+    flex-direction: column;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__media {
+    margin-bottom: 20px;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__media--below {
+    margin-bottom: 0;
+    margin-top: 20px;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__column--image-right .dark-step-banner-columns__row {
+    flex-direction: row-reverse;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__body {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__media--side {
+    margin: 0;
+    flex-shrink: 0;
+    max-width: 45%;
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__column--image-side .dark-step-banner-columns__row {
+      flex-direction: column;
+    }
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__media--side {
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__heading {
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__subtext {
+    margin-top: 16px;
+    opacity: 0.9;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__column.text-center .dark-step-banner-columns__subtext {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__column.text-left .dark-step-banner-columns__subtext {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  #shopify-section-{{ section.id }} .dark-step-banner-columns__column.text-right .dark-step-banner-columns__subtext {
+    margin-left: auto;
+    margin-right: 0;
+  }
+  @media screen and (min-width: 768px) {
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} .dark-step-banner-columns,
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__content {
+      min-height: {{ min_height_tablet }}px;
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} .dark-step-banner-columns,
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__content {
+      min-height: {{ min_height_laptop }}px;
+    }
+    {%- if columns_count == '1' -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__grid--cols-1 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    {%- elsif columns_count == '2' -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__grid--cols-2 {
+        grid-template-columns: minmax(0, {{ col1 }}fr) minmax(0, {{ col2 }}fr);
+      }
+    {%- elsif columns_count == '3' -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__grid--cols-3 {
+        grid-template-columns: minmax(0, {{ col1 }}fr) minmax(0, {{ col2 }}fr) minmax(0, {{ col3 }}fr);
+      }
+    {%- endif -%}
+  }
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media screen and (min-width: 1441px) {
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} .dark-step-banner-columns,
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__content {
+      min-height: {{ min_height_desktop }}px;
+    }
+  }
+  @media screen and (min-width: 2560px) {
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} .dark-step-banner-columns,
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__content {
+      min-height: {{ min_height_4k }}px;
+    }
+  }
+  {% render 'section-spacing-gap', section: section, selector: '.dark-step-banner-columns__grid', stack_breakpoint: '0' %}
+  {%- if section.settings.col_padding_top > 0 -%}
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+      padding-top: {{ section.settings.col_padding_top }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.col_padding_bottom > 0 -%}
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+      padding-bottom: {{ section.settings.col_padding_bottom }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.col_padding_left > 0 -%}
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+      padding-left: {{ section.settings.col_padding_left }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.col_padding_right > 0 -%}
+    #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+      padding-right: {{ section.settings.col_padding_right }}px;
+    }
+  {%- endif -%}
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    {%- if section.settings.col_padding_top_tablet > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-top: {{ section.settings.col_padding_top_tablet }}px;
+      }
+    {%- endif -%}
+    {%- if section.settings.col_padding_bottom_tablet > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-bottom: {{ section.settings.col_padding_bottom_tablet }}px;
+      }
+    {%- endif -%}
+    {%- if section.settings.col_padding_left_tablet > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-left: {{ section.settings.col_padding_left_tablet }}px;
+      }
+    {%- endif -%}
+    {%- if section.settings.col_padding_right_tablet > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-right: {{ section.settings.col_padding_right_tablet }}px;
+      }
+    {%- endif -%}
+  }
+  @media screen and (max-width: 767px) {
+    {%- if section.settings.col_padding_top_mobile > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-top: {{ section.settings.col_padding_top_mobile }}px;
+      }
+    {%- endif -%}
+    {%- if section.settings.col_padding_bottom_mobile > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-bottom: {{ section.settings.col_padding_bottom_mobile }}px;
+      }
+    {%- endif -%}
+    {%- if section.settings.col_padding_left_mobile > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-left: {{ section.settings.col_padding_left_mobile }}px;
+      }
+    {%- endif -%}
+    {%- if section.settings.col_padding_right_mobile > 0 -%}
+      #shopify-section-{{ section.id }} .dark-step-banner-columns__column {
+        padding-right: {{ section.settings.col_padding_right_mobile }}px;
+      }
+    {%- endif -%}
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Dark Step Banner Columns",
+  "tag": "section",
+  "class": "section-dark-step-banner-columns",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Banner top heading"
+    },
+    {
+      "type": "text",
+      "id": "top_heading",
+      "label": "Top heading (single line)",
+      "default": "STEP 3",
+      "info": "Shown centered above the columns inside the banner. Or use split heading fields below."
+    },
+    {
+      "type": "text",
+      "id": "top_heading_before",
+      "label": "Top heading (before highlight)"
+    },
+    {
+      "type": "text",
+      "id": "top_heading_highlight",
+      "label": "Top heading highlight"
+    },
+    {
+      "type": "text",
+      "id": "top_heading_after",
+      "label": "Top heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "top_heading_font_color",
+      "label": "Top heading color",
+      "info": "Empty = section default text color."
+    },
+    {
+      "type": "range",
+      "id": "top_heading_font_size",
+      "label": "Top heading font size",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "top_heading_font_weight",
+      "label": "Top heading font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "top_heading_before_weight",
+      "label": "Top heading weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "top_heading_before_font_size",
+      "label": "Top heading size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "color",
+      "id": "top_heading_before_color",
+      "label": "Top heading color (before highlight)",
+      "info": "Empty = top heading color."
+    },
+    {
+      "type": "select",
+      "id": "top_heading_highlight_weight",
+      "label": "Top heading weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "range",
+      "id": "top_heading_highlight_font_size",
+      "label": "Top heading size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "color",
+      "id": "top_heading_highlight_color",
+      "label": "Top heading highlight color",
+      "info": "Empty = section default highlight color."
+    },
+    {
+      "type": "select",
+      "id": "top_heading_after_weight",
+      "label": "Top heading weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "top_heading_after_font_size",
+      "label": "Top heading size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "top_heading_tag",
+      "label": "Top heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "top_heading_align",
+      "label": "Top heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "top_heading_text_transform",
+      "label": "Top heading text transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "lowercase", "label": "Lowercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "top_heading_gap",
+      "label": "Space below top heading (desktop)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "top_heading_gap_tablet",
+      "label": "Space below top heading (tablet)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px. 0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "top_heading_gap_mobile",
+      "label": "Space below top heading (mobile)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below. 0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Columns layout"
+    },
+    {
+      "type": "select",
+      "id": "columns_count",
+      "label": "Columns (desktop)",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" },
+        { "value": "3", "label": "3 columns" }
+      ],
+      "default": "1",
+      "info": "Columns stack to a single column below 1024px. Add one block per column (up to 3)."
+    },
+    {
+      "type": "select",
+      "id": "columns_alignment",
+      "label": "Columns vertical alignment",
+      "options": [
+        { "value": "start", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "Bottom" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "center",
+      "info": "Aligns columns when row heights differ (desktop grid)."
+    },
+    {
+      "type": "select",
+      "id": "columns_horizontal_alignment",
+      "label": "Columns horizontal alignment",
+      "options": [
+        { "value": "start", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "Right" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "center",
+      "info": "Aligns each column within its grid track."
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Column 1 width",
+      "min": 15,
+      "max": 85,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Relative width share. Used when 2 or 3 columns are selected."
+    },
+    {
+      "type": "range",
+      "id": "column_2_width",
+      "label": "Column 2 width",
+      "min": 0,
+      "max": 85,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (remaining space). Used when 2 or 3 columns are selected."
+    },
+    {
+      "type": "range",
+      "id": "column_3_width",
+      "label": "Column 3 width",
+      "min": 0,
+      "max": 85,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (remaining space). Used when 3 columns are selected."
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 32,
+      "info": "768px–1023px. 0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 24,
+      "info": "767px and below. 0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Column padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "col_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "Applied inside each column. 0 = none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Column padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "col_padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Column padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "col_padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "col_padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "text",
+      "id": "section_aria_label",
+      "label": "Accessibility label",
+      "info": "Optional. Describes the section for screen readers."
+    },
+    {
+      "type": "header",
+      "content": "Colors (defaults)"
+    },
+    {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background type",
+      "options": [
+        { "value": "color", "label": "Solid color" },
+        { "value": "gradient", "label": "Gradient" }
+      ],
+      "default": "color"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#0A1D3C",
+      "info": "Used when Background type is Solid color."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_start",
+      "label": "Gradient start color",
+      "default": "#0A1D3C",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_end",
+      "label": "Gradient end color",
+      "default": "#51ADA0",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "select",
+      "id": "gradient_direction",
+      "label": "Gradient direction",
+      "options": [
+        { "value": "vertical", "label": "Vertical (top to bottom)" },
+        { "value": "horizontal", "label": "Horizontal (left to right)" }
+      ],
+      "default": "vertical",
+      "info": "Used when Background type is Gradient."
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Default text color",
+      "default": "#FFFFFF",
+      "info": "Used when a column does not set its own text color."
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Default highlight color",
+      "default": "#51ADA0",
+      "info": "Used when a column does not set its own highlight color."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "header",
+      "content": "Section minimum height"
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_4k",
+      "label": "4K (2560px and up)",
+      "min": 160,
+      "max": 1000,
+      "step": 20,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_desktop",
+      "label": "Desktop (1441px – 2559px)",
+      "min": 160,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_laptop",
+      "label": "Laptop (1024px – 1440px)",
+      "min": 160,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_tablet",
+      "label": "Tablet (768px – 1023px)",
+      "min": 160,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "section_min_height_mobile",
+      "label": "Mobile (767px and below)",
+      "min": 160,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image — tablet and up (768px+)",
+      "info": "Used from tablet breakpoint upward. Set in this section only."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image — mobile (767px and below)",
+      "info": "Optional separate graphic for phones. If empty, the tablet/desktop image above is used on all sizes."
+    },
+    {
+      "type": "header",
+      "content": "Background size (per breakpoint)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Fit width (squeeze) keeps the graphic full width without cropping. Cover fills the section and may crop edges."
+    },
+    {
+      "type": "select",
+      "id": "background_size_4k",
+      "label": "4K — background fit (2560px+)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_desktop",
+      "label": "Desktop — background fit (1441px–2559px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_laptop",
+      "label": "Laptop — background fit (1024px–1440px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_tablet",
+      "label": "Tablet — background fit (768px–1023px)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_size_mobile",
+      "label": "Mobile — background fit (767px and below)",
+      "options": [
+        { "value": "fit_width", "label": "Fit width (squeeze)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "fit_width"
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center top", "label": "Top" },
+        { "value": "center bottom", "label": "Bottom" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_flip",
+      "label": "Background flip — tablet and up (768px+)",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "horizontal", "label": "Horizontal (mirror)" },
+        { "value": "vertical", "label": "Vertical" },
+        { "value": "both", "label": "Both axes" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "background_flip_mobile",
+      "label": "Background flip — mobile (767px and below)",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "horizontal", "label": "Horizontal (mirror)" },
+        { "value": "vertical", "label": "Vertical" },
+        { "value": "both", "label": "Both axes" }
+      ],
+      "default": "none",
+      "info": "Applies only when a separate mobile background image is set."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step_column",
+      "name": "Column",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text"
+        },
+        {
+          "type": "select",
+          "id": "image_position",
+          "label": "Image position",
+          "options": [
+            { "value": "above", "label": "Above text" },
+            { "value": "below", "label": "Below text" },
+            { "value": "left", "label": "Left of text" },
+            { "value": "right", "label": "Right of text" }
+          ],
+          "default": "above"
+        },
+        {
+          "type": "select",
+          "id": "image_align",
+          "label": "Image alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "image_object_fit",
+          "label": "Image fit",
+          "options": [
+            { "value": "contain", "label": "Contain" },
+            { "value": "cover", "label": "Cover" },
+            { "value": "fill", "label": "Fill" },
+            { "value": "none", "label": "None" }
+          ],
+          "default": "contain"
+        },
+        {
+          "type": "range",
+          "id": "image_border_radius",
+          "label": "Image border radius",
+          "min": 0,
+          "max": 48,
+          "step": 4,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = square corners."
+        },
+        {
+          "type": "select",
+          "id": "image_loading",
+          "label": "Image loading",
+          "options": [
+            { "value": "lazy", "label": "Lazy (recommended)" },
+            { "value": "eager", "label": "Eager (above the fold)" }
+          ],
+          "default": "lazy"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "label": "Image file width (src)",
+          "min": 10,
+          "max": 1010,
+          "step": 10,
+          "unit": "px",
+          "default": 800,
+          "info": "Max width requested from Shopify CDN (desktop). Max 1010px (theme editor step limit)."
+        },
+        {
+          "type": "range",
+          "id": "image_src_width_tablet",
+          "label": "Image file width — tablet (src)",
+          "min": 0,
+          "max": 1200,
+          "step": 100,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use desktop file width."
+        },
+        {
+          "type": "range",
+          "id": "image_src_width_mobile",
+          "label": "Image file width — mobile (src)",
+          "min": 0,
+          "max": 800,
+          "step": 100,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = use tablet or desktop file width."
+        },
+        {
+          "type": "range",
+          "id": "image_display_width",
+          "label": "Image display width (desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 0,
+          "info": "0 = full column width."
+        },
+        {
+          "type": "range",
+          "id": "image_max_width",
+          "label": "Image display max width (desktop)",
+          "min": 0,
+          "max": 900,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = no pixel cap (use % width if set)."
+        },
+        {
+          "type": "range",
+          "id": "image_display_width_tablet",
+          "label": "Image display width — tablet",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 0,
+          "info": "768px–1023px. 0 = full column width."
+        },
+        {
+          "type": "range",
+          "id": "image_max_width_tablet",
+          "label": "Image display max width — tablet",
+          "min": 0,
+          "max": 900,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "768px–1023px. 0 = no extra cap."
+        },
+        {
+          "type": "range",
+          "id": "image_display_width_mobile",
+          "label": "Image display width — mobile",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 0,
+          "info": "767px and below. 0 = full column width."
+        },
+        {
+          "type": "range",
+          "id": "image_max_width_mobile",
+          "label": "Image display max width — mobile",
+          "min": 0,
+          "max": 900,
+          "step": 20,
+          "unit": "px",
+          "default": 0,
+          "info": "767px and below. 0 = no extra cap."
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading (single line)",
+          "info": "Or use split heading fields below"
+        },
+        {
+          "type": "range",
+          "id": "heading_max_width",
+          "label": "Heading max width (single line)",
+          "min": 200,
+          "max": 1200,
+          "step": 20,
+          "unit": "px",
+          "default": 720,
+          "info": "Only applies when single line heading is used"
+        },
+        {
+          "type": "text",
+          "id": "heading_before",
+          "label": "Heading (before highlight)"
+        },
+        {
+          "type": "text",
+          "id": "heading_highlight",
+          "label": "Heading highlight"
+        },
+        {
+          "type": "text",
+          "id": "heading_after",
+          "label": "Heading (after highlight)"
+        },
+        {
+          "type": "select",
+          "id": "heading_weight",
+          "label": "Font weight (single line heading)",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "select",
+          "id": "heading_before_weight",
+          "label": "Font weight (before highlight)",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "select",
+          "id": "heading_highlight_weight",
+          "label": "Font weight (highlight)",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select",
+          "id": "heading_after_weight",
+          "label": "Font weight (after highlight)",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading tag (SEO)",
+          "options": [
+            { "value": "h2", "label": "H2" },
+            { "value": "h3", "label": "H3" }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "richtext",
+          "id": "subtext",
+          "label": "Subtext"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Heading text color",
+          "info": "Empty = section default text color."
+        },
+        {
+          "type": "color",
+          "id": "highlight_color",
+          "label": "Highlight color",
+          "info": "Empty = section default highlight color."
+        },
+        {
+          "type": "color",
+          "id": "subtext_font_color",
+          "label": "Subtext color",
+          "info": "Empty = column heading text color."
+        },
+        {
+          "type": "range",
+          "id": "subtext_font_size",
+          "label": "Subtext font size",
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "0 = theme body size."
+        },
+        {
+          "type": "select",
+          "id": "subtext_font_weight",
+          "label": "Subtext font weight",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Regular (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi-bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra-bold (800)" }
+          ],
+          "default": "inherit"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dark Step Banner Columns",
+      "settings": {
+        "top_heading": "STEP 3",
+        "columns_count": "2",
+        "column_1_width": 35,
+        "column_2_width": 0
+      },
+      "blocks": [
+        {
+          "type": "step_column",
+          "settings": {
+            "image_position": "above",
+            "text_align": "center"
+          }
+        },
+        {
+          "type": "step_column",
+          "settings": {
+            "heading": "Schedule a 2-Hour Interactive Online PD Session With One of Our Expert Facilitators",
+            "text_align": "left",
+            "heading_tag": "h3"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

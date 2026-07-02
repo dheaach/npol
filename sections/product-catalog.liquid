@@ -236,6 +236,26 @@
     assign topic_tag_entries = topic_tags_joined | split: '::'
   endif
 
+  assign active_type_tag = false
+  for entry in type_tag_entries
+    assign entry_parts = entry | split: '||'
+    assign tag_name = entry_parts[0]
+    if current_tags contains tag_name
+      assign active_type_tag = true
+      break
+    endif
+  endfor
+
+  assign active_topic_tag = false
+  for entry in topic_tag_entries
+    assign entry_parts = entry | split: '||'
+    assign tag_name = entry_parts[0]
+    if current_tags contains tag_name
+      assign active_topic_tag = true
+      break
+    endif
+  endfor
+
   assign has_active_filters = false
   if current_tags.size > 0
     assign has_active_filters = true
@@ -340,7 +360,10 @@
                     name="catalog_type"
                     data-catalog-filter
                   >
-                    <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- if section.settings.show_type_filter_all -%}
+                      <option value=""{% unless active_type_tag %} selected{% endunless %}>{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- endif -%}
+                    {%- assign type_option_index = 0 -%}
                     {%- for entry in type_tag_entries -%}
                       {%- assign entry_parts = entry | split: '||' -%}
                       {%- assign tag_name = entry_parts[0] -%}
@@ -348,10 +371,15 @@
                       {%- assign tag_handle = entry_parts[2] | default: tag_name | handleize -%}
                       <option
                         value="{{ tag_handle | escape }}"
-                        {% if current_tags contains tag_name %}selected{% endif %}
+                        {% if current_tags contains tag_name %}
+                          selected
+                        {% elsif section.settings.show_type_filter_all == false and active_type_tag == false and type_option_index == 0 %}
+                          selected
+                        {% endif %}
                       >
                         {{ tag_label }}
                       </option>
+                      {%- assign type_option_index = type_option_index | plus: 1 -%}
                     {%- endfor -%}
                   </select>
                 </div>
@@ -368,7 +396,10 @@
                     name="catalog_topic"
                     data-catalog-filter
                   >
-                    <option value="">{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- if section.settings.show_topic_filter_all -%}
+                      <option value=""{% unless active_topic_tag %} selected{% endunless %}>{{ section.settings.filter_all_label | default: 'All' }}</option>
+                    {%- endif -%}
+                    {%- assign topic_option_index = 0 -%}
                     {%- for entry in topic_tag_entries -%}
                       {%- assign entry_parts = entry | split: '||' -%}
                       {%- assign tag_name = entry_parts[0] -%}
@@ -376,10 +407,15 @@
                       {%- assign tag_handle = entry_parts[2] | default: tag_name | handleize -%}
                       <option
                         value="{{ tag_handle | escape }}"
-                        {% if current_tags contains tag_name %}selected{% endif %}
+                        {% if current_tags contains tag_name %}
+                          selected
+                        {% elsif section.settings.show_topic_filter_all == false and active_topic_tag == false and topic_option_index == 0 %}
+                          selected
+                        {% endif %}
                       >
                         {{ tag_label }}
                       </option>
+                      {%- assign topic_option_index = topic_option_index | plus: 1 -%}
                     {%- endfor -%}
                   </select>
                 </div>
@@ -1158,8 +1194,20 @@
     {
       "type": "text",
       "id": "filter_all_label",
-      "label": "Filter — all option",
+      "label": "Filter — all option label",
       "default": "All"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_type_filter_all",
+      "label": "Show \"All\" option — Type filter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_topic_filter_all",
+      "label": "Show \"All\" option — Topics filter",
+      "default": true
     },
     {
       "type": "checkbox",

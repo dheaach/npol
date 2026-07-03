@@ -1,7 +1,28 @@
 {
   "general": {
     "accessibility": {
-      "skip_to_content": "Skip to content"
+      "skip_to_content": "Skip to content",
+      "error": "Error"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Cart"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "sold_out": "Sold Out",
+      "quantity": "Quantity",
+      "include_taxes": "Tax included.",
+      "shipping_policy_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
+      "quantity_minimum_message": "Quantity must be 1 or more",
+      "loader_label": "Adding to cart",
+      "view_in_space": "View in your space",
+      "view_in_space_label": "View in your space, loads item in augmented reality window",
+      "pickup_available": "Pickup available",
+      "pickup_unavailable": "Pickup currently unavailable"
     }
   }
 }

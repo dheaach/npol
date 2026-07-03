@@ -255,6 +255,18 @@
       }
     }
   {%- endif -%}
+  @media screen and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .program-cards__header {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #shopify-section-{{ section.id }} .program-cards__header-left,
+    #shopify-section-{{ section.id }} .program-cards__header-right {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
   {%- liquid
     assign program_heading_color = section.settings.heading_font_color
     if program_heading_color == blank

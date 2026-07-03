@@ -1,0 +1,49 @@
+{%- comment -%}
+  Social sharing buttons. Pass share_title, share_permalink, share_image (optional).
+{%- endcomment -%}
+{%- liquid
+  assign share_url = share_permalink | default: product.url | prepend: request.origin
+  assign share_text = share_title | default: product.title | url_param_escape
+-%}
+
+<div class="main-product__share" style="margin-top: 24px;">
+  <p class="section-text" style="margin: 0 0 12px; font-weight: 600;">Share</p>
+  <ul class="main-product__share-list" style="display: flex; gap: 12px; list-style: none; margin: 0; padding: 0;">
+    <li>
+      <a
+        href="https://www.facebook.com/sharer.php?u={{ share_url | url_param_escape }}"
+        class="btn btn--outline"
+        style="padding: 8px 12px;"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share on Facebook"
+      >
+        {% render 'icon-facebook' %}
+      </a>
+    </li>
+    <li>
+      <a
+        href="https://twitter.com/intent/tweet?url={{ share_url | url_param_escape }}&text={{ share_text }}"
+        class="btn btn--outline"
+        style="padding: 8px 12px;"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share on X"
+      >
+        {% render 'icon-twitter' %}
+      </a>
+    </li>
+    <li>
+      <a
+        href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url | url_param_escape }}"
+        class="btn btn--outline"
+        style="padding: 8px 12px;"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share on LinkedIn"
+      >
+        {% render 'icon-linkedin' %}
+      </a>
+    </li>
+  </ul>
+</div>

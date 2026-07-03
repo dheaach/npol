@@ -14,17 +14,38 @@
   assign cols_tablet = section.settings.cards_per_row_tablet | default: 2
   assign cols_mobile = section.settings.cards_per_row_mobile | default: 1
   assign hub_size = section.settings.center_hub_size | default: 48
+  assign hub_size_tablet = section.settings.center_hub_size_tablet | default: 0
+  if hub_size_tablet == 0
+    assign hub_size_tablet = hub_size
+  endif
   assign hub_offset_x = section.settings.center_hub_offset_x | default: 0
   assign hub_offset_y = section.settings.center_hub_offset_y | default: 0
-  assign show_hub = section.settings.show_center_hub
+  assign hub_offset_x_tablet = section.settings.center_hub_offset_x_tablet | default: 0
+  assign hub_offset_y_tablet = section.settings.center_hub_offset_y_tablet | default: 0
+  assign show_hub_desktop = section.settings.show_center_hub
+  if section.settings.show_center_hub_tablet == true
+    assign show_hub_tablet = true
+  elsif section.settings.show_center_hub_tablet == false
+    assign show_hub_tablet = false
+  else
+    assign show_hub_tablet = show_hub_desktop
+  endif
+  assign hub_visible_desktop = false
+  if show_hub_desktop and section.blocks.size >= 4 and grid_gap > 0
+    assign hub_visible_desktop = true
+  endif
+  assign hub_visible_tablet = false
+  if show_hub_tablet and section.blocks.size >= 4 and grid_gap_tablet > 0
+    assign hub_visible_tablet = true
+  endif
   assign card_text_color = section.settings.card_text_color | default: '#FFFFFF'
   assign content_max = section.settings.content_max_width | default: 1200
   assign grid_margin_top = section.settings.cards_margin_top | default: 48
+  assign section_bg = section.settings.background_color | default: '#F0F1F3'
 -%}
 
 <section
   class="where-to-start section-spacing"
-  style="background-color: {{ section.settings.background_color | default: '#F0F1F3' }};"
   aria-labelledby="where-to-start-heading-{{ section.id }}"
 >
   <div class="page-width">
@@ -65,9 +86,14 @@
               --where-to-start-gap-tablet: {{ grid_gap_tablet }}px;
               --where-to-start-gap-mobile: {{ grid_gap_mobile }}px;
               --where-to-start-hub: {{ hub_size }}px;
+              --where-to-start-hub-tablet: {{ hub_size_tablet }}px;
+              --where-to-start-hub-offset-x: {{ hub_offset_x }}px;
+              --where-to-start-hub-offset-y: {{ hub_offset_y }}px;
+              --where-to-start-hub-offset-x-tablet: {{ hub_offset_x_tablet }}px;
+              --where-to-start-hub-offset-y-tablet: {{ hub_offset_y_tablet }}px;
             "
           >
-            {%- if show_hub and section.blocks.size >= 4 and grid_gap > 0 -%}
+            {%- if hub_visible_desktop or hub_visible_tablet -%}
               <span class="where-to-start__hub" aria-hidden="true"></span>
             {%- endif -%}
 
@@ -107,6 +133,9 @@
 <style>
   {% render 'section-spacing-styles', root: '.where-to-start', pad_x: '.page-width' %}
 
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section_bg }};
+  }
   #shopify-section-{{ section.id }} .where-to-start__inner {
     margin-inline: auto;
   }
@@ -157,12 +186,35 @@
     top: 50%;
     left: 50%;
     z-index: 2;
-    width: var(--where-to-start-hub, 48px);
-    height: var(--where-to-start-hub, 48px);
     border-radius: 50%;
-    background-color: {{ section.settings.background_color | default: '#F0F1F3' }};
-    transform: translate(calc(-50% + {{ hub_offset_x }}px), calc(-50% + {{ hub_offset_y }}px));
+    background-color: {{ section_bg }};
     pointer-events: none;
+  }
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .where-to-start__hub {
+      width: var(--where-to-start-hub-tablet, 48px);
+      height: var(--where-to-start-hub-tablet, 48px);
+      transform: translate(
+        calc(-50% + var(--where-to-start-hub-offset-x-tablet, 0px)),
+        calc(-50% + var(--where-to-start-hub-offset-y-tablet, 0px))
+      );
+      {%- unless hub_visible_tablet -%}
+      display: none;
+      {%- endunless -%}
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .where-to-start__hub {
+      width: var(--where-to-start-hub, 48px);
+      height: var(--where-to-start-hub, 48px);
+      transform: translate(
+        calc(-50% + var(--where-to-start-hub-offset-x, 0px)),
+        calc(-50% + var(--where-to-start-hub-offset-y, 0px))
+      );
+      {%- unless hub_visible_desktop -%}
+      display: none;
+      {%- endunless -%}
+    }
   }
   #shopify-section-{{ section.id }} .where-to-start__card {
     display: flex;
@@ -271,6 +323,10 @@
       "label": "Font weight (single line heading)",
       "options": [
         { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
         { "value": "700", "label": "Bold (700)" },
         { "value": "800", "label": "Extra-bold (800)" }
       ],
@@ -282,6 +338,10 @@
       "label": "Font weight (before highlight)",
       "options": [
         { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
         { "value": "700", "label": "Bold (700)" },
         { "value": "800", "label": "Extra-bold (800)" }
       ],
@@ -293,6 +353,10 @@
       "label": "Font weight (highlight)",
       "options": [
         { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
         { "value": "700", "label": "Bold (700)" },
         { "value": "800", "label": "Extra-bold (800)" }
       ],
@@ -304,6 +368,10 @@
       "label": "Font weight (after highlight)",
       "options": [
         { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
         { "value": "700", "label": "Bold (700)" },
         { "value": "800", "label": "Extra-bold (800)" }
       ],
@@ -384,8 +452,9 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background color",
-      "default": "#F0F1F3"
+      "label": "Section background color",
+      "default": "#F0F1F3",
+      "info": "Applies to the outer section only, not inner cards."
     },
     {
       "type": "color",
@@ -437,14 +506,14 @@
     {
       "type": "checkbox",
       "id": "show_center_hub",
-      "label": "Show center circle",
+      "label": "Show center circle (desktop)",
       "default": true,
-      "info": "White circle where four cards meet. Requires gap and 4 cards on desktop."
+      "info": "Circle where four cards meet. Requires gap > 0 and 4 cards on desktop (1024px+)."
     },
     {
       "type": "range",
       "id": "center_hub_size",
-      "label": "Center circle size",
+      "label": "Center circle size (desktop)",
       "min": 24,
       "max": 120,
       "step": 4,
@@ -454,7 +523,7 @@
     {
       "type": "range",
       "id": "center_hub_offset_x",
-      "label": "Center circle offset — left / right",
+      "label": "Center circle offset — left / right (desktop)",
       "min": -80,
       "max": 80,
       "step": 2,
@@ -465,7 +534,47 @@
     {
       "type": "range",
       "id": "center_hub_offset_y",
-      "label": "Center circle offset — up / down",
+      "label": "Center circle offset — up / down (desktop)",
+      "min": -80,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "Negative = up. Positive = down."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_center_hub_tablet",
+      "label": "Show center circle (tablet)",
+      "default": true,
+      "info": "Circle where four cards meet. Requires gap > 0 and 4 cards on tablet (768px–1023px)."
+    },
+    {
+      "type": "range",
+      "id": "center_hub_size_tablet",
+      "label": "Center circle size (tablet)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = desktop size."
+    },
+    {
+      "type": "range",
+      "id": "center_hub_offset_x_tablet",
+      "label": "Center circle offset — left / right (tablet)",
+      "min": -80,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "Negative = left. Positive = right."
+    },
+    {
+      "type": "range",
+      "id": "center_hub_offset_y_tablet",
+      "label": "Center circle offset — up / down (tablet)",
       "min": -80,
       "max": 80,
       "step": 2,
@@ -972,7 +1081,8 @@
         "heading_highlight": "Start?",
         "caption": "Where Is Your Team Right Now?",
         "column_gap": 16,
-        "show_center_hub": true
+        "show_center_hub": true,
+        "show_center_hub_tablet": true
       },
       "blocks": [
         {

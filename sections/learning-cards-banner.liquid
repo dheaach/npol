@@ -579,15 +579,12 @@
       max-width: 100%;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width {
-      flex-direction: column;
-      flex-wrap: nowrap;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: {{ card_row_align_mobile }};
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width .learning-cards-banner__row {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: var(--learning-cards-column-gap-mobile, 16px);
-      width: 100%;
-      justify-content: {{ card_row_align_mobile }};
+      display: contents;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-mobile-same_width .learning-cards-banner__card {
       flex: 0 0 calc((100% - (var(--learning-cards-columns-mobile, 1) - 1) * var(--learning-cards-column-gap-mobile, 16px)) / var(--learning-cards-columns-mobile, 1));
@@ -616,15 +613,12 @@
       max-width: 100%;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width {
-      flex-direction: column;
-      flex-wrap: nowrap;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: {{ card_row_align_tablet }};
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width .learning-cards-banner__row {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: var(--learning-cards-column-gap-tablet, 16px);
-      width: 100%;
-      justify-content: {{ card_row_align_tablet }};
+      display: contents;
     }
     #shopify-section-{{ section.id }} .learning-cards-banner__cards--width-tablet-same_width .learning-cards-banner__card {
       flex: 0 0 calc((100% - (var(--learning-cards-columns-tablet, 2) - 1) * var(--learning-cards-column-gap-tablet, 16px)) / var(--learning-cards-columns-tablet, 2));
@@ -1218,7 +1212,8 @@
       "min": 1,
       "max": 4,
       "step": 1,
-      "default": 2
+      "default": 2,
+      "info": "768px–1023px. Cards reflow into rows of this size on tablet."
     },
     {
       "type": "range",
@@ -1227,7 +1222,8 @@
       "min": 1,
       "max": 3,
       "step": 1,
-      "default": 1
+      "default": 1,
+      "info": "767px and below. Cards reflow into rows of this size on mobile."
     },
     {
       "type": "header",

@@ -79,24 +79,48 @@
       </a>
 
       {%- if section.settings.show_search -%}
-        <form action="{{ routes.search_url }}" method="get" role="search" class="site-header__search">
-          <label class="visually-hidden" for="header-search-{{ section.id }}">
-            {{ section.settings.search_label | default: 'Search' }}
-          </label>
-          <span class="site-header__search-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-          </span>
-          <input
-            type="search"
-            name="q"
-            id="header-search-{{ section.id }}"
-            class="site-header__search-input"
-            placeholder="{{ section.settings.search_placeholder }}"
-            value="{{ search.terms | escape }}"
-          >
-        </form>
+        <div
+          class="site-header__search"
+          data-predictive-search
+          data-predictive-search-url="{{ routes.predictive_search_url }}"
+        >
+          <form action="{{ routes.search_url }}" method="get" role="search" class="site-header__search-form" data-predictive-search-form>
+            <label class="visually-hidden" for="header-search-{{ section.id }}">
+              {{ section.settings.search_label | default: 'Search' }}
+            </label>
+            <span class="site-header__search-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </span>
+            <input
+              type="search"
+              name="q"
+              id="header-search-{{ section.id }}"
+              class="site-header__search-input"
+              placeholder="{{ section.settings.search_placeholder }}"
+              value="{{ search.terms | escape }}"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              role="combobox"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              aria-controls="header-search-results-{{ section.id }}"
+              data-predictive-search-input
+            >
+          </form>
+          <div
+            id="header-search-results-{{ section.id }}"
+            class="predictive-search"
+            data-predictive-search-results
+            role="region"
+            aria-live="polite"
+            hidden
+          ></div>
+        </div>
+        <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
       {%- endif -%}
 
       {%- if section.settings.top_menu != blank or section.settings.menu != blank -%}

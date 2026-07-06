@@ -1,0 +1,50 @@
+{%- comment -%}
+  List item for non-product search results (collections, pages, articles).
+  Usage: {% render 'search-content-card', item: item %}
+{%- endcomment -%}
+
+{%- liquid
+  assign card_type = item.object_type
+  assign card_image = blank
+  assign card_meta = blank
+  assign card_excerpt = blank
+
+  case card_type
+    when 'article'
+      assign card_image = item.image
+      assign card_meta = item.published_at | date: '%B %d, %Y'
+      if item.excerpt != blank
+        assign card_excerpt = item.excerpt | strip_html | truncate: 160
+      elsif item.content != blank
+        assign card_excerpt = item.content | strip_html | truncate: 160
+      endif
+    when 'collection'
+      assign card_image = item.featured_image
+      if item.products_count != blank
+        assign card_meta = item.products_count | append: ' products'
+      endif
+    when 'page'
+      if item.content != blank
+        assign card_excerpt = item.content | strip_html | truncate: 160
+      endif
+  endcase
+-%}
+
+<li class="main-search__content-item">
+  <a href="{{ item.url }}" class="main-search__content-link">
+    {%- if card_image != blank -%}
+      <span class="main-search__content-media">
+        {{ card_image | image_url: width: 120 | image_tag: alt: card_image.alt | default: item.title, class: 'main-search__content-image', loading: 'lazy', widths: '60, 120' }}
+      </span>
+    {%- endif -%}
+    <span class="main-search__content-body">
+      <span class="main-search__content-title">{{ item.title }}</span>
+      {%- if card_meta != blank -%}
+        <span class="main-search__content-meta section-text">{{ card_meta }}</span>
+      {%- endif -%}
+      {%- if card_excerpt != blank -%}
+        <span class="main-search__content-excerpt section-text">{{ card_excerpt }}</span>
+      {%- endif -%}
+    </span>
+  </a>
+</li>

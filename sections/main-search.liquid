@@ -1,41 +1,425 @@
-<section class="main-search section-spacing">
-  <div class="page-width">
-    <h1 class="section-heading section-heading--h1">Search</h1>
+{%- liquid
+  assign results_per_page = section.settings.results_per_page | default: 24
+  assign cols_desktop = section.settings.products_per_row | default: 4
+  assign cols_tablet = section.settings.products_per_row_tablet | default: 2
+  assign cols_mobile = section.settings.products_per_row_mobile | default: 1
 
-    <form action="{{ routes.search_url }}" method="get" role="search" style="margin: 24px 0 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+  assign col_gap_d = section.settings.column_gap | default: 0
+  if col_gap_d == 0
+    assign col_gap_d = 32
+  endif
+  assign col_gap_t = section.settings.column_gap_tablet | default: 0
+  if col_gap_t == 0
+    assign col_gap_t = col_gap_d
+  endif
+  assign col_gap_m = section.settings.column_gap_mobile | default: 0
+  if col_gap_m == 0
+    assign col_gap_m = col_gap_t
+  endif
+
+  assign row_gap_d = section.settings.row_gap | default: 0
+  if row_gap_d == 0
+    assign row_gap_d = 32
+  endif
+  assign row_gap_t = section.settings.row_gap_tablet | default: 0
+  if row_gap_t == 0
+    assign row_gap_t = row_gap_d
+  endif
+  assign row_gap_m = section.settings.row_gap_mobile | default: 0
+  if row_gap_m == 0
+    assign row_gap_m = row_gap_t
+  endif
+
+-%}
+
+<section class="main-search section-spacing">
+  <div class="page-width main-search__inner">
+    <h1 class="section-heading section-heading--h1">{{ section.settings.heading | default: 'Search' }}</h1>
+
+    <form action="{{ routes.search_url }}" method="get" role="search" class="main-search__form">
+      <input type="hidden" name="type" value="product,article,page,collection">
       <input
         type="search"
         name="q"
         value="{{ search.terms | escape }}"
-        placeholder="Search..."
-        style="flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid rgba(10,29,60,0.2); border-radius: 8px; font-family: var(--font-body);"
+        placeholder="{{ section.settings.search_placeholder | default: 'Search...' }}"
+        class="main-search__input"
+        aria-label="{{ section.settings.search_placeholder | default: 'Search' | escape }}"
       >
-      <button type="submit" class="btn btn--primary">Search</button>
+      <button type="submit" class="btn btn--primary">{{ section.settings.search_button_label | default: 'Search' }}</button>
     </form>
 
     {%- if search.performed -%}
-      <p class="section-text" style="margin-bottom: 24px;">{{ search.results_count }} results for "{{ search.terms }}"</p>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px;">
-        {%- for item in search.results -%}
-          <article>
-            <a href="{{ item.url }}">
-              {%- if item.featured_image -%}
-                {{ item.featured_image | image_url: width: 400 | image_tag: alt: item.title, loading: 'lazy' }}
-              {%- endif -%}
-              <h2 class="section-heading section-heading--h5" style="margin-top: 12px;">{{ item.title }}</h2>
-            </a>
-          </article>
-        {%- endfor -%}
-      </div>
+      {%- paginate search.results by results_per_page -%}
+        {%- liquid
+          assign product_count = 0
+          assign collection_count = 0
+          assign page_count = 0
+          assign article_count = 0
+
+          for item in search.results
+            case item.object_type
+              when 'product'
+                assign product_count = product_count | plus: 1
+              when 'collection'
+                assign collection_count = collection_count | plus: 1
+              when 'page'
+                assign page_count = page_count | plus: 1
+              when 'article'
+                assign article_count = article_count | plus: 1
+            endcase
+          endfor
+        -%}
+
+        {%- if search.results_count == 0 -%}
+          <p class="main-search__empty section-text" role="status">
+            {{ 'general.search.no_results' | t: terms: search.terms }}
+          </p>
+        {%- else -%}
+          <p class="main-search__summary section-text">
+            {{ search.results_count }} {{ section.settings.results_suffix | default: 'results for' }} "{{ search.terms }}"
+          </p>
+
+          {%- if product_count > 0 -%}
+            <div class="main-search__group">
+              <h2 class="main-search__group-heading section-heading section-heading--h3" id="main-search-products-{{ section.id }}">
+                {{ 'general.search.products' | t }}
+                <span class="main-search__group-count">({{ product_count }})</span>
+              </h2>
+              <div
+                class="product-catalog__grid main-search__product-grid"
+                style="
+                  --product-catalog-columns: {{ cols_desktop }};
+                  --product-catalog-columns-tablet: {{ cols_tablet }};
+                  --product-catalog-columns-mobile: {{ cols_mobile }};
+                "
+                aria-labelledby="main-search-products-{{ section.id }}"
+              >
+                {%- for item in search.results -%}
+                  {%- if item.object_type == 'product' -%}
+                    {% render 'product-card',
+                      product: item,
+                      show_vendor: section.settings.show_vendor,
+                      show_badge: section.settings.show_sale_badge,
+                      image_ratio: section.settings.image_ratio
+                    %}
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if collection_count > 0 -%}
+            <div class="main-search__group">
+              <h2 class="main-search__group-heading section-heading section-heading--h3" id="main-search-collections-{{ section.id }}">
+                {{ 'general.search.collections' | t }}
+                <span class="main-search__group-count">({{ collection_count }})</span>
+              </h2>
+              <ul class="main-search__content-list" role="list" aria-labelledby="main-search-collections-{{ section.id }}">
+                {%- for item in search.results -%}
+                  {%- if item.object_type == 'collection' -%}
+                    {% render 'search-content-card', item: item %}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+
+          {%- if page_count > 0 -%}
+            <div class="main-search__group">
+              <h2 class="main-search__group-heading section-heading section-heading--h3" id="main-search-pages-{{ section.id }}">
+                {{ 'general.search.pages' | t }}
+                <span class="main-search__group-count">({{ page_count }})</span>
+              </h2>
+              <ul class="main-search__content-list" role="list" aria-labelledby="main-search-pages-{{ section.id }}">
+                {%- for item in search.results -%}
+                  {%- if item.object_type == 'page' -%}
+                    {% render 'search-content-card', item: item %}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+
+          {%- if article_count > 0 -%}
+            <div class="main-search__group">
+              <h2 class="main-search__group-heading section-heading section-heading--h3" id="main-search-articles-{{ section.id }}">
+                {{ 'general.search.articles' | t }}
+                <span class="main-search__group-count">({{ article_count }})</span>
+              </h2>
+              <ul class="main-search__content-list" role="list" aria-labelledby="main-search-articles-{{ section.id }}">
+                {%- for item in search.results -%}
+                  {%- if item.object_type == 'article' -%}
+                    {% render 'search-content-card', item: item %}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+
+          {%- if paginate.pages > 1 -%}
+            <nav class="product-catalog__pagination main-search__pagination" aria-label="{{ section.settings.pagination_label | default: 'Search results pagination' | escape }}">
+              <ul class="product-catalog__pagination-list" role="list">
+                {%- if paginate.previous -%}
+                  <li>
+                    <a href="{{ paginate.previous.url }}" class="product-catalog__pagination-link product-catalog__pagination-link--prev">
+                      {{ section.settings.pagination_prev_label | default: 'Previous' }}
+                    </a>
+                  </li>
+                {%- endif -%}
+
+                {%- for part in paginate.parts -%}
+                  <li>
+                    {%- if part.is_link -%}
+                      <a href="{{ part.url }}" class="product-catalog__pagination-link">{{ part.title }}</a>
+                    {%- else -%}
+                      <span class="product-catalog__pagination-link is-current" aria-current="page">{{ part.title }}</span>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+
+                {%- if paginate.next -%}
+                  <li>
+                    <a href="{{ paginate.next.url }}" class="product-catalog__pagination-link product-catalog__pagination-link--next">
+                      {{ section.settings.pagination_next_label | default: 'Next' }}
+                    </a>
+                  </li>
+                {%- endif -%}
+              </ul>
+            </nav>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endpaginate -%}
     {%- endif -%}
   </div>
 </section>
+
+<style>
+  #shopify-section-{{ section.id }} .main-search__product-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--product-catalog-columns, 4), minmax(0, 1fr));
+    column-gap: {{ col_gap_d }}px;
+    row-gap: {{ row_gap_d }}px;
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .main-search__product-grid {
+      grid-template-columns: repeat(var(--product-catalog-columns-tablet, 2), minmax(0, 1fr));
+      column-gap: {{ col_gap_t }}px;
+      row-gap: {{ row_gap_t }}px;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .main-search__product-grid {
+      grid-template-columns: repeat(var(--product-catalog-columns-mobile, 1), minmax(0, 1fr));
+      column-gap: {{ col_gap_m }}px;
+      row-gap: {{ row_gap_m }}px;
+    }
+  }
+
+  {%- if section.settings.card_bg_color != blank -%}
+    #shopify-section-{{ section.id }} .product-card {
+      background-color: {{ section.settings.card_bg_color }};
+    }
+  {%- endif -%}
+</style>
 
 {% schema %}
 {
   "name": "Search",
   "tag": "section",
   "class": "section-main-search",
-  "settings": []
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Search"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder",
+      "default": "Search..."
+    },
+    {
+      "type": "text",
+      "id": "search_button_label",
+      "label": "Search button label",
+      "default": "Search"
+    },
+    {
+      "type": "text",
+      "id": "results_suffix",
+      "label": "Results count suffix",
+      "default": "results for",
+      "info": "Shown as: 12 results for \"query\""
+    },
+    {
+      "type": "range",
+      "id": "results_per_page",
+      "label": "Results per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Product results"
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "label": "Products per row (desktop)",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 4,
+      "info": "1024px and above."
+    },
+    {
+      "type": "range",
+      "id": "products_per_row_tablet",
+      "label": "Products per row (tablet)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "info": "768px–1023px."
+    },
+    {
+      "type": "range",
+      "id": "products_per_row_mobile",
+      "label": "Products per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1,
+      "info": "767px and below."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_badge",
+      "label": "Show sale badge",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Product image ratio",
+      "options": [
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (4:5)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Product grid spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "0 = 32px default."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Column gap (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Column gap (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Row gap (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 32,
+      "info": "0 = 32px default."
+    },
+    {
+      "type": "range",
+      "id": "row_gap_tablet",
+      "label": "Row gap (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop value."
+    },
+    {
+      "type": "range",
+      "id": "row_gap_mobile",
+      "label": "Row gap (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "text",
+      "id": "pagination_label",
+      "label": "Pagination accessibility label",
+      "default": "Search results pagination"
+    },
+    {
+      "type": "text",
+      "id": "pagination_prev_label",
+      "label": "Previous button label",
+      "default": "Previous"
+    },
+    {
+      "type": "text",
+      "id": "pagination_next_label",
+      "label": "Next button label",
+      "default": "Next"
+    }
+  ]
 }
 {% endschema %}

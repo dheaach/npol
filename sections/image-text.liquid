@@ -37,9 +37,6 @@
 
 <section
   class="image-text section-spacing"
-  {% if bg_color != blank and bg_color != 'rgba(0,0,0,0)' %}
-    style="background-color: {{ bg_color }};"
-  {% endif %}
 >
   <div class="page-width">
     <div class="image-text__inner{% if image_only %} image-text__inner--image-only{% elsif layout == 'stacked' %} image-text__inner--stacked text-center{% endif %}{% if layout == 'side-by-side' and section.settings.image_position == 'right' %} image-text__inner--reverse{% endif %}">
@@ -97,6 +94,11 @@
 </section>
 
 <style>
+  {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ bg_color }};
+    }
+  {%- endif -%}
   {% render 'section-spacing-styles', root: '.image-text', pad_x: '.page-width' %}
   {%- if layout == 'stacked' -%}
   #shopify-section-{{ section.id }} .image-text__inner--stacked {
@@ -465,7 +467,8 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background color"
+      "label": "Section background color",
+      "info": "Applies to the outer section only, not inner content columns."
     },
     {
       "type": "header",

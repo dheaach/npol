@@ -75,6 +75,19 @@ h4, .section-heading--h4 { font-size: var(--font-size-h4); }
 h5, .section-heading--h5 { font-size: var(--font-size-h5); }
 h6, .section-heading--h6 { font-size: var(--font-size-h6); }
 
+.section-heading__link {
+  color: inherit;
+  text-decoration: inherit;
+  text-decoration-color: inherit;
+  text-underline-offset: inherit;
+}
+
+.section-heading__link:hover,
+.section-heading__link:focus-visible {
+  opacity: 0.85;
+  outline: none;
+}
+
 p, .section-text,
 .rte p, .rte li, .rte blockquote {
   font-family: var(--font-body);

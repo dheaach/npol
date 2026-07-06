@@ -49,6 +49,8 @@
             {% render 'highlighted-heading',
               heading: section.settings.heading,
               heading_weight: section.settings.heading_weight,
+              heading_url: section.settings.heading_url,
+              heading_link_new_tab: section.settings.heading_link_new_tab,
               heading_before: section.settings.heading_before,
               heading_highlight: section.settings.heading_highlight,
               heading_after: section.settings.heading_after,
@@ -221,6 +223,18 @@
       "label": "Heading (single line)",
       "default": "Your Heading Here",
       "info": "Or use split heading fields below."
+    },
+    {
+      "type": "url",
+      "id": "heading_url",
+      "label": "Heading link",
+      "info": "Optional. Makes the heading clickable."
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_link_new_tab",
+      "label": "Open heading link in new tab",
+      "default": false
     },
     {
       "type": "text",

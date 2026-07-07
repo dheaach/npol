@@ -27,7 +27,6 @@
 
 <section
   class="podcast section-spacing"
-  style="background-color: {{ section.settings.background_color | default: '#FFFFFF' }};"
   aria-labelledby="podcast-heading-{{ section.id }}"
 >
   <div class="page-width">
@@ -170,6 +169,12 @@
 </section>
 
 <style>
+  {%- if section.settings.background_color != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
+
   {% render 'section-spacing-styles', root: '.podcast', pad_x: '.page-width' %}
 
   #shopify-section-{{ section.id }} .podcast__inner {
@@ -465,16 +470,6 @@
       "default": "#2E6BAA"
     },
     {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Section background",
-      "default": "#FFFFFF"
-    },
-    {
       "type": "range",
       "id": "content_max_width",
       "label": "Content max width",
@@ -701,6 +696,17 @@
       "unit": "px",
       "default": 0,
       "info": "0 = use tablet or desktop value."
+    },
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#FFFFFF",
+      "info": "Applies to the outer section only, not inner cards or banners."
     },
     {
       "type": "header",

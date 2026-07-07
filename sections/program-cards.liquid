@@ -53,7 +53,7 @@
         %}
       </div>
       {%- if section.settings.description != blank -%}
-        <div class="program-cards__header-right section-text rte text-{{ section.settings.description_text_alignment | default: 'left' }}">{{ section.settings.description }}</div>
+        <div class="program-cards__header-right section-text program-cards__header-description text-{{ section.settings.description_text_alignment | default: 'left' }}">{{ section.settings.description }}</div>
       {%- endif -%}
     </div>
 
@@ -290,13 +290,15 @@
   {%- endif -%}
   {%- if section.settings.description_font_size > 0 -%}
     #shopify-section-{{ section.id }} .program-cards__header-right,
-    #shopify-section-{{ section.id }} .program-cards__header-right p {
+    #shopify-section-{{ section.id }} .program-cards__header-right p,
+    #shopify-section-{{ section.id }} .program-cards__header-right li {
       font-size: {{ section.settings.description_font_size }}px;
     }
   {%- endif -%}
   {%- if section.settings.description_font_weight != blank and section.settings.description_font_weight != 'inherit' -%}
     #shopify-section-{{ section.id }} .program-cards__header-right,
-    #shopify-section-{{ section.id }} .program-cards__header-right p {
+    #shopify-section-{{ section.id }} .program-cards__header-right p,
+    #shopify-section-{{ section.id }} .program-cards__header-right li {
       font-weight: {{ section.settings.description_font_weight }};
     }
   {%- endif -%}
@@ -306,6 +308,18 @@
     #shopify-section-{{ section.id }} .program-cards__header-right li,
     #shopify-section-{{ section.id }} .program-cards__header-right a {
       color: {{ section.settings.description_font_color }} !important;
+    }
+  {%- endif -%}
+  {%- liquid
+    assign description_bullet_color = section.settings.description_bullet_color
+    if description_bullet_color == blank
+      assign description_bullet_color = section.settings.description_font_color
+    endif
+  -%}
+  {%- if description_bullet_color != blank -%}
+    #shopify-section-{{ section.id }} .program-cards__header-right ul li::marker,
+    #shopify-section-{{ section.id }} .program-cards__header-right ol li::marker {
+      color: {{ description_bullet_color }};
     }
   {%- endif -%}
   {%- if section.settings.footer_font_size > 0 -%}
@@ -414,6 +428,13 @@
         assign card_text_html_color = block.settings.text_color
       endif
       assign card_tag_color = block.settings.tag_font_color
+      assign card_bullet_color = block.settings.bullet_color
+      if card_bullet_color == blank
+        assign card_bullet_color = card_text_color
+      endif
+      if card_bullet_color == blank
+        assign card_bullet_color = block.settings.text_color
+      endif
     -%}
     {%- if card_title_color != blank -%}
       #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__title {
@@ -433,6 +454,14 @@
       #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text li,
       #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text a {
         color: {{ card_text_color }} !important;
+      }
+    {%- endif -%}
+    {%- if card_bullet_color != blank -%}
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text ul li::marker,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text ol li::marker,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text-html ul li::marker,
+      #shopify-section-{{ section.id }} #program-card-{{ block.id }} .program-card__text-html ol li::marker {
+        color: {{ card_bullet_color }};
       }
     {%- endif -%}
     {%- if card_text_html_color != blank -%}
@@ -706,9 +735,10 @@
       "info": "Used when per-segment heading colors above are empty."
     },
     {
-      "type": "richtext",
+      "type": "html",
       "id": "description",
-      "label": "Description (right side)"
+      "label": "Description (right side)",
+      "info": "Raw HTML. You can use inline styles, classes, and custom markup."
     },
     {
       "type": "color",
@@ -740,6 +770,12 @@
         { "value": "800", "label": "Extra-bold (800)" }
       ],
       "default": "inherit"
+    },
+    {
+      "type": "color",
+      "id": "description_bullet_color",
+      "label": "Description bullet color",
+      "info": "List marker color for the header description. Empty = match description text color."
     },
     {
       "type": "header",
@@ -1704,6 +1740,12 @@
             { "value": "800", "label": "Extra-bold (800)" }
           ],
           "default": "inherit"
+        },
+        {
+          "type": "color",
+          "id": "bullet_color",
+          "label": "Bullet color",
+          "info": "List marker color in card description. Empty = match description text color."
         },
         {
           "type": "color",

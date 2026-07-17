@@ -3316,7 +3316,7 @@ p, .section-text,
 .product-card__placeholder {
   width: 100%;
   aspect-ratio: var(--product-card-aspect, 1 / 1);
-  object-fit: cover;
+  object-fit: var(--product-card-object-fit, cover);
 }
 
 .product-card__placeholder {

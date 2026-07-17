@@ -272,7 +272,8 @@
               product: product,
               show_vendor: section.settings.show_vendor,
               show_badge: section.settings.show_sale_badge,
-              image_ratio: section.settings.image_ratio
+              image_ratio: section.settings.image_ratio,
+              image_object_fit: section.settings.image_object_fit
             %}
           {%- endfor -%}
         </div>
@@ -690,6 +691,20 @@
         { "value": "landscape", "label": "Landscape (4:3)" }
       ],
       "default": "square"
+    },
+    {
+      "type": "select",
+      "id": "image_object_fit",
+      "label": "Image fit",
+      "options": [
+        { "value": "cover", "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (fit in box)" },
+        { "value": "fill", "label": "Fill (stretch)" },
+        { "value": "none", "label": "None (natural size)" },
+        { "value": "scale-down", "label": "Scale down" }
+      ],
+      "default": "cover",
+      "info": "How the product image fits inside the card frame."
     },
     {
       "type": "color",

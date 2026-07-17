@@ -90,13 +90,17 @@
       font-weight: {{ section.settings.subtext_font_weight }};
     }
   {%- endif -%}
-  {%- if section.settings.subtext_max_width > 0 -%}
-    #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
-      max-width: {{ section.settings.subtext_max_width }}px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-  {%- endif -%}
+  {%- liquid
+    assign subtext_max_w = section.settings.subtext_max_width | default: 0
+    if subtext_max_w == 0
+      assign subtext_max_w = 960
+    endif
+  -%}
+  #shopify-section-{{ section.id }} .dark-quote-banner__subtext {
+    max-width: {{ subtext_max_w }}px;
+    margin-left: auto;
+    margin-right: auto;
+  }
   #shopify-section-{{ section.id }} .text-highlight {
     color: {{ section.settings.highlight_color | default: '#51ADA0' }} !important;
   }
@@ -338,11 +342,11 @@
       "id": "subtext_max_width",
       "label": "Subtext max width",
       "min": 0,
-      "max": 1200,
+      "max": 1400,
       "step": 20,
       "unit": "px",
-      "default": 0,
-      "info": "0 = no limit (full container width)."
+      "default": 960,
+      "info": "0 = theme default (960px). Increase for longer lines; up to full page width."
     },
     {
       "type": "color",

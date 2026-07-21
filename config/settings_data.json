@@ -33,7 +33,7 @@
     "font_size_button": 20,
     "seo_default_title_suffix": "| AGM",
     "seo_enable_structured_data": true,
-    "page_width": 1360,
+    "page_width": 1240,
     "section_spacing": 80
   },
   "presets": {
@@ -53,7 +53,7 @@
       "font_size_body": 16,
       "font_button": "poppins_n5",
       "font_size_button": 20,
-      "page_width": 1360,
+      "page_width": 1240,
       "section_spacing": 80
     }
   }

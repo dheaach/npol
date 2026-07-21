@@ -987,7 +987,7 @@ p, .section-text,
 
 .dark-quote-banner__subtext {
   margin-top: 16px;
-  max-width: 720px;
+  max-width: 960px;
   margin-left: auto;
   margin-right: auto;
   opacity: 0.9;
@@ -3316,7 +3316,7 @@ p, .section-text,
 .product-card__placeholder {
   width: 100%;
   aspect-ratio: var(--product-card-aspect, 1 / 1);
-  object-fit: cover;
+  object-fit: var(--product-card-object-fit, cover);
 }
 
 .product-card__placeholder {

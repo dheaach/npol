@@ -5,12 +5,20 @@
   <div class="page-width">
     <div class="intro-content__inner{% if section.settings.layout == 'reverse' %} intro-content__inner--reverse{% endif %}{% if section.settings.mobile_stack_order == 'content-first' %} intro-content__inner--mobile-content-first{% endif %}">
       <div class="intro-content__media">
-        {% render 'responsive-image',
-          image: section.settings.image,
-          alt: section.settings.image_alt,
-          class: 'intro-content__image',
-          loading: section.settings.image_loading
-        %}
+        {%- if section.settings.media_type == 'html' -%}
+          {%- if section.settings.embed_html != blank -%}
+            <div class="intro-content__embed">
+              {{ section.settings.embed_html }}
+            </div>
+          {%- endif -%}
+        {%- else -%}
+          {% render 'responsive-image',
+            image: section.settings.image,
+            alt: section.settings.image_alt,
+            class: 'intro-content__image',
+            loading: section.settings.image_loading
+          %}
+        {%- endif -%}
         {%- if section.settings.image_button_label != blank -%}
           <div class="intro-content__media-cta">
             {% render 'button',
@@ -219,9 +227,17 @@
       order: -1;
     }
   }
+  #shopify-section-{{ section.id }} .intro-content__embed {
+    width: 100%;
+    max-width: 100%;
+  }
+  #shopify-section-{{ section.id }} .intro-content__embed > * {
+    max-width: 100%;
+  }
   {%- if section.settings.image_width_tablet > 0 -%}
   @media screen and (min-width: 768px) and (max-width: 1023px) {
-    #shopify-section-{{ section.id }} .intro-content__media .intro-content__image {
+    #shopify-section-{{ section.id }} .intro-content__media .intro-content__image,
+    #shopify-section-{{ section.id }} .intro-content__media .intro-content__embed {
       width: {{ section.settings.image_width_tablet }}%;
       max-width: 100%;
       margin-inline: auto;
@@ -230,7 +246,8 @@
   {%- endif -%}
   {%- if section.settings.image_width_mobile > 0 -%}
   @media screen and (max-width: 767px) {
-    #shopify-section-{{ section.id }} .intro-content__media .intro-content__image {
+    #shopify-section-{{ section.id }} .intro-content__media .intro-content__image,
+    #shopify-section-{{ section.id }} .intro-content__media .intro-content__embed {
       width: {{ section.settings.image_width_mobile }}%;
       max-width: 100%;
       margin-inline: auto;
@@ -565,12 +582,23 @@
     },
     {
       "type": "header",
-      "content": "Image"
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_type",
+      "label": "Media type",
+      "options": [
+        { "value": "image", "label": "Image" },
+        { "value": "html", "label": "Embed HTML" }
+      ],
+      "default": "image"
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Image"
+      "label": "Image",
+      "info": "Used when Media type is Image."
     },
     {
       "type": "text",
@@ -588,9 +616,15 @@
       "default": "lazy"
     },
     {
+      "type": "html",
+      "id": "embed_html",
+      "label": "Embed HTML",
+      "info": "Used when Media type is Embed HTML. Paste custom HTML/CSS (e.g. animated card)."
+    },
+    {
       "type": "range",
       "id": "image_width_tablet",
-      "label": "Image width (tablet)",
+      "label": "Media width (tablet)",
       "min": 0,
       "max": 100,
       "step": 5,
@@ -601,7 +635,7 @@
     {
       "type": "range",
       "id": "image_width_mobile",
-      "label": "Image width (mobile)",
+      "label": "Media width (mobile)",
       "min": 0,
       "max": 100,
       "step": 5,
@@ -612,17 +646,17 @@
     {
       "type": "text",
       "id": "image_button_label",
-      "label": "Button label (below image)"
+      "label": "Button label (below media)"
     },
     {
       "type": "url",
       "id": "image_button_url",
-      "label": "Button link (below image)"
+      "label": "Button link (below media)"
     },
     {
       "type": "select",
       "id": "image_button_style",
-      "label": "Button style (below image)",
+      "label": "Button style (below media)",
       "options": [
         { "value": "primary", "label": "Primary" },
         { "value": "secondary", "label": "Secondary" },
@@ -634,7 +668,7 @@
     {
       "type": "select",
       "id": "image_button_alignment",
-      "label": "Button alignment (below image)",
+      "label": "Button alignment (below media)",
       "options": [
         { "value": "left", "label": "Left" },
         { "value": "center", "label": "Center" },
@@ -651,21 +685,21 @@
       "id": "layout",
       "label": "Layout",
       "options": [
-        { "value": "default", "label": "Image left, text right" },
-        { "value": "reverse", "label": "Image right, text left" }
+        { "value": "default", "label": "Media left, text right" },
+        { "value": "reverse", "label": "Media right, text left" }
       ],
       "default": "default"
     },
     {
       "type": "range",
       "id": "column_1_width",
-      "label": "Image column width",
+      "label": "Media column width",
       "min": 25,
       "max": 75,
       "step": 5,
       "unit": "%",
       "default": 50,
-      "info": "Text column uses the remaining width. Applies to the first column (image) in reading order."
+      "info": "Text column uses the remaining width. Applies to the first column (media) in reading order."
     },
     {
       "type": "range",
@@ -683,10 +717,10 @@
       "type": "select",
       "id": "mobile_stack_order",
       "label": "Tablet & mobile column order",
-      "info": "When the layout stacks (1023px and below), controls whether the image block or the text block appears first. On desktop use the Layout setting above.",
+      "info": "When the layout stacks (1023px and below), controls whether the media block or the text block appears first. On desktop use the Layout setting above.",
       "options": [
         { "value": "content-first", "label": "Content first" },
-        { "value": "image-first", "label": "Image first" }
+        { "value": "image-first", "label": "Media first" }
       ],
       "default": "image-first"
     },

@@ -62,14 +62,21 @@
       </div>
 
       <div class="hero-math__media">
-        
-        {% render 'responsive-image',
-          image: section.settings.image,
-          alt: section.settings.image_alt,
-          class: 'hero-math__image',
-          loading: 'eager',
-          fetchpriority: 'high'
-        %}
+        {%- if section.settings.media_type == 'html' -%}
+          {%- if section.settings.embed_html != blank -%}
+            <div class="hero-math__embed">
+              {{ section.settings.embed_html }}
+            </div>
+          {%- endif -%}
+        {%- else -%}
+          {% render 'responsive-image',
+            image: section.settings.image,
+            alt: section.settings.image_alt,
+            class: 'hero-math__image',
+            loading: 'eager',
+            fetchpriority: 'high'
+          %}
+        {%- endif -%}
       </div>
     </div>
   </div>
@@ -156,9 +163,17 @@
       order: -1;
     }
   }
+  #shopify-section-{{ section.id }} .hero-math__embed {
+    width: 100%;
+    max-width: 100%;
+  }
+  #shopify-section-{{ section.id }} .hero-math__embed > * {
+    max-width: 100%;
+  }
   {%- if section.settings.image_width_tablet > 0 -%}
   @media screen and (min-width: 768px) and (max-width: 1023px) {
-    #shopify-section-{{ section.id }} .hero-math__media .hero-math__image {
+    #shopify-section-{{ section.id }} .hero-math__media .hero-math__image,
+    #shopify-section-{{ section.id }} .hero-math__media .hero-math__embed {
       width: {{ section.settings.image_width_tablet }}%;
       max-width: 100%;
       margin-inline: auto;
@@ -167,7 +182,8 @@
   {%- endif -%}
   {%- if section.settings.image_width_mobile > 0 -%}
   @media screen and (max-width: 767px) {
-    #shopify-section-{{ section.id }} .hero-math__media .hero-math__image {
+    #shopify-section-{{ section.id }} .hero-math__media .hero-math__image,
+    #shopify-section-{{ section.id }} .hero-math__media .hero-math__embed {
       width: {{ section.settings.image_width_mobile }}%;
       max-width: 100%;
       margin-inline: auto;
@@ -462,12 +478,23 @@
     },
     {
       "type": "header",
-      "content": "Image"
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_type",
+      "label": "Media type",
+      "options": [
+        { "value": "image", "label": "Hero image" },
+        { "value": "html", "label": "Embed HTML" }
+      ],
+      "default": "image"
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Hero image"
+      "label": "Hero image",
+      "info": "Used when Media type is Hero image."
     },
     {
       "type": "text",
@@ -475,26 +502,32 @@
       "label": "Image alt text (SEO)"
     },
     {
+      "type": "html",
+      "id": "embed_html",
+      "label": "Embed HTML",
+      "info": "Used when Media type is Embed HTML. Paste custom HTML/CSS (e.g. animated card)."
+    },
+    {
       "type": "range",
       "id": "image_width_tablet",
-      "label": "Image width (tablet)",
+      "label": "Media width (tablet)",
       "min": 0,
       "max": 100,
       "step": 5,
       "unit": "%",
       "default": 0,
-      "info": "768px–1023px. 0 = theme default (about 85% width)."
+      "info": "768px–1023px. 0 = theme default (about 85% width for images)."
     },
     {
       "type": "range",
       "id": "image_width_mobile",
-      "label": "Image width (mobile)",
+      "label": "Media width (mobile)",
       "min": 0,
       "max": 100,
       "step": 5,
       "unit": "%",
       "default": 0,
-      "info": "767px and below. 0 = theme default (about 85% width)."
+      "info": "767px and below. 0 = theme default (about 85% width for images)."
     },
     {
       "type": "header",
@@ -527,10 +560,10 @@
       "type": "select",
       "id": "mobile_stack_order",
       "label": "Tablet & mobile column order",
-      "info": "When the layout stacks (1023px and below), controls whether the image block or the text block appears first.",
+      "info": "When the layout stacks (1023px and below), controls whether the media block or the text block appears first.",
       "options": [
         { "value": "content-first", "label": "Content first" },
-        { "value": "image-first", "label": "Image first" }
+        { "value": "image-first", "label": "Media first" }
       ],
       "default": "content-first"
     },

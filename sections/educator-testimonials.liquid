@@ -1,0 +1,1236 @@
+{% render 'section-font-vars', section: section %}
+
+{%- liquid
+  assign cols_d = section.settings.cards_per_row | default: 4
+  assign cols_t = section.settings.cards_per_row_tablet | default: 2
+  assign cols_m = section.settings.cards_per_row_mobile | default: 1
+
+  assign gap_d = section.settings.column_gap | default: 0
+  if gap_d == 0
+    assign gap_d = 24
+  endif
+  assign gap_t = section.settings.column_gap_tablet | default: 0
+  if gap_t == 0
+    assign gap_t = gap_d
+  endif
+  assign gap_m = section.settings.column_gap_mobile | default: 0
+  if gap_m == 0
+    assign gap_m = 16
+  endif
+
+  assign card_bg = section.settings.card_background_color | default: '#FFFFFF'
+  assign card_border = section.settings.card_border_color | default: '#E5E7EB'
+  assign card_radius = section.settings.card_border_radius | default: 12
+  assign star_color = section.settings.star_color | default: '#F5C518'
+  assign logo_size = section.settings.logo_size | default: 40
+
+  assign heading_before_color = section.settings.heading_before_color
+  if heading_before_color == blank
+    assign heading_before_color = '#0A1D3C'
+  endif
+-%}
+
+<section
+  class="educator-testimonials section-spacing"
+  aria-labelledby="educator-testimonials-heading-{{ section.id }}"
+  style="
+    --et-cols: {{ cols_d }};
+    --et-cols-tablet: {{ cols_t }};
+    --et-cols-mobile: {{ cols_m }};
+    --et-gap: {{ gap_d }}px;
+    --et-gap-tablet: {{ gap_t }}px;
+    --et-gap-mobile: {{ gap_m }}px;
+    --et-card-bg: {{ card_bg }};
+    --et-card-border: {{ card_border }};
+    --et-card-radius: {{ card_radius }}px;
+    --et-star-color: {{ star_color }};
+    --et-logo-size: {{ logo_size }}px;
+  "
+>
+  <div class="page-width">
+    {%- if section.settings.heading_before != blank or section.settings.heading_highlight != blank or section.settings.heading_after != blank -%}
+      <div class="educator-testimonials__header text-center" id="educator-testimonials-heading-{{ section.id }}">
+        {% render 'highlighted-heading',
+          heading_before: section.settings.heading_before,
+          heading_before_weight: section.settings.heading_before_weight,
+          heading_before_font_size: section.settings.heading_before_font_size,
+          heading_before_color: heading_before_color,
+          heading_highlight: section.settings.heading_highlight,
+          heading_highlight_weight: section.settings.heading_highlight_weight,
+          heading_highlight_font_size: section.settings.heading_highlight_font_size,
+          heading_after: section.settings.heading_after,
+          heading_after_weight: section.settings.heading_after_weight,
+          heading_after_font_size: section.settings.heading_after_font_size,
+          heading_after_color: section.settings.heading_after_color,
+          heading_tag: section.settings.heading_tag,
+          heading_size: section.settings.heading_tag,
+          highlight_color: section.settings.highlight_color
+        %}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div
+        class="educator-testimonials__slider"
+        data-edu-testimonials-slider
+        data-per-view="{{ cols_d }}"
+        data-per-view-tablet="{{ cols_t }}"
+        data-per-view-mobile="{{ cols_m }}"
+      >
+        <div class="educator-testimonials__viewport">
+          <div class="educator-testimonials__track" data-edu-testimonials-track>
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign rating = block.settings.rating | default: 5
+                if rating < 0
+                  assign rating = 0
+                endif
+                if rating > 5
+                  assign rating = 5
+                endif
+              -%}
+              <article
+                class="educator-testimonial-card"
+                {{ block.shopify_attributes }}
+                data-edu-testimonial-slide
+              >
+                <div class="educator-testimonial-card__stars" role="img" aria-label="{{ rating }} out of 5 stars">
+                  {%- for i in (1..5) -%}
+                    <span class="educator-testimonial-card__star{% if i <= rating %} is-filled{% endif %}" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 1.2l1.76 3.56 3.93.57-2.84 2.77.67 3.91L8 10.16l-3.52 1.85.67-3.91L2.31 5.33l3.93-.57L8 1.2z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                  {%- endfor -%}
+                </div>
+
+                {%- if block.settings.quote != blank -%}
+                  <blockquote class="educator-testimonial-card__quote section-text rte">
+                    {{ block.settings.quote }}
+                  </blockquote>
+                {%- endif -%}
+
+                <footer class="educator-testimonial-card__author">
+                  <div class="educator-testimonial-card__logo">
+                    {%- if block.settings.logo != blank -%}
+                      {% render 'responsive-image',
+                        image: block.settings.logo,
+                        alt: block.settings.logo_alt | default: block.settings.author_name,
+                        class: 'educator-testimonial-card__logo-img',
+                        width: 96
+                      %}
+                    {%- else -%}
+                      <span class="educator-testimonial-card__logo-fallback" aria-hidden="true">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="40" height="40" rx="8" fill="#E8F6F4"/>
+                          <path d="M11 14.5c0-1.38 1.12-2.5 2.5-2.5h9c1.38 0 2.5 1.12 2.5 2.5v7c0 1.38-1.12 2.5-2.5 2.5h-3.2L15.5 27v-3.5H13.5c-1.38 0-2.5-1.12-2.5-2.5v-7z" fill="#51ADA0"/>
+                          <circle cx="16" cy="18" r="1.25" fill="#fff"/>
+                          <circle cx="20" cy="18" r="1.25" fill="#fff"/>
+                          <circle cx="24" cy="18" r="1.25" fill="#fff"/>
+                          <path d="M22 22.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5v4c0 .83-.67 1.5-1.5 1.5h-1.4L25.5 30v-2.5H23.5c-.83 0-1.5-.67-1.5-1.5v-3.5z" fill="#0A1D3C"/>
+                          <circle cx="25.25" cy="25" r=".9" fill="#fff"/>
+                          <circle cx="27.5" cy="25" r=".9" fill="#fff"/>
+                          <circle cx="29.75" cy="25" r=".9" fill="#fff"/>
+                        </svg>
+                      </span>
+                    {%- endif -%}
+                  </div>
+                  <cite class="educator-testimonial-card__cite">
+                    {%- if block.settings.author_name != blank -%}
+                      <span class="educator-testimonial-card__name">{{ block.settings.author_name }}</span>
+                    {%- endif -%}
+                    {%- if block.settings.author_role != blank -%}
+                      <span class="educator-testimonial-card__role">{{ block.settings.author_role }}</span>
+                    {%- endif -%}
+                  </cite>
+                </footer>
+              </article>
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <div class="educator-testimonials__controls" data-edu-testimonials-controls hidden>
+          <button
+            class="educator-testimonials__arrow educator-testimonials__arrow--prev"
+            type="button"
+            data-edu-testimonials-prev
+            aria-label="Previous testimonials"
+          >
+            <svg width="17" height="22" viewBox="0 0 17 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M15.5 1L1.5 11L15.5 21V1Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="educator-testimonials__dots" data-edu-testimonials-dots role="tablist" aria-label="Testimonial pages"></div>
+          <button
+            class="educator-testimonials__arrow educator-testimonials__arrow--next"
+            type="button"
+            data-edu-testimonials-next
+            aria-label="Next testimonials"
+          >
+            <svg width="17" height="22" viewBox="0 0 17 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M1.5 1L15.5 11L1.5 21V1Z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  {% render 'section-spacing-styles', root: '.educator-testimonials', pad_x: '.page-width' %}
+
+  {%- if section.settings.background_color != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.background_color }};
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .educator-testimonials__header {
+    margin-bottom: 40px;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__header .section-heading {
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__slider {
+    position: relative;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__viewport {
+    overflow: hidden;
+    width: 100%;
+    padding-top: 8px;
+    padding-bottom: 16px;
+    margin-top: -8px;
+    margin-bottom: -16px;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__track {
+    display: flex;
+    gap: var(--et-gap);
+    transition: transform 0.4s ease;
+    will-change: transform;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card {
+    flex: 0 0 calc((100% - (var(--et-cols) - 1) * var(--et-gap)) / var(--et-cols));
+    width: calc((100% - (var(--et-cols) - 1) * var(--et-gap)) / var(--et-cols));
+    max-width: calc((100% - (var(--et-cols) - 1) * var(--et-gap)) / var(--et-cols));
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    background: var(--et-card-bg);
+    border: 1px solid var(--et-card-border);
+    border-radius: var(--et-card-radius);
+    min-height: 100%;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    #shopify-section-{{ section.id }} .educator-testimonial-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 28px rgba(10, 29, 60, 0.12);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #shopify-section-{{ section.id }} .educator-testimonial-card {
+      transition: none;
+    }
+
+    #shopify-section-{{ section.id }} .educator-testimonial-card:hover {
+      transform: none;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__star {
+    display: inline-flex;
+    color: #D1D5DB;
+    line-height: 0;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__star.is-filled {
+    color: var(--et-star-color);
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__quote {
+    margin: 0;
+    flex: 1 1 auto;
+    color: #374151;
+    font-style: normal;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__quote.rte p {
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__quote.rte p + p {
+    margin-top: 0.75em;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__logo {
+    flex-shrink: 0;
+    width: var(--et-logo-size);
+    height: var(--et-logo-size);
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__logo-img,
+  #shopify-section-{{ section.id }} .educator-testimonial-card__logo-fallback,
+  #shopify-section-{{ section.id }} .educator-testimonial-card__logo-fallback svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__cite {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-style: normal;
+    min-width: 0;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__name {
+    color: #0A1D3C;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonial-card__role {
+    color: #6B7280;
+    font-size: 0.875em;
+    line-height: 1.3;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__controls[hidden] {
+    display: none;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__arrow {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: #DFDFDF;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.2s ease;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__arrow:hover {
+    background: #b0b0b0;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__arrow:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: #D1D5DB;
+    cursor: pointer;
+  }
+
+  #shopify-section-{{ section.id }} .educator-testimonials__dot.is-active {
+    background: #0A1D3C;
+  }
+
+  {%- if section.settings.quote_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote,
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote p {
+      font-size: {{ section.settings.quote_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.quote_font_weight != blank and section.settings.quote_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote,
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote p {
+      font-weight: {{ section.settings.quote_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.quote_font_color != blank -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote,
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote p,
+    #shopify-section-{{ section.id }} .educator-testimonial-card__quote a {
+      color: {{ section.settings.quote_font_color }} !important;
+    }
+  {%- endif -%}
+
+  {%- if section.settings.author_name_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__name {
+      font-size: {{ section.settings.author_name_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.author_name_font_weight != blank and section.settings.author_name_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__name {
+      font-weight: {{ section.settings.author_name_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.author_name_font_color != blank -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__name {
+      color: {{ section.settings.author_name_font_color }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.author_role_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__role {
+      font-size: {{ section.settings.author_role_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.author_role_font_weight != blank and section.settings.author_role_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__role {
+      font-weight: {{ section.settings.author_role_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.author_role_font_color != blank -%}
+    #shopify-section-{{ section.id }} .educator-testimonial-card__role {
+      color: {{ section.settings.author_role_font_color }};
+    }
+  {%- endif -%}
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    #shopify-section-{{ section.id }} .educator-testimonials__track {
+      gap: var(--et-gap-tablet);
+    }
+
+    #shopify-section-{{ section.id }} .educator-testimonial-card {
+      flex-basis: calc((100% - (var(--et-cols-tablet) - 1) * var(--et-gap-tablet)) / var(--et-cols-tablet));
+      width: calc((100% - (var(--et-cols-tablet) - 1) * var(--et-gap-tablet)) / var(--et-cols-tablet));
+      max-width: calc((100% - (var(--et-cols-tablet) - 1) * var(--et-gap-tablet)) / var(--et-cols-tablet));
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .educator-testimonials__header {
+      margin-bottom: 28px;
+    }
+
+    #shopify-section-{{ section.id }} .educator-testimonials__track {
+      gap: var(--et-gap-mobile);
+    }
+
+    #shopify-section-{{ section.id }} .educator-testimonial-card {
+      flex-basis: calc((100% - (var(--et-cols-mobile) - 1) * var(--et-gap-mobile)) / var(--et-cols-mobile));
+      width: calc((100% - (var(--et-cols-mobile) - 1) * var(--et-gap-mobile)) / var(--et-cols-mobile));
+      max-width: calc((100% - (var(--et-cols-mobile) - 1) * var(--et-gap-mobile)) / var(--et-cols-mobile));
+      padding: 20px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Educator Testimonials",
+  "tag": "section",
+  "class": "section-educator-testimonials",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#F8F8F8",
+      "info": "Applies to the outer section only, not inner cards or banners."
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before highlight)",
+      "default": "What Educators Are Already"
+    },
+    {
+      "type": "color",
+      "id": "heading_before_color",
+      "label": "Color (before highlight)",
+      "default": "#0A1D3C",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "range",
+      "id": "heading_before_font_size",
+      "label": "Font size (before highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_before_weight",
+      "label": "Font weight (before highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Heading highlight",
+      "default": "Saying..."
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#51ADA0"
+    },
+    {
+      "type": "range",
+      "id": "heading_highlight_font_size",
+      "label": "Font size (highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_weight",
+      "label": "Font weight (highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after highlight)"
+    },
+    {
+      "type": "color",
+      "id": "heading_after_color",
+      "label": "Color (after highlight)",
+      "info": "Empty = theme heading color."
+    },
+    {
+      "type": "range",
+      "id": "heading_after_font_size",
+      "label": "Font size (after highlight)",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use heading scale only."
+    },
+    {
+      "type": "select",
+      "id": "heading_after_weight",
+      "label": "Font weight (after highlight)",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag (SEO)",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row",
+      "label": "Cards per row (desktop)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 4,
+      "info": "1024px and up."
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_tablet",
+      "label": "Cards per row (tablet)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "info": "768px–1023px."
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_mobile",
+      "label": "Cards per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1,
+      "info": "767px and below."
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border",
+      "default": "#E5E7EB"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#F5C518"
+    },
+    {
+      "type": "range",
+      "id": "logo_size",
+      "label": "Logo size",
+      "min": 24,
+      "max": 72,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Quote typography"
+    },
+    {
+      "type": "color",
+      "id": "quote_font_color",
+      "label": "Quote color",
+      "default": "#374151",
+      "info": "Empty = default card quote color."
+    },
+    {
+      "type": "range",
+      "id": "quote_font_size",
+      "label": "Quote font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "quote_font_weight",
+      "label": "Quote font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Author name typography"
+    },
+    {
+      "type": "color",
+      "id": "author_name_font_color",
+      "label": "Author name color",
+      "default": "#0A1D3C"
+    },
+    {
+      "type": "range",
+      "id": "author_name_font_size",
+      "label": "Author name font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "author_name_font_weight",
+      "label": "Author name font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "header",
+      "content": "Author role typography"
+    },
+    {
+      "type": "color",
+      "id": "author_role_font_color",
+      "label": "Author role color",
+      "default": "#6B7280"
+    },
+    {
+      "type": "range",
+      "id": "author_role_font_size",
+      "label": "Author role font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "author_role_font_weight",
+      "label": "Author role font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64,
+      "info": "0 = theme default section spacing."
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme horizontal padding."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_tablet",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_tablet",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section padding — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "label": "Padding left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "label": "Padding right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or theme default."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Tablet"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_tablet",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_tablet",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_tablet",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_tablet",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use desktop or none."
+    },
+    {
+      "type": "header",
+      "content": "Section margin — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_left_mobile",
+      "label": "Margin left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "range",
+      "id": "margin_right_mobile",
+      "label": "Margin right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = use tablet, desktop, or none."
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 24,
+      "info": "1024px+. 0 = 24px."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 24,
+      "info": "768px–1023px. 0 = desktop gap."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 16,
+      "info": "767px and below. 0 = 16px."
+    },
+    {
+      "type": "header",
+      "content": "Typography Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_font",
+      "label": "Override heading font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom heading font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_body_font",
+      "label": "Override body font",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_body_font",
+      "label": "Custom body font",
+      "default": "montserrat_n4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Star rating",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "default": 5,
+          "info": "Number of filled stars (0–5)."
+        },
+        {
+          "type": "richtext",
+          "id": "quote",
+          "label": "Quote",
+          "default": "<p>\"It's like having a thinking partner in the moment, right when I need it.\"</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo",
+          "info": "Upload the logo or icon shown next to the author name."
+        },
+        {
+          "type": "text",
+          "id": "logo_alt",
+          "label": "Logo alt text"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author name",
+          "default": "Josefine"
+        },
+        {
+          "type": "text",
+          "id": "author_role",
+          "label": "Author role / title",
+          "default": "Classroom Teacher"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Educator Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>\"It's like having a thinking partner in the moment, right when I need it.\"</p>",
+            "author_name": "Josefine",
+            "author_role": "Classroom Teacher"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>\"It helps me understand what students are thinking and what to do next.\"</p>",
+            "author_name": "Kylie",
+            "author_role": "Math Interventionist"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>\"It's always available—asking thoughtful questions and offering insights that deepen my understanding.\"</p>",
+            "author_name": "Stefanie",
+            "author_role": "Math Coach"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "<p>\"It helps teachers immediately. It doesn't give answers to students, but builds pedagogy for teachers. Brilliant.\"</p>",
+            "author_name": "Tim",
+            "author_role": "District Math Coordinator"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -90,6 +90,10 @@
       %}
     </div>
 
+    {%- if section.settings.description != blank -%}
+      <div class="section-text rte video-showcase__description">{{ section.settings.description }}</div>
+    {%- endif -%}
+
     <div
       class="video-showcase__player"
       style="--video-showcase-media-radius: {{ media_radius }}px;"
@@ -181,6 +185,29 @@
       color: {{ section.settings.highlight_color }};
     }
   {%- endif -%}
+  {%- if section.settings.description_font_size > 0 -%}
+    #shopify-section-{{ section.id }} .video-showcase__description,
+    #shopify-section-{{ section.id }} .video-showcase__description p {
+      font-size: {{ section.settings.description_font_size }}px;
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_weight != blank and section.settings.description_font_weight != 'inherit' -%}
+    #shopify-section-{{ section.id }} .video-showcase__description,
+    #shopify-section-{{ section.id }} .video-showcase__description p {
+      font-weight: {{ section.settings.description_font_weight }};
+    }
+  {%- endif -%}
+  {%- if section.settings.description_font_color != blank -%}
+    #shopify-section-{{ section.id }} .video-showcase__description,
+    #shopify-section-{{ section.id }} .video-showcase__description p,
+    #shopify-section-{{ section.id }} .video-showcase__description a {
+      color: {{ section.settings.description_font_color }};
+    }
+  {%- endif -%}
+  #shopify-section-{{ section.id }} .video-showcase__description {
+    
+    margin: 16px auto 0;
+  }
   {%- if section.settings.caption_font_size > 0 -%}
     #shopify-section-{{ section.id }} .video-showcase__caption {
       font-size: {{ section.settings.caption_font_size }}px;
@@ -407,6 +434,43 @@
       "label": "Heading color (legacy fallback)",
       "default": "#0A1D3C",
       "info": "Used when per-segment heading colors above are empty."
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "info": "Shown under the heading and above the video."
+    },
+    {
+      "type": "color",
+      "id": "description_font_color",
+      "label": "Description color"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description font size",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme body size."
+    },
+    {
+      "type": "select",
+      "id": "description_font_weight",
+      "label": "Description font weight",
+      "options": [
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" }
+      ],
+      "default": "inherit"
     },
     {
       "type": "header",

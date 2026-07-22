@@ -107,7 +107,7 @@
           {%- if divider_enabled and show_dots_top -%}
             {% render 'process-step-dots', section: section, position: 'top', dots_size: dots_size, dots_spacing: dots_spacing %}
           {%- endif -%}
-          <div class="process-step__body{% if section.settings.mobile_stack_order == 'content-first' %} process-step__body--stack-content-first{% endif %}">
+          <div class="process-step__body{% if section.settings.mobile_stack_order == 'content-first' %} process-step__body--stack-content-first{% else %} process-step__body--stack-image-first{% endif %}">
             <div class="process-step__content">
               {%- if block.settings.step_label != blank -%}
                 <span class="process-step__label">{{ block.settings.step_label }}</span>
@@ -197,10 +197,26 @@
       grid-template-columns: 1fr;
       gap: {{ gap_t }}px;
     }
-    #shopify-section-{{ section.id }} .process-step--reverse .process-step__content,
-    #shopify-section-{{ section.id }} .process-step--reverse .process-step__media {
-      order: unset;
+    {%- comment -%} DOM is content then media; force stack order for all steps (incl. reverse). {%- endcomment -%}
+    {%- if section.settings.mobile_stack_order == 'content-first' -%}
+    #shopify-section-{{ section.id }} .process-step__body .process-step__content,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__content {
+      order: 1;
     }
+    #shopify-section-{{ section.id }} .process-step__body .process-step__media,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__media {
+      order: 2;
+    }
+    {%- else -%}
+    #shopify-section-{{ section.id }} .process-step__body .process-step__media,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__media {
+      order: 1;
+    }
+    #shopify-section-{{ section.id }} .process-step__body .process-step__content,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__content {
+      order: 2;
+    }
+    {%- endif -%}
   }
   {%- else -%}
   @media screen and (min-width: 768px) and (max-width: 1023px) {
@@ -222,10 +238,25 @@
       grid-template-columns: 1fr;
       gap: {{ gap_m }}px;
     }
-    #shopify-section-{{ section.id }} .process-step--reverse .process-step__content,
-    #shopify-section-{{ section.id }} .process-step--reverse .process-step__media {
-      order: unset;
+    {%- if section.settings.mobile_stack_order == 'content-first' -%}
+    #shopify-section-{{ section.id }} .process-step__body .process-step__content,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__content {
+      order: 1;
     }
+    #shopify-section-{{ section.id }} .process-step__body .process-step__media,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__media {
+      order: 2;
+    }
+    {%- else -%}
+    #shopify-section-{{ section.id }} .process-step__body .process-step__media,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__media {
+      order: 1;
+    }
+    #shopify-section-{{ section.id }} .process-step__body .process-step__content,
+    #shopify-section-{{ section.id }} .process-step--reverse .process-step__body .process-step__content {
+      order: 2;
+    }
+    {%- endif -%}
   }
   {%- else -%}
   @media screen and (max-width: 767px) {
@@ -282,14 +313,6 @@
       }
     {%- endfor -%}
     {%- endif -%}
-  }
-  @media screen and (max-width: 1023px) {
-    #shopify-section-{{ section.id }} .process-step__body--stack-content-first .process-step__content {
-      order: -1;
-    }
-    #shopify-section-{{ section.id }} .process-step__body--stack-content-first .process-step__media {
-      order: 0;
-    }
   }
   #shopify-section-{{ section.id }} .process-step__dots {
       width: calc((100vw - 80px) * (var(--dots-width, 100) / 100));
@@ -435,7 +458,7 @@
       #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text p,
       #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text li,
       #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__text a {
-        color: {{ block.settings.text_font_color }} !important;
+        color: {{ block.settings.text_font_color }};
       }
     {%- endif -%}
     #shopify-section-{{ section.id }} #process-step-{{ block.id }} .process-step__image {

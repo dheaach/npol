@@ -1577,6 +1577,11 @@ p, .section-text,
   gap: 16px;
 }
 
+.process-step__text a{
+  color:#51ada0!important;
+  font-weight: 700;
+}
+
 .process-steps__subtext {
   max-width: 930px;
   margin: 0 auto;

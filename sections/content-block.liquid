@@ -1,4 +1,5 @@
 {% render 'section-font-vars', section: section %}
+{% render 'section-column-widths', section: section, grid_class: 'content-block__inner', gap_fallback_tablet: 32, gap_fallback_mobile: 32 %}
 
 {%- liquid
   assign bg_color = section.settings.background_color
@@ -515,6 +516,91 @@
       "content": "Layout"
     },
     {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout direction",
+      "options": [
+        { "value": "default", "label": "Image left, text right" },
+        { "value": "reverse", "label": "Image right, text left" }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "column_1_width",
+      "label": "Image column width",
+      "min": 25,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Text column uses the remainder. Desktop only; stacks on tablet and mobile."
+    },
+    {
+      "type": "range",
+      "id": "column_2_width",
+      "label": "Text column width (override)",
+      "min": 0,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 0,
+      "info": "0 = auto (100% minus image column width)."
+    },
+    {
+      "type": "header",
+      "content": "Column spacing"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (desktop)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = theme default (48px)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_tablet",
+      "label": "Gap between columns (tablet)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "768px–1023px when stacked. 0 = theme default (32px)."
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between columns (mobile)",
+      "min": 0,
+      "max": 96,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "767px and below when stacked. 0 = theme default (32px)."
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "info": "Applies to the outer section only, not inner cards or banners."
+    },
+    {
       "type": "header",
       "content": "Section position"
     },
@@ -544,31 +630,6 @@
         { "value": "px", "label": "px (fixed pixels)" }
       ],
       "default": "em"
-    },
-    {
-      "type": "select",
-      "id": "layout",
-      "label": "Layout direction",
-      "options": [
-        { "value": "default", "label": "Image left, text right" },
-        { "value": "reverse", "label": "Image right, text left" }
-      ],
-      "default": "default"
-    },
-    {
-      "type": "select",
-      "id": "text_alignment",
-      "label": "Text alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" }
-      ],
-      "default": "left"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color"
     },
     {
       "type": "header",
